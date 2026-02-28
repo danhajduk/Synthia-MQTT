@@ -75,8 +75,14 @@ class MqttClientService:
         self._client.loop_stop()
         self._client.disconnect()
 
-    def publish_json(self, topic: str, payload: dict[str, Any], retain: bool, qos: int) -> bool:
-        message = json.dumps(payload)
+    def publish(self, topic: str, payload: Any, retain: bool = True, qos: int = 1) -> bool:
+        if isinstance(payload, (dict, list)):
+            message = json.dumps(payload)
+        elif isinstance(payload, str):
+            message = payload
+        else:
+            message = json.dumps(payload)
+
         result = self._client.publish(topic, message, qos=qos, retain=retain)
         ok = result.rc == mqtt.MQTT_ERR_SUCCESS
 
@@ -115,14 +121,14 @@ class MqttClientService:
             "version": "0.1.0",
             "capabilities": self._capabilities,
         }
-        self.publish_json(self._announce_topic, payload, retain=True, qos=self._qos)
+        self.publish(self._announce_topic, payload, retain=True, qos=self._qos)
 
     def _publish_health(self) -> None:
         payload = {
             "status": "healthy" if self._health_service.snapshot().mqtt_connected else "degraded",
             "last_seen": datetime.now(timezone.utc).isoformat(),
         }
-        self.publish_json(self._health_topic, payload, retain=True, qos=self._qos)
+        self.publish(self._health_topic, payload, retain=True, qos=self._qos)
 
     def _publish_health_forever(self) -> None:
         while not self._stop_event.is_set():

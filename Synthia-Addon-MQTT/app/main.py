@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI
 
 from app.api.addon_contract import CAPABILITIES, build_addon_contract_router
+from app.api.mqtt_publish import build_mqtt_publish_router
 from app.services.config_store import ConfigStore
 from app.services.health import HealthService
 from app.services.mqtt_client import MqttClientService
@@ -19,6 +20,7 @@ health_service = HealthService()
 mqtt_service: MqttClientService | None = None
 
 app.include_router(build_addon_contract_router(config_store, health_service))
+app.include_router(build_mqtt_publish_router(lambda: mqtt_service))
 
 
 @app.get("/healthz")

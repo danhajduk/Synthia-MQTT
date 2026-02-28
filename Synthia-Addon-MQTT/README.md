@@ -35,3 +35,9 @@ Configuration defaults come from environment variables and overrides are persist
 - Publishes retained announce payload to `synthia/addons/mqtt/announce` on connect.
 - Publishes retained health every 15 seconds.
 - Automatically reconnects when broker connectivity is lost.
+
+## MQTT Publish API (Phase 4)
+
+- `POST /api/mqtt/publish`
+- Validates non-empty topic.
+- Accepts any payload type and JSON-encodes `dict`/`list` payloads automatically.
