@@ -27,3 +27,11 @@ Then open `http://localhost:18080/healthz`.
 - `GET /api/addon/capabilities`
 
 Configuration defaults come from environment variables and overrides are persisted at `runtime/config.json`.
+
+## MQTT Runtime (Phase 3)
+
+- Uses `paho-mqtt` for broker connectivity.
+- Sets retained LWT on `synthia/addons/mqtt/health` with `offline` payload.
+- Publishes retained announce payload to `synthia/addons/mqtt/announce` on connect.
+- Publishes retained health every 15 seconds.
+- Automatically reconnects when broker connectivity is lost.

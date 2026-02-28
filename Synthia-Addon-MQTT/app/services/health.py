@@ -13,6 +13,8 @@ class HealthService:
     def set_mqtt_connected(self, connected: bool) -> None:
         self._mqtt_connected = connected
         if connected:
+            self._offline = False
+        if connected:
             self._last_error = None
 
     def set_last_error(self, error: str | None) -> None:
