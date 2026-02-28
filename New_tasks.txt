@@ -1,0 +1,232 @@
+GOAL:
+Implement a distributed Synthia addon service named "mqtt" that runs in its own Docker container on the same host as Synthia Core, following:
+- Synthia Distributed Addon Spec v0.1
+- Synthia Addon API & MQTT Standard v0.1
+- Synthia Distributed Addons Implementation Checklist v0.1
+
+This addon must comply fully with the distributed addon contract and operate independently from Core (non-interference principle).
+
+================================================================================
+PHASE 1 — SERVICE SCAFFOLD
+================================================================================
+
+Create a new repository/service:
+
+Synthia-Addon-MQTT/
+  app/
+    main.py
+    api/
+      addon_contract.py
+      mqtt_publish.py
+      ha_discovery.py
+    services/
+      mqtt_client.py
+      config_store.py
+      health.py
+    models/
+      addon_models.py
+      publish_models.py
+  docker/
+    docker-compose.yml
+    mosquitto/
+      mosquitto.conf
+  runtime/        (persistent volume)
+  README.md
+
+Use FastAPI.
+
+================================================================================
+PHASE 2 — REQUIRED ADDON CONTRACT (MANDATORY)
+================================================================================
+
+Implement the required HTTP endpoints:
+
+GET  /api/addon/meta
+GET  /api/addon/health
+GET  /api/addon/config/effective
+POST /api/addon/config
+GET  /api/addon/capabilities
+
+Behavior requirements:
+
+/api/addon/meta:
+{
+  id: "mqtt",
+  name: "MQTT Service",
+  version: "0.1.0",
+  description: "Distributed MQTT and HA discovery service"
+}
+
+/api/addon/health:
+{
+  status: "healthy" | "degraded" | "offline",
+  mqtt_connected: bool,
+  last_error: string | null,
+  uptime_seconds: number
+}
+
+/api/addon/capabilities:
+Return:
+[
+  "mqtt.publish",
+  "mqtt.ha_discovery.publish",
+  "mqtt.ha_state.publish"
+]
+
+Config rules:
+- Environment variables are defaults.
+- POST /config persists overrides to runtime/config.json.
+- Secrets never transmitted via MQTT.
+
+================================================================================
+PHASE 3 — MQTT CLIENT IMPLEMENTATION
+================================================================================
+
+Use paho-mqtt (stable, thread-safe).
+
+Config via ENV:
+
+MQTT_HOST
+MQTT_PORT
+MQTT_USERNAME
+MQTT_PASSWORD
+MQTT_TLS
+MQTT_CLIENT_ID (default: synthia-addon-mqtt)
+MQTT_BASE_TOPIC (default: synthia)
+MQTT_QOS (default: 1)
+
+On startup:
+
+1. Connect to broker.
+2. Publish retained announce:
+   Topic: synthia/addons/mqtt/announce
+   Payload:
+   {
+     id: "mqtt",
+     base_url: "http://mqtt-addon:8080",
+     version: "0.1.0",
+     capabilities: [...]
+   }
+
+3. Publish retained health:
+   Topic: synthia/addons/mqtt/health
+   Payload:
+   {
+     status: "healthy",
+     last_seen: ISO8601 timestamp
+   }
+
+4. Republish health every 15 seconds (retained).
+
+5. Set LWT:
+   Topic: synthia/addons/mqtt/health
+   Payload:
+   {
+     status: "offline",
+     last_seen: timestamp
+   }
+   retained = true
+
+Addon must continue functioning even if Core is down.
+
+================================================================================
+PHASE 4 — MQTT PUBLISH API
+================================================================================
+
+Implement:
+
+POST /api/mqtt/publish
+
+Body:
+{
+  topic: string,
+  payload: any,
+  retain: true,
+  qos: 1
+}
+
+Rules:
+- Auto-JSON encode dict/list.
+- Validate topic not empty.
+- Return { ok: true } or HTTP 500.
+
+================================================================================
+PHASE 5 — HOME ASSISTANT DISCOVERY SUPPORT
+================================================================================
+
+Implement:
+
+POST /api/ha/discovery/sensor
+
+Body:
+{
+  unique_id: string,
+  name: string,
+  state_topic: string,
+  unit_of_measurement?: string,
+  device_class?: string,
+  icon?: string
+}
+
+Publish retained to:
+homeassistant/sensor/{unique_id}/config
+
+Payload must follow HA MQTT discovery schema.
+
+================================================================================
+PHASE 6 — DOCKER DEPLOYMENT
+================================================================================
+
+docker-compose.yml must start:
+
+1) mosquitto broker container
+   - Persistent volume
+   - Expose 1883 internally
+   - Optional host exposure
+
+2) mqtt-addon container
+   - Depends on mosquitto
+   - Connected to same docker network
+   - Expose API port 8080 (optional host port 18080)
+   - Mount runtime/ as persistent volume
+
+The addon must:
+- Start without Core
+- Keep publishing announce + health retained
+- Reconnect automatically if broker restarts
+
+================================================================================
+NON-INTERFERENCE RULE
+================================================================================
+
+The addon must:
+- Never require Core to operate
+- Never block if Core is offline
+- Continue publishing health via MQTT
+- Not assume registry presence
+
+================================================================================
+LOGGING
+================================================================================
+
+- Structured logs
+- Log MQTT connection events
+- Log publish failures
+- Log config changes
+- Include last_error tracking
+
+================================================================================
+DELIVERABLE
+================================================================================
+
+Provide:
+- Complete service implementation
+- Docker compose
+- Mosquitto config
+- README with run instructions
+- Clean separation between API layer and MQTT service layer
+- Type hints and structured models
+
+Do not implement Core changes.
+Do not embed addon inside Core.
+This is a fully distributed service addon.
