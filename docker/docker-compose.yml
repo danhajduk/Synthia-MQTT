@@ -15,6 +15,7 @@ services:
 
   mqtt-addon:
     image: python:3.12-slim
+    container_name: Synthia-MQTT
     restart: unless-stopped
     working_dir: /workspace
     environment:

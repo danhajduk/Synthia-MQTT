@@ -7,7 +7,7 @@ File: `docker/docker-compose.yml`
 Services:
 
 - `mosquitto`: MQTT broker with persistent data and logs.
-- `mqtt-addon`: FastAPI service that connects to broker and serves addon APIs.
+- `mqtt-addon` (`Synthia-MQTT`): FastAPI service that connects to broker and serves addon APIs.
 
 Ports:
 
