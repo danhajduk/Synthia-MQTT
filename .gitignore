@@ -1,3 +1,6 @@
 New_tasks.txt
 .codex/
 completed_task.txt
+__pycache__/
+*.pyc
+runtime/config.json
