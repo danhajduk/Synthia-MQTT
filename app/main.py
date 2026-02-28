@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI
 
 from app.api.addon_contract import CAPABILITIES, build_addon_contract_router
+from app.api.broker_admin import build_broker_admin_router
 from app.api.ha_discovery import build_ha_discovery_router
 from app.api.mqtt_publish import build_mqtt_publish_router
 from app.services.config_store import ConfigStore
@@ -23,6 +24,7 @@ mqtt_service: MqttClientService | None = None
 app.include_router(build_addon_contract_router(config_store, health_service))
 app.include_router(build_mqtt_publish_router(lambda: mqtt_service))
 app.include_router(build_ha_discovery_router(lambda: mqtt_service))
+app.include_router(build_broker_admin_router())
 
 
 @app.get("/healthz")

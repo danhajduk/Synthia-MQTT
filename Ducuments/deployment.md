@@ -20,6 +20,13 @@ Ports:
 docker compose -f docker/docker-compose.yml up -d
 ```
 
+## Embedded Broker Restart API
+
+`POST /api/broker/restart` can restart the embedded `mosquitto` container automatically only when
+`/var/run/docker.sock:/var/run/docker.sock` is mounted into the `mqtt-addon` service.
+
+If that mount remains commented out, the endpoint returns an `operator_action` command for manual restart.
+
 ## Shutdown
 
 ```bash

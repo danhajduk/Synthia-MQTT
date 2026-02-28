@@ -1,3 +1,5 @@
 fastapi
 uvicorn
 paho-mqtt
+docker
+filelock

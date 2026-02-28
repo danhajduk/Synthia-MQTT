@@ -1,6 +1,8 @@
 services:
   mosquitto:
     image: eclipse-mosquitto:2
+    profiles: ["embedded"]
+    container_name: synthia-mosquitto
     restart: unless-stopped
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
@@ -33,6 +35,9 @@ services:
     volumes:
       - ..:/workspace
       - ../runtime:/workspace/runtime
+      # Required for automatic broker restart via POST /api/broker/restart.
+      # If omitted, the API returns an operator_action command instead.
+      # - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "18080:8080"
     networks:
