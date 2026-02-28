@@ -41,3 +41,8 @@ Configuration defaults come from environment variables and overrides are persist
 - `POST /api/mqtt/publish`
 - Validates non-empty topic.
 - Accepts any payload type and JSON-encodes `dict`/`list` payloads automatically.
+
+## Home Assistant Discovery API (Phase 5)
+
+- `POST /api/ha/discovery/sensor`
+- Publishes retained sensor discovery config to `homeassistant/sensor/{unique_id}/config`.
