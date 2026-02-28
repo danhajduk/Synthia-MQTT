@@ -20,6 +20,12 @@ Ports:
 docker compose -f docker/docker-compose.yml up -d
 ```
 
+Start with embedded Mosquitto:
+
+```bash
+docker compose -f docker/docker-compose.yml --profile embedded up -d
+```
+
 ## Embedded Broker Restart API
 
 `POST /api/broker/restart` can restart the embedded `mosquitto` container automatically only when

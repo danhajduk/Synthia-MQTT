@@ -16,8 +16,6 @@ services:
   mqtt-addon:
     image: python:3.12-slim
     restart: unless-stopped
-    depends_on:
-      - mosquitto
     working_dir: /workspace
     environment:
       MQTT_HOST: mosquitto
