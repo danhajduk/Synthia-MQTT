@@ -1,11 +1,45 @@
 version: "3.9"
 
 services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      - "1883:1883"
+    networks:
+      - synthia_mqtt
+
   mqtt-addon:
     image: python:3.12-slim
-    working_dir: /app
-    command: ["bash", "-lc", "pip install fastapi uvicorn paho-mqtt && uvicorn app.main:app --host 0.0.0.0 --port 8080"]
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    working_dir: /workspace/Synthia-Addon-MQTT
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      MQTT_CLIENT_ID: synthia-addon-mqtt
+      MQTT_BASE_TOPIC: synthia
+      MQTT_QOS: "1"
+      MQTT_TLS: "false"
+    command:
+      [
+        "bash",
+        "-lc",
+        "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8080",
+      ]
     volumes:
-      - ../:/app
+      - ../:/workspace/Synthia-Addon-MQTT
+      - ../runtime:/workspace/Synthia-Addon-MQTT/runtime
     ports:
       - "18080:8080"
+    networks:
+      - synthia_mqtt
+
+networks:
+  synthia_mqtt:
+    driver: bridge

@@ -46,3 +46,16 @@ Configuration defaults come from environment variables and overrides are persist
 
 - `POST /api/ha/discovery/sensor`
 - Publishes retained sensor discovery config to `homeassistant/sensor/{unique_id}/config`.
+
+## Docker Deployment (Phase 6)
+
+- `mosquitto` broker runs in its own container with persisted `data` and `log` folders.
+- `mqtt-addon` runs independently and only depends on the broker.
+- Both services share a dedicated bridge network.
+- API exposed on `18080`, broker exposed on `1883`.
+
+Run detached:
+
+```bash
+docker compose -f Synthia-Addon-MQTT/docker/docker-compose.yml up -d
+```
