@@ -9,10 +9,11 @@ fi
 
 ASSET_NAME="${ASSET_NAME:-addon.tgz}"
 SIGNING_KEY="${SIGNING_KEY:-./keys/publisher_private.pem}"
-PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json app frontend}"
+PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json app frontend requirements.txt}"
 REPO_SLUG="${REPO_SLUG:-danhajduk/Synthia-MQTT}"
 MKTIME="${MKTIME:-UTC 2026-01-01}"
 PUBLISHER_KEY_ID="${PUBLISHER_KEY_ID:-publisher.danhajduk#2026-02}"
+PACKAGE_PROFILE="${PACKAGE_PROFILE:-standalone_service}"
 OUTPUT_JSON="${OUTPUT_JSON:-release-output.json}"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
@@ -67,6 +68,7 @@ echo "==> Writing ${OUTPUT_JSON}"
 cat > "${OUTPUT_JSON}" <<EOF
 {
   "version": "${VERSION}",
+  "package_profile": "${PACKAGE_PROFILE}",
   "artifact": {
     "type": "github_release_asset",
     "url": "${ARTIFACT_URL}"

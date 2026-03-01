@@ -12,15 +12,17 @@ set -euo pipefail
 #   - publisher_key_id.txt
 #   - artifact_base_url.txt (optional)
 #
-# Optional manifest fields:
-# - .release.artifact_url_template  (supports {version})
-# - .release.asset_name            (default addon.tgz)
+# Optional environment variables:
+# - ARTIFACT_URL_TEMPLATE (supports {version})
+# - ASSET_NAME (default addon.tgz)
 
 MANIFEST="manifest.json"
 OUTDIR="dist"
 KEY=""
 PUBLISHER_KEY_ID=""
 ARTIFACT_URL=""
+ARTIFACT_URL_TEMPLATE="${ARTIFACT_URL_TEMPLATE:-}"
+ASSET_NAME="${ASSET_NAME:-addon.tgz}"
 KEYS_DIR="keys"
 INCLUDE_EXTRA=()
 
@@ -108,19 +110,23 @@ have sha256sum || die "sha256sum not found"
 have base64 || die "base64 not found"
 
 # --- Load manifest basics ---
+SCHEMA_VERSION="$(json_get '.schema_version')"
 ADDON_ID="$(json_get '.id')"
 ADDON_NAME="$(json_get '.name')"
 ADDON_VERSION="$(json_get '.version')"
+PACKAGE_PROFILE="$(json_get '.package_profile')"
+CORE_MIN="$(json_get '.compatibility.core_min_version')"
+CORE_MAX="$(json_get '.compatibility.core_max_version')"
 
-CORE_MIN="$(json_get '.core_min_version')"
-CORE_MAX="$(json_get '.core_max_version')"
-if [[ -z "$CORE_MIN" ]]; then CORE_MIN="$(json_get '.compatibility.core_min_version')"; fi
-if [[ -z "$CORE_MAX" ]]; then CORE_MAX="$(json_get '.compatibility.core_max_version')"; fi
-
+[[ -n "$SCHEMA_VERSION" ]] || die "manifest.json missing required field: schema_version"
 [[ -n "$ADDON_ID" ]] || die "manifest.json missing required field: id"
 [[ -n "$ADDON_VERSION" ]] || die "manifest.json missing required field: version"
 [[ -n "$ADDON_NAME" ]] || ADDON_NAME="$ADDON_ID"
-[[ -n "$CORE_MIN" ]] || CORE_MIN="0.0.0"
+[[ -n "$PACKAGE_PROFILE" ]] || die "manifest.json missing required field: package_profile"
+[[ -n "$CORE_MIN" ]] || die "manifest.json missing required field: compatibility.core_min_version"
+if [[ "$SCHEMA_VERSION" != "1.1" ]]; then
+  die "manifest schema_version must be 1.1 for SAS v1.1 signing (found: $SCHEMA_VERSION)"
+fi
 
 # --- Auto-find key + key id from keys dir ---
 if [[ -z "$KEY" ]]; then
@@ -149,12 +155,10 @@ fi
 [[ -n "$PUBLISHER_KEY_ID" ]] || die "No publisher key id found. Provide --publisher-key-id or add keys/publisher_key_id.txt"
 
 # --- Determine artifact URL ---
-ASSET_NAME="$(json_get '.release.asset_name')"
-[[ -n "$ASSET_NAME" ]] || ASSET_NAME="addon.tgz"
-PACKAGE_PROFILE="$(json_get '.release.package_profile')"
-[[ -n "$PACKAGE_PROFILE" ]] || PACKAGE_PROFILE="default"
-
-URL_TEMPLATE="$(json_get '.release.artifact_url_template')"
+URL_TEMPLATE="$ARTIFACT_URL_TEMPLATE"
+if [[ -z "$URL_TEMPLATE" && -f "$KEYS_DIR/artifact_url_template.txt" ]]; then
+  URL_TEMPLATE="$(tr -d '\r\n' < "$KEYS_DIR/artifact_url_template.txt")"
+fi
 
 if [[ -z "$ARTIFACT_URL" ]]; then
   if [[ -n "$URL_TEMPLATE" ]]; then
@@ -167,7 +171,7 @@ if [[ -z "$ARTIFACT_URL" ]]; then
     # derive from git remote (GitHub https or ssh)
     REPO_URL="$(git config --get remote.origin.url 2>/dev/null || true)"
     if [[ -z "$REPO_URL" ]]; then
-      die "artifact url not provided and git remote not found. Provide --artifact-url or set .release.artifact_url_template"
+      die "artifact url not provided and git remote not found. Provide --artifact-url, ARTIFACT_URL_TEMPLATE, or keys/artifact_base_url.txt"
     fi
     # Normalize to owner/repo
     # https://github.com/owner/repo.git  OR git@github.com:owner/repo.git
@@ -176,7 +180,7 @@ if [[ -z "$ARTIFACT_URL" ]]; then
       repo="${BASH_REMATCH[2]}"
       ARTIFACT_URL="https://github.com/${owner}/${repo}/releases/download/v${ADDON_VERSION}/${ASSET_NAME}"
     else
-      die "Cannot derive GitHub artifact URL from remote: $REPO_URL. Provide --artifact-url or .release.artifact_url_template"
+      die "Cannot derive GitHub artifact URL from remote: $REPO_URL. Provide --artifact-url or ARTIFACT_URL_TEMPLATE"
     fi
   fi
 fi
@@ -185,25 +189,14 @@ fi
 
 mkdir -p "$OUTDIR"
 
-# --- Determine packaging paths (existing behavior + manifest paths) ---
+# --- Determine packaging paths from manifest.paths ---
 PATHS=()
-BACKEND_PATH="$(json_get '.backend')"
-FRONTEND_PATH="$(json_get '.frontend')"
-WORKER_PATH="$(json_get '.worker')"
-
-if [[ -n "$BACKEND_PATH" || -n "$FRONTEND_PATH" || -n "$WORKER_PATH" ]]; then
-  [[ -n "$BACKEND_PATH" ]] && PATHS+=("${BACKEND_PATH#./}")
-  [[ -n "$FRONTEND_PATH" ]] && PATHS+=("${FRONTEND_PATH#./}")
-  [[ -n "$WORKER_PATH" ]] && PATHS+=("${WORKER_PATH#./}")
-else
-  [[ -d backend ]] && PATHS+=(backend)
-  [[ -d frontend ]] && PATHS+=(frontend)
-  [[ -d worker ]] && PATHS+=(worker)
-fi
-
 while IFS= read -r p; do
   [[ -n "$p" ]] && PATHS+=("${p#./}")
 done < <(json_list_get '.paths' || true)
+if [[ ${#PATHS[@]} -eq 0 ]]; then
+  PATHS=(app frontend requirements.txt)
+fi
 
 FILES=( "$MANIFEST" )
 for p in "${PATHS[@]}"; do

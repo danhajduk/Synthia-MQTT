@@ -34,3 +34,36 @@ MQTT_BASE_TOPIC=synthia \
 EXPECTED_ANNOUNCE_BASE_URL=http://10.0.0.100:18080 \
 ./scripts/validate-service-flow.sh
 ```
+
+## `scripts/sign-addon.sh`
+
+Purpose:
+
+- Package and sign addon artifact from SAS v1.1 `manifest.json`.
+- Read `package_profile`, `compatibility`, and `paths` from manifest.
+- Generate `dist/catalog-snippet.json` for catalog release entries.
+
+Usage:
+
+```bash
+./scripts/sign-addon.sh
+```
+
+Optional overrides:
+
+- `ASSET_NAME` (default `addon.tgz`)
+- `ARTIFACT_URL_TEMPLATE` (supports `{version}`)
+- `--artifact-url <url>` for explicit release URL
+
+## `scripts/release-addon.sh`
+
+Purpose:
+
+- Build deterministic release artifact and upload to GitHub release.
+- Emit `release-output.json` including `package_profile`.
+
+Usage:
+
+```bash
+./scripts/release-addon.sh v0.1.2
+```
