@@ -10,6 +10,10 @@ Distributed MQTT addon service running from the repository root at `~/Projects/S
 - `scripts/`: Operational scripts.
 - `Ducuments/`: Module-level documentation.
 
+## Local Workflow Files
+
+- Local workflow/tracking files like `New_tasks.txt` and `completed_task.txt` are intentionally ignored by Git.
+
 ## Quick Start
 
 ```bash
