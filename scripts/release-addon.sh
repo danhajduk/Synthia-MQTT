@@ -43,8 +43,22 @@ SHA256="$(sha256sum "${ASSET_NAME}" | awk '{print $1}')"
 echo "==> Generating detached signature"
 RELEASE_SIG="$(openssl dgst -sha256 -sign "${SIGNING_KEY}" -binary "${ASSET_NAME}" | base64 -w0)"
 
-echo "==> Uploading to GitHub Release"
-gh release upload "${VERSION}" "${ASSET_NAME}" --repo "${REPO_SLUG}" --clobber
+echo "==> Ensuring GitHub release exists: ${VERSION}"
+
+if gh release view "${VERSION}" --repo "${REPO_SLUG}" >/dev/null 2>&1; then
+  echo "    Release exists."
+else
+  echo "    Release missing — creating it."
+  gh release create "${VERSION}" \
+    --repo "${REPO_SLUG}" \
+    --title "${VERSION}" \
+    --notes ""
+fi
+
+echo "==> Uploading ${ASSET_NAME}"
+gh release upload "${VERSION}" "${ASSET_NAME}" \
+  --repo "${REPO_SLUG}" \
+  --clobber
 
 ARTIFACT_URL="https://github.com/${REPO_SLUG}/releases/download/${VERSION}/${ASSET_NAME}"
 
