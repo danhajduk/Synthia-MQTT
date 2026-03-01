@@ -21,15 +21,13 @@
 
   "paths": [
     "manifest.json",
-    "backend",
     "frontend",
-    "worker"
+    "app",
+    "requirements.txt"
   ],
 
   "entrypoints": {
-    "backend": "backend/addon.py",
-    "frontend": "frontend/index.ts",
-    "worker": "worker/worker.py"
+    "service": "app/main.py"
   },
   "release": {
     "asset_name": "addon.tgz",

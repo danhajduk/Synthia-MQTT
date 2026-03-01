@@ -67,3 +67,11 @@ cd frontend && npm run build
 - `Ducuments/models.md`
 - `Ducuments/deployment.md`
 - `Ducuments/scripts.md`
+
+## Release Artifact Layout
+
+`manifest.json` now packages the service runtime layout directly:
+
+- `app/`
+- `frontend/`
+- `requirements.txt`
