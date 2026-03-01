@@ -1,6 +1,7 @@
 # Synthia MQTT Addon Service
 
 Distributed MQTT addon service running from the repository root at `~/Projects/Synthia-MQTT`.
+This artifact runs as a standalone external service and does not manage an embedded broker.
 
 ## Repository Layout
 
@@ -18,7 +19,7 @@ Distributed MQTT addon service running from the repository root at `~/Projects/S
 ## Quick Start
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d
+MQTT_HOST=10.0.0.100 MQTT_PORT=1883 docker compose -f docker/docker-compose.yml up -d
 ```
 
 Health check:
