@@ -1,8 +1,11 @@
+import os
 from typing import Callable
 
 from fastapi import APIRouter, HTTPException
 
 from app.models.install_models import (
+    CoreRegistryRequest,
+    CoreRegistryResponse,
     ExternalConnectionConfig,
     InstallApplyRequest,
     InstallApplyResponse,
@@ -10,6 +13,7 @@ from app.models.install_models import (
     InstallTestExternalResponse,
 )
 from app.services.config_store import ConfigStore
+from app.services.core_registry import register_addon_endpoint
 from app.services.health import HealthService
 from app.services.mqtt_client import test_external_connection
 
@@ -64,5 +68,23 @@ def build_install_workflow_router(
         return InstallApplyResponse(
             ok=True,
         )
+
+    @router.post("/register-core", response_model=CoreRegistryResponse)
+    def register_core(payload: CoreRegistryRequest) -> CoreRegistryResponse:
+        core_base_url = (payload.core_base_url or os.getenv("CORE_BASE_URL", "")).strip()
+        addon_id = payload.addon_id.strip()
+        auth_token = payload.auth_token or os.getenv("CORE_ADMIN_TOKEN")
+        if not core_base_url:
+            raise HTTPException(status_code=400, detail="core_base_url is required (or set CORE_BASE_URL)")
+
+        ok, status_code, reason = register_addon_endpoint(
+            core_base_url=core_base_url,
+            addon_id=addon_id,
+            base_url=payload.base_url,
+            auth_token=auth_token,
+        )
+        if not ok:
+            raise HTTPException(status_code=502, detail=reason or "Core registry request failed")
+        return CoreRegistryResponse(ok=True, status_code=status_code)
 
     return router

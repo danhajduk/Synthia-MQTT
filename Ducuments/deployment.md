@@ -53,6 +53,16 @@ sudo systemctl enable --now synthia-mqtt.service
 
 The service should be reachable from Synthia Core at a stable base URL (for example, `http://10.0.0.100:18080`).
 
+## Core Registry Registration
+
+After deployment, register the endpoint in Core:
+
+```bash
+curl -X POST http://localhost:18080/api/install/register-core \
+  -H "Content-Type: application/json" \
+  -d '{"core_base_url":"http://10.0.0.100:3000","addon_id":"mqtt","base_url":"http://10.0.0.100:18080"}'
+```
+
 ## Shutdown
 
 ```bash

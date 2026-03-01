@@ -62,3 +62,18 @@ class InstallApplyResponse(BaseModel):
     requires_operator_action: bool | None = None
     operator_action: str | None = None
     warnings: list[str] | None = None
+
+
+class CoreRegistryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    base_url: str = Field(min_length=1)
+    core_base_url: str | None = None
+    addon_id: str = Field(default="mqtt", min_length=1)
+    auth_token: str | None = None
+
+
+class CoreRegistryResponse(BaseModel):
+    ok: bool
+    status_code: int | None = None
+    reason: str | None = None

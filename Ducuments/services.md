@@ -20,6 +20,12 @@
 - Provides generic publish method used by API endpoints.
 - Includes install-time external MQTT connectivity test helper.
 
+## `app/services/core_registry.py`
+
+- Posts addon service endpoint registration to Synthia Core `/api/admin/addons/registry`.
+- Sends `addon_id` and externally reachable `base_url`.
+- Supports optional bearer token for Core admin auth.
+
 ## `app/services/broker_manager.py`
 
 - Handles embedded broker restart attempts with docker socket checks.

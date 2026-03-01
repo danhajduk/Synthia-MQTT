@@ -50,6 +50,7 @@ cd frontend && npm run build
 - `GET /api/install/status`
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
+- `POST /api/install/register-core`
 - `POST /api/broker/restart`
 - `POST /api/mqtt/publish`
 - `POST /api/ha/discovery/sensor`

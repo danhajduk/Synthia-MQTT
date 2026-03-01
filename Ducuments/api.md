@@ -19,8 +19,10 @@ Implements install workflow endpoints:
 - `GET /api/install/status`
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
+- `POST /api/install/register-core`
 
 `/api/install/apply` now accepts only external mode for this artifact, persists external broker config, and reconnects the MQTT client.
+`/api/install/register-core` posts `{ addon_id, base_url }` to Core at `/api/admin/addons/registry`.
 
 ## `app/api/broker_admin.py`
 

@@ -22,4 +22,5 @@ Defines install workflow models for:
 
 - install status response
 - external broker connectivity test request/response
-- install apply request/response for external vs embedded mode
+- install apply request/response for external mode
+- core registry registration request/response
