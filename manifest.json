@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+
+  "id": "mqtt",
+  "name": "Synthia MQTT",
+  "description": "MQTT integration layer for Synthia Core",
+
+  "version": "0.1.0",
+
+  "compatibility": {
+    "core_min_version": "0.6.0",
+    "core_max_version": null,
+    "dependencies": [],
+    "conflicts": []
+  },
+
+  "permissions": [
+    "network.outbound",
+    "mqtt.client"
+  ],
+
+  "paths": [
+    "manifest.json",
+    "backend",
+    "frontend",
+    "worker"
+  ],
+
+  "entrypoints": {
+    "backend": "backend/addon.py",
+    "frontend": "frontend/index.ts",
+    "worker": "worker/worker.py"
+  }
+}
