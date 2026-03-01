@@ -4,18 +4,29 @@ set -euo pipefail
 # Creates a signed addon artifact using manifest.json.
 # Outputs in ./dist:
 #   addon.tgz, addon.tgz.sig, addon.sha256, addon.release_sig.b64, catalog-snippet.json
+#
+# Defaults:
+# - manifest.json in repo root
+# - keys/ directory contains signing materials
+#   - publisher_private.pem
+#   - publisher_key_id.txt
+#   - artifact_base_url.txt (optional)
+#
+# Optional manifest fields:
+# - .release.artifact_url_template  (supports {version})
+# - .release.asset_name            (default addon.tgz)
 
 MANIFEST="manifest.json"
 OUTDIR="dist"
 KEY=""
 PUBLISHER_KEY_ID=""
 ARTIFACT_URL=""
+KEYS_DIR="keys"
 INCLUDE_EXTRA=()
 
 die(){ echo "ERROR: $*" >&2; exit 1; }
 have(){ command -v "$1" >/dev/null 2>&1; }
 
-# JSON getters: prefer jq; fallback to python3 with -c (no heredocs).
 json_get() {
   local expr="$1"
   if have jq; then
@@ -26,7 +37,6 @@ json_get() {
   python3 -c 'import json,sys
 m=json.load(open(sys.argv[1],"r",encoding="utf-8"))
 path=sys.argv[2].strip()
-# support ".a.b.c" only
 parts=[p for p in path.lstrip(".").split(".") if p]
 cur=m
 for p in parts:
@@ -60,33 +70,44 @@ for item in cur:
 ' "$MANIFEST" "$expr"
 }
 
+usage() {
+  cat <<EOF
+Usage: $0 [options]
+
+Options:
+  --manifest <path>       (default: manifest.json)
+  --out <dir>             (default: dist)
+  --keys-dir <dir>        (default: keys)
+  --key <pem>             (override private key)
+  --publisher-key-id <id> (override key id)
+  --artifact-url <url>    (override artifact url)
+  --include <path>        (extra include)
+  -h|--help
+EOF
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --manifest) MANIFEST="$2"; shift 2;;
     --out) OUTDIR="$2"; shift 2;;
+    --keys-dir) KEYS_DIR="$2"; shift 2;;
     --key) KEY="$2"; shift 2;;
     --publisher-key-id) PUBLISHER_KEY_ID="$2"; shift 2;;
     --artifact-url) ARTIFACT_URL="$2"; shift 2;;
     --include) INCLUDE_EXTRA+=("$2"); shift 2;;
-    -h|--help)
-      echo "Usage: $0 --key <publisher_private.pem> --publisher-key-id <id> --artifact-url <url> [--manifest manifest.json] [--out dist]"
-      exit 0
-      ;;
+    -h|--help) usage; exit 0;;
     *) die "Unknown arg: $1";;
   esac
 done
 
 [[ -f "$MANIFEST" ]] || die "Manifest not found: $MANIFEST"
-[[ -n "$KEY" ]] || die "--key is required"
-[[ -f "$KEY" ]] || die "Private key not found: $KEY"
-[[ -n "$PUBLISHER_KEY_ID" ]] || die "--publisher-key-id is required"
-[[ -n "$ARTIFACT_URL" ]] || die "--artifact-url is required"
 
 have openssl || die "openssl not found"
 have tar || die "tar not found"
 have sha256sum || die "sha256sum not found"
 have base64 || die "base64 not found"
 
+# --- Load manifest basics ---
 ADDON_ID="$(json_get '.id')"
 ADDON_NAME="$(json_get '.name')"
 ADDON_VERSION="$(json_get '.version')"
@@ -101,9 +122,68 @@ if [[ -z "$CORE_MAX" ]]; then CORE_MAX="$(json_get '.compatibility.core_max_vers
 [[ -n "$ADDON_NAME" ]] || ADDON_NAME="$ADDON_ID"
 [[ -n "$CORE_MIN" ]] || CORE_MIN="0.0.0"
 
+# --- Auto-find key + key id from keys dir ---
+if [[ -z "$KEY" ]]; then
+  if [[ -f "$KEYS_DIR/publisher_private.pem" ]]; then
+    KEY="$KEYS_DIR/publisher_private.pem"
+  else
+    # first .pem in keys dir
+    KEY="$(ls -1 "$KEYS_DIR"/*.pem 2>/dev/null | head -n 1 || true)"
+  fi
+fi
+
+if [[ -z "$PUBLISHER_KEY_ID" ]]; then
+  if [[ -f "$KEYS_DIR/publisher_key_id.txt" ]]; then
+    PUBLISHER_KEY_ID="$(tr -d '\r\n' < "$KEYS_DIR/publisher_key_id.txt")"
+  else
+    # fallback: first file matching *.key_id or *.kid
+    local_id_file="$(ls -1 "$KEYS_DIR"/*.key_id "$KEYS_DIR"/*.kid 2>/dev/null | head -n 1 || true)"
+    if [[ -n "${local_id_file:-}" ]]; then
+      PUBLISHER_KEY_ID="$(tr -d '\r\n' < "$local_id_file")"
+    fi
+  fi
+fi
+
+[[ -n "$KEY" ]] || die "No private key found. Provide --key or add keys/publisher_private.pem"
+[[ -f "$KEY" ]] || die "Private key not found: $KEY"
+[[ -n "$PUBLISHER_KEY_ID" ]] || die "No publisher key id found. Provide --publisher-key-id or add keys/publisher_key_id.txt"
+
+# --- Determine artifact URL ---
+ASSET_NAME="$(json_get '.release.asset_name')"
+[[ -n "$ASSET_NAME" ]] || ASSET_NAME="addon.tgz"
+
+URL_TEMPLATE="$(json_get '.release.artifact_url_template')"
+
+if [[ -z "$ARTIFACT_URL" ]]; then
+  if [[ -n "$URL_TEMPLATE" ]]; then
+    ARTIFACT_URL="${URL_TEMPLATE//\{version\}/$ADDON_VERSION}"
+  elif [[ -f "$KEYS_DIR/artifact_base_url.txt" ]]; then
+    base="$(tr -d '\r\n' < "$KEYS_DIR/artifact_base_url.txt")"
+    # expect base like: https://github.com/owner/repo/releases/download
+    ARTIFACT_URL="${base%/}/v${ADDON_VERSION}/${ASSET_NAME}"
+  else
+    # derive from git remote (GitHub https or ssh)
+    REPO_URL="$(git config --get remote.origin.url 2>/dev/null || true)"
+    if [[ -z "$REPO_URL" ]]; then
+      die "artifact url not provided and git remote not found. Provide --artifact-url or set .release.artifact_url_template"
+    fi
+    # Normalize to owner/repo
+    # https://github.com/owner/repo.git  OR git@github.com:owner/repo.git
+    if [[ "$REPO_URL" =~ github\.com[:/]+([^/]+)/([^/.]+) ]]; then
+      owner="${BASH_REMATCH[1]}"
+      repo="${BASH_REMATCH[2]}"
+      ARTIFACT_URL="https://github.com/${owner}/${repo}/releases/download/v${ADDON_VERSION}/${ASSET_NAME}"
+    else
+      die "Cannot derive GitHub artifact URL from remote: $REPO_URL. Provide --artifact-url or .release.artifact_url_template"
+    fi
+  fi
+fi
+
+[[ -n "$ARTIFACT_URL" ]] || die "artifact url could not be determined"
+
 mkdir -p "$OUTDIR"
 
-# Determine packaging paths.
+# --- Determine packaging paths (existing behavior + manifest paths) ---
 PATHS=()
 BACKEND_PATH="$(json_get '.backend')"
 FRONTEND_PATH="$(json_get '.frontend')"
@@ -119,7 +199,6 @@ else
   [[ -d worker ]] && PATHS+=(worker)
 fi
 
-# Optional manifest array: paths:[...]
 while IFS= read -r p; do
   [[ -n "$p" ]] && PATHS+=("${p#./}")
 done < <(json_list_get '.paths' || true)
@@ -143,21 +222,24 @@ for f in "${FILES[@]}"; do
 done
 FILES=("${DEDUP[@]}")
 
-ARTIFACT="$OUTDIR/addon.tgz"
-SIGFILE="$OUTDIR/addon.tgz.sig"
-SHAFILE="$OUTDIR/addon.sha256"
+ARTIFACT="$OUTDIR/$ASSET_NAME"
+SIGFILE="$OUTDIR/$ASSET_NAME.sig"
+SHAFILE="$OUTDIR/${ASSET_NAME}.sha256"
 B64FILE="$OUTDIR/addon.release_sig.b64"
 SNIPFILE="$OUTDIR/catalog-snippet.json"
 
 echo "== Packaging =="
 echo "Addon: $ADDON_ID ($ADDON_NAME) v$ADDON_VERSION"
+echo "Key: $KEY"
+echo "Key ID: $PUBLISHER_KEY_ID"
+echo "Artifact URL: $ARTIFACT_URL"
 echo "Include:"
 printf " - %s\n" "${FILES[@]}"
 
 tar -czf "$ARTIFACT" "${FILES[@]}"
 
 SHA256="$(sha256sum "$ARTIFACT" | awk '{print $1}')"
-echo "$SHA256  addon.tgz" | tee "$SHAFILE"
+echo "$SHA256  $ASSET_NAME" | tee "$SHAFILE"
 
 echo "== Signing artifact (detached sig) =="
 openssl dgst -sha256 -sign "$KEY" -out "$SIGFILE" "$ARTIFACT"
