@@ -5,7 +5,7 @@
 - Resolves effective config from environment defaults + runtime overrides.
 - Persists overrides to `runtime/config.json`.
 - Masks sensitive fields for effective-config API responses.
-- Persists install workflow mode settings (`external` / `embedded`) and derives MQTT runtime settings.
+- Persists external install workflow settings and derives MQTT runtime settings.
 
 ## `app/services/health.py`
 

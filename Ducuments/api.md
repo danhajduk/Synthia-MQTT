@@ -20,7 +20,7 @@ Implements install workflow endpoints:
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
 
-`/api/install/apply` persists install mode config, generates embedded broker runtime files when needed, triggers broker restart flow when possible, and reconnects the MQTT client.
+`/api/install/apply` now accepts only external mode for this artifact, persists external broker config, and reconnects the MQTT client.
 
 ## `app/api/broker_admin.py`
 

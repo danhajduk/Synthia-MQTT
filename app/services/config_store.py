@@ -50,8 +50,8 @@ class ConfigStore:
         overrides = self._load_overrides()
 
         mode = overrides.get("mode")
-        if mode not in {"external", "embedded"}:
-            mode = "embedded" if str(overrides.get("mqtt_host", "mosquitto")) == "mosquitto" else "external"
+        if mode != "external":
+            mode = "external"
 
         external = overrides.get("external") or {
             "host": overrides.get("mqtt_host", os.getenv("MQTT_HOST", "mosquitto")),
@@ -88,6 +88,8 @@ class ConfigStore:
         overrides = self._load_overrides()
         data = request.model_dump(exclude_none=True)
         mode = data["mode"]
+        if mode != "external":
+            raise ValueError("Only external install mode is supported for this artifact")
 
         overrides["mode"] = mode
         if "external" in data:
@@ -108,17 +110,6 @@ class ConfigStore:
             overrides["mqtt_tls"] = external["tls"]
             overrides["mqtt_username"] = external.get("username")
             overrides["mqtt_password"] = external.get("password")
-        else:
-            embedded = data["embedded"]
-            overrides["mqtt_host"] = "mosquitto"
-            overrides["mqtt_port"] = embedded["port"]
-            overrides["mqtt_tls"] = False
-            if embedded.get("allow_anonymous"):
-                overrides["mqtt_username"] = None
-                overrides["mqtt_password"] = None
-            else:
-                overrides["mqtt_username"] = embedded.get("admin_user")
-                overrides["mqtt_password"] = embedded.get("admin_pass")
 
         if "base_topic" in data:
             overrides["mqtt_base_topic"] = data["base_topic"]
