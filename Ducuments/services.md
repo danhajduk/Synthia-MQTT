@@ -4,6 +4,8 @@
 
 - Resolves effective config from environment defaults + runtime overrides.
 - Persists overrides to `runtime/config.json`.
+- Masks sensitive fields for effective-config API responses.
+- Persists install workflow mode settings (`external` / `embedded`) and derives MQTT runtime settings.
 
 ## `app/services/health.py`
 
@@ -16,3 +18,10 @@
 - Sets LWT offline payload.
 - Publishes retained announce and periodic health messages.
 - Provides generic publish method used by API endpoints.
+- Supports explicit retained state republish after runtime reconnect.
+- Includes install-time external MQTT connectivity test helper.
+
+## `app/services/broker_manager.py`
+
+- Handles embedded broker restart attempts with docker socket checks.
+- Generates runtime embedded broker files under `runtime/broker/`.

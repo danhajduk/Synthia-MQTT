@@ -26,6 +26,12 @@ Health check:
 curl http://localhost:18080/healthz
 ```
 
+UI (when `frontend/dist` exists):
+
+```bash
+open http://localhost:18080/ui
+```
+
 ## API Endpoints
 
 - `GET /api/addon/meta`
@@ -33,6 +39,10 @@ curl http://localhost:18080/healthz
 - `GET /api/addon/config/effective`
 - `POST /api/addon/config`
 - `GET /api/addon/capabilities`
+- `GET /api/install/status`
+- `POST /api/install/test-external`
+- `POST /api/install/apply`
+- `POST /api/broker/restart`
 - `POST /api/mqtt/publish`
 - `POST /api/ha/discovery/sensor`
 

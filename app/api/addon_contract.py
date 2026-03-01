@@ -1,3 +1,5 @@
+from typing import Callable
+
 from fastapi import APIRouter, HTTPException
 
 from app.models.addon_models import (
@@ -26,6 +28,7 @@ CAPABILITIES = [
 def build_addon_contract_router(
     config_store: ConfigStore,
     health_service: HealthService,
+    apply_runtime_config: Callable[[], None],
 ) -> APIRouter:
     router = APIRouter(prefix="/api/addon", tags=["addon"])
 
@@ -39,13 +42,14 @@ def build_addon_contract_router(
 
     @router.get("/config/effective", response_model=AddonConfigEffective)
     def get_effective_config() -> AddonConfigEffective:
-        return AddonConfigEffective(**config_store.get_effective_config())
+        return AddonConfigEffective(**config_store.get_effective_config(mask_secrets=True))
 
     @router.post("/config", response_model=AddonConfigEffective)
     def update_config(config_update: AddonConfigUpdate) -> AddonConfigEffective:
         try:
-            config = config_store.update_config(config_update)
-            return AddonConfigEffective(**config)
+            config_store.update_config(config_update)
+            apply_runtime_config()
+            return AddonConfigEffective(**config_store.get_effective_config(mask_secrets=True))
         except Exception as exc:  # pragma: no cover
             raise HTTPException(status_code=500, detail="Failed to persist config") from exc
 

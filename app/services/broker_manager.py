@@ -2,6 +2,7 @@ import socket
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 DOCKER_SOCKET_PATH = Path("/var/run/docker.sock")
 DEFAULT_CONTAINER_NAME = "synthia-mosquitto"
@@ -49,6 +50,56 @@ class BrokerManager:
                 reason=f"Docker restart failed: {exc}",
                 operator_action=OPERATOR_ACTION,
             )
+
+    def docker_socket_available(self) -> bool:
+        return DOCKER_SOCKET_PATH.exists()
+
+
+def write_embedded_broker_files(
+    broker_dir: Path,
+    embedded_config: dict[str, Any],
+) -> None:
+    broker_dir.mkdir(parents=True, exist_ok=True)
+
+    allow_anonymous = bool(embedded_config.get("allow_anonymous", False))
+    persistence = bool(embedded_config.get("persistence", True))
+    log_type = str(embedded_config.get("log_type", "stdout"))
+    port = int(embedded_config.get("port", 1883))
+    admin_user = embedded_config.get("admin_user")
+    admin_pass = embedded_config.get("admin_pass")
+
+    conf_lines = [
+        f"listener {port}",
+        f"allow_anonymous {'true' if allow_anonymous else 'false'}",
+        "",
+        f"persistence {'true' if persistence else 'false'}",
+        "persistence_location /mosquitto/data/",
+        f"log_dest {log_type}",
+    ]
+
+    if not allow_anonymous:
+        conf_lines.extend(
+            [
+                "password_file /mosquitto/config/passwordfile",
+                "acl_file /mosquitto/config/aclfile",
+            ]
+        )
+
+    (broker_dir / "mosquitto.conf").write_text("\n".join(conf_lines) + "\n", encoding="utf-8")
+
+    if allow_anonymous:
+        (broker_dir / "pwfile").write_text("", encoding="utf-8")
+        (broker_dir / "aclfile").write_text("topic readwrite #\n", encoding="utf-8")
+        return
+
+    if admin_user and admin_pass:
+        # Store plaintext credentials for operator tooling to convert into passwordfile if needed.
+        (broker_dir / "pwfile").write_text(f"{admin_user}:{admin_pass}\n", encoding="utf-8")
+    else:
+        (broker_dir / "pwfile").write_text("", encoding="utf-8")
+
+    acl_user = admin_user or "admin"
+    (broker_dir / "aclfile").write_text(f"user {acl_user}\ntopic readwrite #\n", encoding="utf-8")
 
 
 def wait_for_port(host: str, port: int, timeout_s: float) -> bool:

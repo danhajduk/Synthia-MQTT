@@ -3,6 +3,7 @@ import logging
 import threading
 import time
 from datetime import datetime, timezone
+from threading import Event
 from typing import Any
 
 import paho.mqtt.client as mqtt
@@ -130,6 +131,10 @@ class MqttClientService:
         }
         self.publish(self._health_topic, payload, retain=True, qos=self._qos)
 
+    def republish_retained_state(self) -> None:
+        self._publish_announce()
+        self._publish_health()
+
     def _publish_health_forever(self) -> None:
         while not self._stop_event.is_set():
             self._publish_health()
@@ -141,3 +146,52 @@ class MqttClientService:
             "status": "offline",
             "last_seen": datetime.now(timezone.utc).isoformat(),
         }
+
+
+def test_external_connection(
+    host: str,
+    port: int,
+    tls: bool,
+    username: str | None,
+    password: str | None,
+    timeout_s: float = 5.0,
+) -> tuple[bool, str | None]:
+    client = mqtt.Client(client_id=f"synthia-install-test-{int(time.time() * 1000)}")
+    if username:
+        client.username_pw_set(username, password=password)
+    if tls:
+        client.tls_set()
+
+    connected = Event()
+    result: dict[str, str | None] = {"reason": None}
+
+    def on_connect(_client: mqtt.Client, _userdata: Any, _flags: Any, rc: int) -> None:
+        if rc == 0:
+            connected.set()
+            return
+        result["reason"] = f"MQTT connect failed with rc={rc}"
+        connected.set()
+
+    def on_disconnect(_client: mqtt.Client, _userdata: Any, rc: int) -> None:
+        if rc != 0 and result["reason"] is None:
+            result["reason"] = f"MQTT disconnected unexpectedly rc={rc}"
+
+    client.on_connect = on_connect
+    client.on_disconnect = on_disconnect
+
+    try:
+        client.connect(host=host, port=port, keepalive=10)
+        client.loop_start()
+        if not connected.wait(timeout=timeout_s):
+            return False, f"Timed out connecting to {host}:{port}"
+        if result["reason"] is not None:
+            return False, result["reason"]
+        return True, None
+    except Exception as exc:
+        return False, str(exc)
+    finally:
+        try:
+            client.loop_stop()
+            client.disconnect()
+        except Exception:
+            pass
