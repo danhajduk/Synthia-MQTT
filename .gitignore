@@ -11,3 +11,5 @@ __pycache__/
 keys/publisher_private.pem
 runtime/config.json
 runtime/broker/
+release-output.json
+addon.tgz
