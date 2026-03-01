@@ -1,36 +1,30 @@
 {
   "schema_version": "1.0",
-
   "id": "mqtt",
   "name": "Synthia MQTT",
   "description": "MQTT integration layer for Synthia Core",
-
   "version": "0.1.1",
-
+  "package_profile": "standalone_service",  
   "compatibility": {
     "core_min_version": "0.6.0",
     "core_max_version": null,
     "dependencies": [],
     "conflicts": []
   },
-
   "permissions": [
     "network.outbound",
     "mqtt.client"
   ],
-
   "paths": [
     "manifest.json",
     "frontend",
     "app",
     "requirements.txt"
   ],
-
   "entrypoints": {
     "service": "app/main.py"
   },
   "release": {
-    "package_profile": "standalone_service",
     "asset_name": "addon.tgz",
     "artifact_url_template": "https://github.com/danhajduk/Synthia-MQTT/releases/download/v{version}/addon.tgz"
   }
