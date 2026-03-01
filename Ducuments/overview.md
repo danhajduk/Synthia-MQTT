@@ -10,3 +10,10 @@ This service provides a distributed MQTT addon for Synthia.
 - `frontend/`: Embedded setup wizard served at `/ui` when `frontend/dist` exists.
 - `docker/`: Deployment stack with Mosquitto and addon containers.
 - `scripts/`: Operational automation scripts.
+
+## Addon Standard Contract
+
+- `manifest.json` uses Synthia Addon Standard `schema_version: 1.1`.
+- The addon runs with `package_profile: standalone_service`.
+- Canonical permissions are `network.egress`, `mqtt.publish`, and `mqtt.subscribe`.
+- Artifact signing/release scripts consume manifest `compatibility`, `package_profile`, and `paths`.

@@ -73,6 +73,20 @@ CORE_PROXY_HEALTH_URL=http://10.0.0.100:3000/api/addons/mqtt/proxy/healthz \
 ./scripts/validate-service-flow.sh
 ```
 
+## Artifact Signing And Release
+
+Create signed addon outputs under `dist/` using SAS v1.1 manifest fields:
+
+```bash
+./scripts/sign-addon.sh
+```
+
+Publish a GitHub release artifact and metadata:
+
+```bash
+./scripts/release-addon.sh v0.1.2
+```
+
 ## Shutdown
 
 ```bash
