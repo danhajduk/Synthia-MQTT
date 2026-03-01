@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Synthia MQTT Setup</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header class="hero">
+        <h1>Synthia MQTT Setup Wizard</h1>
+        <p>Configure broker mode, validate connectivity, and apply live settings.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Step 1: Status</h2>
+        <div class="status-grid">
+          <div><span>Mode</span><strong id="status-mode">-</strong></div>
+          <div><span>Docker socket</span><strong id="status-docker">-</strong></div>
+          <div><span>Broker running</span><strong id="status-broker">-</strong></div>
+          <div><span>MQTT connected</span><strong id="status-mqtt">-</strong></div>
+          <div><span>Addon health</span><strong id="status-health">-</strong></div>
+          <div><span>Last error</span><strong id="status-error">-</strong></div>
+        </div>
+        <button id="refresh-status" type="button">Refresh Status</button>
+      </section>
+
+      <section class="panel">
+        <h2>Step 2: Select Mode</h2>
+        <div class="mode-pick">
+          <label><input type="radio" name="mode" value="external" checked /> External broker</label>
+          <label><input type="radio" name="mode" value="embedded" /> Embedded broker</label>
+        </div>
+      </section>
+
+      <section class="panel" id="external-panel">
+        <h2>Step 3 (External): Test and Apply</h2>
+        <div class="form-grid">
+          <label>Host <input id="external-host" type="text" value="localhost" /></label>
+          <label>Port <input id="external-port" type="number" min="1" max="65535" value="1883" /></label>
+          <label class="check"><input id="external-tls" type="checkbox" /> TLS</label>
+          <label>Username <input id="external-user" type="text" /></label>
+          <label>Password <input id="external-pass" type="password" /></label>
+          <label>Base topic <input id="base-topic" type="text" value="synthia" /></label>
+          <label>HA discovery prefix <input id="ha-prefix" type="text" value="homeassistant" /></label>
+          <label>Default QoS <input id="qos-default" type="number" min="0" max="2" value="1" /></label>
+        </div>
+        <div class="actions">
+          <button id="test-external" type="button">Test Connection</button>
+          <button id="apply-external" type="button">Apply External</button>
+        </div>
+        <p id="external-result" class="result">-</p>
+      </section>
+
+      <section class="panel hidden" id="embedded-panel">
+        <h2>Step 3 (Embedded): Configure and Apply</h2>
+        <div class="form-grid">
+          <label class="check"><input id="embedded-anon" type="checkbox" /> Allow anonymous</label>
+          <label class="check"><input id="embedded-persist" type="checkbox" checked /> Persistence</label>
+          <label>Log type <input id="embedded-log" type="text" value="stdout" /></label>
+          <label>Broker port <input id="embedded-port" type="number" min="1" max="65535" value="1883" /></label>
+          <label>Admin user <input id="embedded-user" type="text" /></label>
+          <label>Admin pass <input id="embedded-pass" type="password" /></label>
+          <label>Base topic <input id="base-topic-embedded" type="text" value="synthia" /></label>
+          <label>HA discovery prefix <input id="ha-prefix-embedded" type="text" value="homeassistant" /></label>
+          <label>Default QoS <input id="qos-default-embedded" type="number" min="0" max="2" value="1" /></label>
+        </div>
+        <div class="actions">
+          <button id="apply-embedded" type="button">Apply Embedded</button>
+          <button id="restart-broker" type="button" class="hidden">Restart Broker</button>
+        </div>
+        <p id="embedded-result" class="result">-</p>
+        <div id="operator-wrap" class="hidden">
+          <p>Operator action required:</p>
+          <textarea id="operator-action" readonly></textarea>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Step 4: Finish</h2>
+        <button id="load-finish" type="button">Load Effective Config + Health</button>
+        <pre id="finish-output">{}</pre>
+      </section>
+
+      <section class="panel">
+        <h2>Test Publish</h2>
+        <div class="form-grid">
+          <label>Topic <input id="pub-topic" type="text" value="synthia/test" /></label>
+          <label>Payload (JSON or text) <input id="pub-payload" type="text" value='{"hello":"world"}' /></label>
+          <label class="check"><input id="pub-retain" type="checkbox" checked /> Retain</label>
+          <label>QoS <input id="pub-qos" type="number" min="0" max="2" value="1" /></label>
+        </div>
+        <button id="test-publish" type="button">Publish</button>
+        <p id="publish-result" class="result">-</p>
+      </section>
+    </main>
+
+    <script type="module" src="/ui/app.js"></script>
+  </body>
+</html>

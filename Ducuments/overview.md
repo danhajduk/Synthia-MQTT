@@ -7,5 +7,6 @@ This service provides a distributed MQTT addon for Synthia.
 - `app/api/`: HTTP APIs for addon contract, MQTT publish, and Home Assistant discovery.
 - `app/services/`: Runtime logic for config persistence, health state, and MQTT client lifecycle.
 - `app/models/`: Pydantic request and response models.
+- `frontend/`: Embedded setup wizard served at `/ui` when `frontend/dist` exists.
 - `docker/`: Deployment stack with Mosquitto and addon containers.
 - `scripts/`: Operational automation scripts.

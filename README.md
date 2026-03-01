@@ -6,6 +6,7 @@ Distributed MQTT addon service running from the repository root at `~/Projects/S
 
 - `app/`: FastAPI application code.
 - `docker/`: Compose stack and Mosquitto broker config.
+- `frontend/`: Embedded setup wizard source (`src/`) and static build output (`dist/`).
 - `runtime/`: Persistent runtime data.
 - `scripts/`: Operational scripts.
 - `Ducuments/`: Module-level documentation.
@@ -30,6 +31,12 @@ UI (when `frontend/dist` exists):
 
 ```bash
 open http://localhost:18080/ui
+```
+
+Build/update frontend static assets:
+
+```bash
+cd frontend && npm run build
 ```
 
 ## API Endpoints
