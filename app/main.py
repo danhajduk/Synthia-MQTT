@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -34,6 +35,7 @@ def reload_mqtt_service() -> None:
         config=config_store.get_effective_config(),
         health_service=health_service,
         capabilities=CAPABILITIES,
+        announce_base_url=os.getenv("ANNOUNCE_BASE_URL", "http://localhost:18080"),
     )
     mqtt_service.start()
 

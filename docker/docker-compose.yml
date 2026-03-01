@@ -13,6 +13,7 @@ services:
       MQTT_TLS: ${MQTT_TLS:-false}
       MQTT_USERNAME: ${MQTT_USERNAME:-}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+      ANNOUNCE_BASE_URL: ${ANNOUNCE_BASE_URL:-http://10.0.0.100:18080}
     command:
       [
         "bash",

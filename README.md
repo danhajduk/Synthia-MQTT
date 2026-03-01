@@ -22,6 +22,8 @@ This artifact runs as a standalone external service and does not manage an embed
 MQTT_HOST=10.0.0.100 MQTT_PORT=1883 docker compose -f docker/docker-compose.yml up -d
 ```
 
+Set `ANNOUNCE_BASE_URL` to the externally reachable API URL so MQTT announce payloads expose the correct address.
+
 Health check:
 
 ```bash
@@ -59,6 +61,12 @@ cd frontend && npm run build
 
 ```bash
 ./scripts/rebuild.sh
+```
+
+Validate health, announce, and optional Core proxy flow:
+
+```bash
+SERVICE_BASE_URL=http://localhost:18080 MQTT_HOST=10.0.0.100 ./scripts/validate-service-flow.sh
 ```
 
 ## Documentation Index

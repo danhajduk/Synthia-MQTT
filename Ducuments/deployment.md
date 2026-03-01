@@ -15,7 +15,7 @@ Ports:
 ## Container Deployment
 
 ```bash
-MQTT_HOST=10.0.0.100 MQTT_PORT=1883 docker compose -f docker/docker-compose.yml up -d
+MQTT_HOST=10.0.0.100 MQTT_PORT=1883 ANNOUNCE_BASE_URL=http://10.0.0.100:18080 docker compose -f docker/docker-compose.yml up -d
 ```
 
 ## Host Process Deployment
@@ -61,6 +61,16 @@ After deployment, register the endpoint in Core:
 curl -X POST http://localhost:18080/api/install/register-core \
   -H "Content-Type: application/json" \
   -d '{"core_base_url":"http://10.0.0.100:3000","addon_id":"mqtt","base_url":"http://10.0.0.100:18080"}'
+```
+
+## Health/Announce/Proxy Validation
+
+```bash
+SERVICE_BASE_URL=http://localhost:18080 \
+MQTT_HOST=10.0.0.100 \
+EXPECTED_ANNOUNCE_BASE_URL=http://10.0.0.100:18080 \
+CORE_PROXY_HEALTH_URL=http://10.0.0.100:3000/api/addons/mqtt/proxy/healthz \
+./scripts/validate-service-flow.sh
 ```
 
 ## Shutdown
