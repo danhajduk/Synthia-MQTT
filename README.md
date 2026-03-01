@@ -78,11 +78,11 @@ SERVICE_BASE_URL=http://localhost:18080 MQTT_HOST=10.0.0.100 ./scripts/validate-
 - `Ducuments/deployment.md`
 - `Ducuments/scripts.md`
 
-## Release Artifact Layout
+## Manifest Standard Alignment
 
-`manifest.json` now packages the service runtime layout directly:
+`manifest.json` follows Synthia Addon Standard v1.1:
 
-- `app/`
-- `frontend/`
-- `requirements.txt`
-- `release.package_profile = standalone_service` for catalog registration
+- `schema_version = 1.1`
+- `package_profile = standalone_service`
+- canonical permissions: `network.egress`, `mqtt.publish`, `mqtt.subscribe`
+- `entrypoints.service = app/main.py` and `entrypoints.ui = frontend`
