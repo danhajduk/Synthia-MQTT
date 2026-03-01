@@ -36,7 +36,6 @@ def reload_mqtt_service() -> None:
         capabilities=CAPABILITIES,
     )
     mqtt_service.start()
-    mqtt_service.republish_retained_state()
 
 
 app.include_router(build_addon_contract_router(config_store, health_service, reload_mqtt_service))

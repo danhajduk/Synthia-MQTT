@@ -131,10 +131,6 @@ class MqttClientService:
         }
         self.publish(self._health_topic, payload, retain=True, qos=self._qos)
 
-    def republish_retained_state(self) -> None:
-        self._publish_announce()
-        self._publish_health()
-
     def _publish_health_forever(self) -> None:
         while not self._stop_event.is_set():
             self._publish_health()

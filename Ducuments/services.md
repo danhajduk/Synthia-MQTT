@@ -18,7 +18,6 @@
 - Sets LWT offline payload.
 - Publishes retained announce and periodic health messages.
 - Provides generic publish method used by API endpoints.
-- Supports explicit retained state republish after runtime reconnect.
 - Includes install-time external MQTT connectivity test helper.
 
 ## `app/services/broker_manager.py`
