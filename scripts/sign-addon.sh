@@ -151,6 +151,8 @@ fi
 # --- Determine artifact URL ---
 ASSET_NAME="$(json_get '.release.asset_name')"
 [[ -n "$ASSET_NAME" ]] || ASSET_NAME="addon.tgz"
+PACKAGE_PROFILE="$(json_get '.release.package_profile')"
+[[ -n "$PACKAGE_PROFILE" ]] || PACKAGE_PROFILE="default"
 
 URL_TEMPLATE="$(json_get '.release.artifact_url_template')"
 
@@ -267,6 +269,7 @@ cat > "$SNIPFILE" <<SNIP
   "releases": [
     {
       "version": "$ADDON_VERSION",
+      "package_profile": "$PACKAGE_PROFILE",
       "core_min": "$CORE_MIN",
       "core_max": $CORE_MAX_JSON,
       "artifact": {

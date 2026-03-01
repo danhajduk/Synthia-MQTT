@@ -30,6 +30,7 @@
     "service": "app/main.py"
   },
   "release": {
+    "package_profile": "standalone_service",
     "asset_name": "addon.tgz",
     "artifact_url_template": "https://github.com/danhajduk/Synthia-MQTT/releases/download/v{version}/addon.tgz"
   }

@@ -75,3 +75,4 @@ cd frontend && npm run build
 - `app/`
 - `frontend/`
 - `requirements.txt`
+- `release.package_profile = standalone_service` for catalog registration
