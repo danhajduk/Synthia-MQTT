@@ -18,9 +18,12 @@ MANIFEST_PATH = Path(__file__).resolve().parents[2] / "manifest.json"
 SSAP_API_VERSION = "1.0"
 
 
-def _load_manifest_metadata() -> dict[str, str]:
+def _load_manifest() -> dict[str, object]:
     with MANIFEST_PATH.open("r", encoding="utf-8") as manifest_file:
-        manifest = json.load(manifest_file)
+        return json.load(manifest_file)
+
+
+def _load_manifest_metadata(manifest: dict[str, object]) -> dict[str, str]:
     return {
         "addon_id": str(manifest["id"]),
         "name": str(manifest.get("name", "Synthia MQTT")),
@@ -29,7 +32,9 @@ def _load_manifest_metadata() -> dict[str, str]:
     }
 
 
-MANIFEST_METADATA = _load_manifest_metadata()
+MANIFEST = _load_manifest()
+MANIFEST_METADATA = _load_manifest_metadata(MANIFEST)
+MANIFEST_PERMISSIONS = [str(permission) for permission in MANIFEST.get("permissions", [])]
 ADDON_VERSION = AddonVersion(
     addon_id=MANIFEST_METADATA["addon_id"],
     version=MANIFEST_METADATA["version"],
@@ -86,5 +91,9 @@ def build_addon_contract_router(
     @router.get("/capabilities", response_model=list[str])
     def get_capabilities() -> list[str]:
         return CAPABILITIES
+
+    @router.get("/permissions", response_model=list[str])
+    def get_permissions() -> list[str]:
+        return MANIFEST_PERMISSIONS
 
     return router

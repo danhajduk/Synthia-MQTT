@@ -3,3 +3,8 @@ Error context: FastAPI runtime import verification unavailable locally because f
 Reasoning: Expose a dedicated version contract endpoint sourced from manifest.json to guarantee static, declarative metadata and no secret leakage.
 What and why: Added AddonVersion model and GET /api/addon/version returning addon_id/version/api_version/manifest_version from manifest metadata loaded at startup.
 ###########
+Task #08.2 :
+Error context: None.
+Reasoning: Permissions must remain static and declarative, so the endpoint is sourced from manifest.json instead of runtime-derived capability data.
+What and why: Added GET /api/addon/permissions that returns MANIFEST_PERMISSIONS loaded from manifest.json; updated API documentation.
+###########
