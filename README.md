@@ -46,6 +46,8 @@ cd frontend && npm run build
 
 - `GET /api/addon/meta`
 - `GET /api/addon/health`
+- `GET /api/addon/version`
+- `GET /api/addon/permissions`
 - `GET /api/addon/config/effective`
 - `POST /api/addon/config`
 - `GET /api/addon/capabilities`
@@ -56,6 +58,12 @@ cd frontend && npm run build
 - `POST /api/broker/restart`
 - `POST /api/mqtt/publish`
 - `POST /api/ha/discovery/sensor`
+
+## Standalone Service Lifecycle
+
+- Addon self-registers and publishes retained announce/health via MQTT.
+- Core acts as control plane (desired state, registry, UI), not data-plane runtime owner.
+- Supervisor/orchestrator handles standalone lifecycle reconciliation and activation.
 
 ## Rebuild And Restart
 

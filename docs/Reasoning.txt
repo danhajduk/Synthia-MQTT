@@ -43,3 +43,8 @@ Error context: None.
 Reasoning: Compliance checks need to fail early on profile drift and permission misuse before deployment/runtime orchestration.
 What and why: Added package_profile enforcement, canonical permission vocabulary validation, and best-effort static permission-literal scan in validate-service-flow.
 ###########
+Task #11.1 :
+Error context: None.
+Reasoning: README must reflect the enforced API surface and architecture split so operators use the correct contract and lifecycle model.
+What and why: Added /api/addon/version and /api/addon/permissions to API list and documented self-registration + Core control-plane + Supervisor lifecycle roles.
+###########
