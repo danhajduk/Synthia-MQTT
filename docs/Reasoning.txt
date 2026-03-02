@@ -28,3 +28,8 @@ Error context: None.
 Reasoning: Stable activation requires explicit directory/symlink contract so Supervisor actions stay deterministic across upgrades and rollbacks.
 What and why: Added canonical SynthiaAddons structure and staged-verify-extract-activate-rollback flow to deployment documentation.
 ###########
+Task #10.1 :
+Error context: None.
+Reasoning: Contract drift is easiest to catch in validation tooling by comparing API responses directly against manifest source-of-truth data.
+What and why: Extended validate-service-flow to call /api/addon/version and /api/addon/permissions and fail on missing fields or manifest mismatch; updated script docs.
+###########

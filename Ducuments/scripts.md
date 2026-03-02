@@ -20,6 +20,8 @@ Usage:
 Purpose:
 
 - Verify HTTP service health endpoints.
+- Verify `/api/addon/version` required fields and manifest version consistency.
+- Verify `/api/addon/permissions` matches canonical manifest permissions.
 - Verify retained MQTT announce and health payloads.
 - Validate announce `base_url` against expected external URL.
 - Optionally validate Core proxy health URL reachability.
