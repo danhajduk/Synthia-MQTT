@@ -48,3 +48,8 @@ Error context: None.
 Reasoning: README must reflect the enforced API surface and architecture split so operators use the correct contract and lifecycle model.
 What and why: Added /api/addon/version and /api/addon/permissions to API list and documented self-registration + Core control-plane + Supervisor lifecycle roles.
 ###########
+Task #11.2 :
+Error context: None.
+Reasoning: Release process failures are mostly procedural, so a normative checklist reduces catalog/signature drift and unsafe activation.
+What and why: Added explicit release checklist steps for deterministic build, SHA256, ed25519 Option A signing, publisher key consistency, catalog alignment, and Supervisor verification behavior.
+###########

@@ -142,6 +142,15 @@ Publish a GitHub release artifact and metadata:
 ./scripts/release-addon.sh v0.1.2
 ```
 
+Release checklist:
+
+1. Build deterministic `addon.tgz` from the same commit/tag that will be published.
+2. Compute SHA256 over artifact bytes and record the exact hex digest.
+3. Sign SHA256 digest bytes using ed25519 (Option A model).
+4. Confirm `publisher_key_id` matches the active publishers registry key.
+5. Confirm catalog entry references the same version, artifact URL, digest, signature, and key id.
+6. Verify Supervisor can stage artifact, validate hash/signature, and activate only after successful verification.
+
 ## Shutdown
 
 ```bash
