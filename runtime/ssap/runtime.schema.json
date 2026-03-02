@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SSAP runtime.json",
+  "type": "object",
+  "required": ["ssap_version", "addon_id", "state"],
+  "properties": {
+    "ssap_version": { "const": "1.0" },
+    "addon_id": { "type": "string" },
+    "active_version": { "type": "string" },
+    "state": { "enum": ["running", "stopped", "degraded", "error"] },
+    "last_action": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "at": { "type": "string" },
+        "ok": { "type": "boolean" },
+        "message": { "type": ["string", "null"] }
+      }
+    },
+    "docker": {
+      "type": "object",
+      "properties": {
+        "project_name": { "type": "string" },
+        "compose_file": { "type": "string" }
+      }
+    },
+    "health": {
+      "type": "object",
+      "properties": {
+        "last_checked": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    }
+  }
+}

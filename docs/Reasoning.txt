@@ -13,3 +13,8 @@ Error context: None.
 Reasoning: Version identity must have one source of truth to prevent API/announce drift and tooling mismatches.
 What and why: Added addon_id/version/api_version/mode announce fields driven by manifest-backed ADDON_VERSION + SSAP_API_VERSION passed from main into MQTT service.
 ###########
+Task #09.1 :
+Error context: None.
+Reasoning: Core/Supervisor handoff needs explicit, versioned artifacts to avoid ambiguous runtime state contracts.
+What and why: Added desired/runtime example and schema files under runtime/ssap and documented atomic desired.json writes plus runtime.json ownership boundaries.
+###########

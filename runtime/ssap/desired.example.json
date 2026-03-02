@@ -1,0 +1,40 @@
+{
+  "ssap_version": "1.0",
+  "addon_id": "mqtt",
+  "mode": "standalone_service",
+  "desired_state": "running",
+  "channel": "stable",
+  "pinned_version": null,
+  "install_source": {
+    "type": "catalog",
+    "catalog_id": "official",
+    "release": {
+      "artifact_url": "https://github.com/danhajduk/Synthia-MQTT/releases/download/v0.1.2/addon.tgz",
+      "sha256": "HEX64",
+      "publisher_key_id": "publisher.danhajduk#2026-02",
+      "signature": {
+        "type": "ed25519",
+        "value": "BASE64_SIGNATURE"
+      }
+    }
+  },
+  "runtime": {
+    "orchestrator": "docker_compose",
+    "project_name": "synthia-addon-mqtt",
+    "network": "synthia_net",
+    "ports": [
+      {
+        "host": 9002,
+        "container": 9002,
+        "proto": "tcp",
+        "purpose": "http_api"
+      }
+    ]
+  },
+  "config": {
+    "env": {
+      "CORE_URL": "http://127.0.0.1:9001",
+      "SYNTHIA_ADDON_ID": "mqtt"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SSAP desired.json",
+  "type": "object",
+  "required": ["ssap_version", "addon_id", "mode", "desired_state"],
+  "properties": {
+    "ssap_version": { "const": "1.0" },
+    "addon_id": { "type": "string" },
+    "mode": { "const": "standalone_service" },
+    "desired_state": { "enum": ["running", "stopped"] },
+    "channel": { "type": "string" },
+    "pinned_version": { "type": ["string", "null"] },
+    "install_source": {
+      "type": "object",
+      "properties": {
+        "release": {
+          "type": "object",
+          "properties": {
+            "artifact_url": { "type": "string" },
+            "sha256": { "type": "string" },
+            "publisher_key_id": { "type": "string" }
+          },
+          "required": ["artifact_url", "sha256", "publisher_key_id"]
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "project_name": { "type": "string" },
+        "network": { "type": "string" },
+        "ports": { "type": "array" }
+      }
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "env": { "type": "object" }
+      }
+    }
+  }
+}

@@ -53,6 +53,22 @@ sudo systemctl enable --now synthia-mqtt.service
 
 The service should be reachable from Synthia Core at a stable base URL (for example, `http://10.0.0.100:18080`).
 
+## SSAP Desired/Runtime Artifacts
+
+Canonical SSAP examples and schemas are stored in `runtime/ssap/`:
+
+- `desired.example.json`
+- `runtime.example.json`
+- `desired.schema.json`
+- `runtime.schema.json`
+
+Ownership and write rules:
+
+- Core writes `desired.json` only.
+- `desired.json` writes must be atomic (write temp file then replace).
+- Supervisor writes `runtime.json` only.
+- Addon runtime must not mutate either file.
+
 ## Core Registry Registration
 
 After deployment, register the endpoint in Core:

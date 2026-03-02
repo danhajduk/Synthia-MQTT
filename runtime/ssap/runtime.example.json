@@ -1,0 +1,20 @@
+{
+  "ssap_version": "1.0",
+  "addon_id": "mqtt",
+  "active_version": "0.1.2",
+  "state": "running",
+  "last_action": {
+    "type": "start",
+    "at": "2026-03-01T01:10:00Z",
+    "ok": true,
+    "message": null
+  },
+  "docker": {
+    "project_name": "synthia-addon-mqtt",
+    "compose_file": "../SynthiaAddons/services/mqtt/versions/0.1.2/docker-compose.yml"
+  },
+  "health": {
+    "last_checked": "2026-03-01T01:11:00Z",
+    "status": "healthy"
+  }
+}
