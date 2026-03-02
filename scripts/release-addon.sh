@@ -9,7 +9,7 @@ VERSION="${1:-}"
 [[ -z "${VERSION}" ]] && { echo "Usage: $0 <version> (example: 0.1.3)"; exit 1; }
 
 ASSET_NAME="${ASSET_NAME:-addon.tgz}"
-SIGNING_KEY="${SIGNING_KEY:-./keys/publisher_ed25519_private.pem}"
+SIGNING_KEY="${SIGNING_KEY:-./keys/publisher_private.pem}"
 REPO_SLUG="${REPO_SLUG:-danhajduk/Synthia-MQTT}"
 PUBLISHER_KEY_ID="${PUBLISHER_KEY_ID:-publisher.danhajduk#2026-02}"
 PACKAGE_PROFILE="${PACKAGE_PROFILE:-standalone_service}"
@@ -63,10 +63,14 @@ echo "==> Generating ed25519 signature (Option A)"
 TMP_DIGEST="$(mktemp)"
 TMP_SIG="$(mktemp)"
 
-# Write raw SHA256 digest bytes
-echo -n "${SHA256}" | xxd -r -p > "${TMP_DIGEST}"
+# Convert SHA256 hex -> raw digest bytes (portable, no xxd/openssl-hex)
+python3 - <<PY > "${TMP_DIGEST}"
+import binascii
+import sys
+sys.stdout.buffer.write(binascii.unhexlify("${SHA256}"))
+PY
 
-# Sign digest bytes
+# Sign digest bytes with ed25519 private key
 openssl pkeyutl -sign \
   -inkey "${SIGNING_KEY}" \
   -rawin \
