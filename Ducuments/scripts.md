@@ -23,6 +23,8 @@ Purpose:
 - Verify `/api/addon/version` required fields and manifest version consistency.
 - Verify `/api/addon/permissions` matches canonical manifest permissions.
 - Verify retained MQTT announce and health payloads.
+- Fail if announce/health retained flags are missing.
+- Verify announce payload contains `addon_id`, `version`, `api_version`, and `mode`.
 - Validate announce `base_url` against expected external URL.
 - Optionally validate Core proxy health URL reachability.
 

@@ -13,8 +13,8 @@ CORE_PROXY_HEALTH_URL="${CORE_PROXY_HEALTH_URL:-}"
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-announce_file="$tmpdir/announce.json"
-health_file="$tmpdir/health.json"
+announce_msg_file="$tmpdir/announce.msg"
+health_msg_file="$tmpdir/health.msg"
 version_file="$tmpdir/version.json"
 permissions_file="$tmpdir/permissions.json"
 manifest_file="$(cd "$(dirname "$0")/.." && pwd)/manifest.json"
@@ -45,21 +45,29 @@ if ! command -v mosquitto_sub >/dev/null 2>&1; then
 fi
 
 echo "[validate] mqtt announce topic"
-mosquitto_sub "${sub_args[@]}" -t "${MQTT_BASE_TOPIC}/addons/mqtt/announce" > "$announce_file"
+mosquitto_sub "${sub_args[@]}" -F '%r\t%p' -t "${MQTT_BASE_TOPIC}/addons/mqtt/announce" > "$announce_msg_file"
 
 echo "[validate] mqtt health topic"
-mosquitto_sub "${sub_args[@]}" -t "${MQTT_BASE_TOPIC}/addons/mqtt/health" > "$health_file"
+mosquitto_sub "${sub_args[@]}" -F '%r\t%p' -t "${MQTT_BASE_TOPIC}/addons/mqtt/health" > "$health_msg_file"
 
-python3 - "$announce_file" "$health_file" "$version_file" "$permissions_file" "$manifest_file" "$EXPECTED_ANNOUNCE_BASE_URL" <<'PY'
+python3 - "$announce_msg_file" "$health_msg_file" "$version_file" "$permissions_file" "$manifest_file" "$EXPECTED_ANNOUNCE_BASE_URL" <<'PY'
 import json
 import sys
 
 announce_path, health_path, version_path, permissions_path, manifest_path, expected_base = sys.argv[1:7]
-announce = json.load(open(announce_path, "r", encoding="utf-8"))
-health = json.load(open(health_path, "r", encoding="utf-8"))
 version_payload = json.load(open(version_path, "r", encoding="utf-8"))
 permissions_payload = json.load(open(permissions_path, "r", encoding="utf-8"))
 manifest = json.load(open(manifest_path, "r", encoding="utf-8"))
+
+def parse_retained_message(path: str) -> tuple[bool, dict]:
+    raw = open(path, "r", encoding="utf-8").read().strip()
+    if "\t" not in raw:
+        raise SystemExit(f"retained-format parse failed for {path}: {raw!r}")
+    retained_text, payload_text = raw.split("\t", 1)
+    return retained_text == "1", json.loads(payload_text)
+
+announce_retained, announce = parse_retained_message(announce_path)
+health_retained, health = parse_retained_message(health_path)
 
 required_version_fields = {"addon_id", "version", "api_version", "manifest_version"}
 missing_fields = required_version_fields.difference(version_payload.keys())
@@ -87,10 +95,22 @@ if permissions_payload != manifest_permissions:
         f"permissions mismatch: {permissions_payload} != {manifest_permissions}"
     )
 
+if not announce_retained:
+    raise SystemExit("announce topic is not retained")
+if not health_retained:
+    raise SystemExit("health topic is not retained")
 if announce.get("base_url") != expected_base:
     raise SystemExit(f"announce base_url mismatch: {announce.get('base_url')} != {expected_base}")
 if announce.get("id") != "mqtt":
     raise SystemExit(f"announce id mismatch: {announce.get('id')}")
+if announce.get("addon_id") != version_payload.get("addon_id"):
+    raise SystemExit("announce addon_id does not match version endpoint")
+if announce.get("version") != version_payload.get("version"):
+    raise SystemExit("announce version does not match version endpoint")
+if announce.get("api_version") != version_payload.get("api_version"):
+    raise SystemExit("announce api_version does not match version endpoint")
+if announce.get("mode") != "standalone_service":
+    raise SystemExit(f"announce mode mismatch: {announce.get('mode')}")
 if health.get("status") not in {"healthy", "degraded", "offline"}:
     raise SystemExit(f"unexpected health status: {health.get('status')}")
 if "last_seen" not in health:

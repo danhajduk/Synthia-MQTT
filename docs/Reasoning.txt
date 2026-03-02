@@ -33,3 +33,8 @@ Error context: None.
 Reasoning: Contract drift is easiest to catch in validation tooling by comparing API responses directly against manifest source-of-truth data.
 What and why: Extended validate-service-flow to call /api/addon/version and /api/addon/permissions and fail on missing fields or manifest mismatch; updated script docs.
 ###########
+Task #10.2 :
+Error context: None.
+Reasoning: MQTT contract validation needs retained-state awareness; payload-only checks can pass while retention policy is broken.
+What and why: Added retained flag parsing via mosquitto_sub format output and strict announce field checks against version endpoint metadata.
+###########
