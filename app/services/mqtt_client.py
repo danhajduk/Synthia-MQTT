@@ -19,11 +19,19 @@ class MqttClientService:
         config: dict[str, Any],
         health_service: HealthService,
         capabilities: list[str],
+        addon_id: str,
+        addon_version: str,
+        api_version: str,
+        mode: str = "standalone_service",
         announce_base_url: str = "http://mqtt-addon:8080",
     ) -> None:
         self._config = config
         self._health_service = health_service
         self._capabilities = capabilities
+        self._addon_id = addon_id
+        self._addon_version = addon_version
+        self._api_version = api_version
+        self._mode = mode
         self._announce_base_url = announce_base_url
 
         client_id = str(self._config["mqtt_client_id"])
@@ -117,9 +125,12 @@ class MqttClientService:
 
     def _publish_announce(self) -> None:
         payload = {
-            "id": "mqtt",
+            "id": self._addon_id,
+            "addon_id": self._addon_id,
             "base_url": self._announce_base_url,
-            "version": "0.1.0",
+            "version": self._addon_version,
+            "api_version": self._api_version,
+            "mode": self._mode,
             "capabilities": self._capabilities,
         }
         self.publish(self._announce_topic, payload, retain=True, qos=self._qos)

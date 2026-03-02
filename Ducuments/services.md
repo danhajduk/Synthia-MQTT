@@ -17,6 +17,7 @@
 - Manages broker connection with reconnect behavior.
 - Sets LWT offline payload.
 - Publishes retained announce and periodic health messages.
+- Announces `addon_id`, `version`, `api_version`, and `mode` aligned with `/api/addon/version`.
 - Uses `ANNOUNCE_BASE_URL` so announce payloads expose an externally reachable service URL.
 - Provides generic publish method used by API endpoints.
 - Includes install-time external MQTT connectivity test helper.

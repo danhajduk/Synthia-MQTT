@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api.addon_contract import CAPABILITIES, build_addon_contract_router
+from app.api.addon_contract import ADDON_VERSION, CAPABILITIES, SSAP_API_VERSION, build_addon_contract_router
 from app.api.broker_admin import build_broker_admin_router
 from app.api.ha_discovery import build_ha_discovery_router
 from app.api.install_workflow import build_install_workflow_router
@@ -35,6 +35,10 @@ def reload_mqtt_service() -> None:
         config=config_store.get_effective_config(),
         health_service=health_service,
         capabilities=CAPABILITIES,
+        addon_id=ADDON_VERSION.addon_id,
+        addon_version=ADDON_VERSION.version,
+        api_version=SSAP_API_VERSION,
+        mode="standalone_service",
         announce_base_url=os.getenv("ANNOUNCE_BASE_URL", "http://localhost:18080"),
     )
     mqtt_service.start()

@@ -8,3 +8,8 @@ Error context: None.
 Reasoning: Permissions must remain static and declarative, so the endpoint is sourced from manifest.json instead of runtime-derived capability data.
 What and why: Added GET /api/addon/permissions that returns MANIFEST_PERMISSIONS loaded from manifest.json; updated API documentation.
 ###########
+Task #08.3 :
+Error context: None.
+Reasoning: Version identity must have one source of truth to prevent API/announce drift and tooling mismatches.
+What and why: Added addon_id/version/api_version/mode announce fields driven by manifest-backed ADDON_VERSION + SSAP_API_VERSION passed from main into MQTT service.
+###########
