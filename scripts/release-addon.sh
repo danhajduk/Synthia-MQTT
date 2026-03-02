@@ -1,73 +1,114 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+########################################
+# CONFIG
+########################################
+
 VERSION="${1:-}"
-if [[ -z "${VERSION}" ]]; then
-  echo "Usage: $0 <version-tag> (example: $0 v0.1.1)" >&2
-  exit 1
-fi
+[[ -z "${VERSION}" ]] && { echo "Usage: $0 <version> (example: 0.1.3)"; exit 1; }
 
 ASSET_NAME="${ASSET_NAME:-addon.tgz}"
-SIGNING_KEY="${SIGNING_KEY:-./keys/publisher_private.pem}"
-PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json app frontend requirements.txt}"
+SIGNING_KEY="${SIGNING_KEY:-./keys/publisher_ed25519_private.pem}"
 REPO_SLUG="${REPO_SLUG:-danhajduk/Synthia-MQTT}"
-MKTIME="${MKTIME:-UTC 2026-01-01}"
 PUBLISHER_KEY_ID="${PUBLISHER_KEY_ID:-publisher.danhajduk#2026-02}"
 PACKAGE_PROFILE="${PACKAGE_PROFILE:-standalone_service}"
+CHANNEL="${CHANNEL:-stable}"
 OUTPUT_JSON="${OUTPUT_JSON:-release-output.json}"
 
-die() { echo "ERROR: $*" >&2; exit 1; }
+# What gets packaged (compose-bundle profile)
+PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json docker app requirements.txt}"
 
-command -v tar >/dev/null || die "tar not installed"
-command -v sha256sum >/dev/null || die "sha256sum not installed"
-command -v openssl >/dev/null || die "openssl not installed"
-command -v base64 >/dev/null || die "base64 not installed"
-command -v gh >/dev/null || die "gh (GitHub CLI) not installed"
+########################################
+# VALIDATION
+########################################
 
-[[ -f "${SIGNING_KEY}" ]] || die "Signing key not found: ${SIGNING_KEY}"
+command -v tar >/dev/null || { echo "tar missing"; exit 1; }
+command -v sha256sum >/dev/null || { echo "sha256sum missing"; exit 1; }
+command -v openssl >/dev/null || { echo "openssl missing"; exit 1; }
+command -v base64 >/dev/null || { echo "base64 missing"; exit 1; }
+command -v gh >/dev/null || { echo "gh CLI missing"; exit 1; }
+
+[[ -f "${SIGNING_KEY}" ]] || { echo "Signing key not found: ${SIGNING_KEY}"; exit 1; }
 
 for p in ${PACKAGE_PATHS}; do
-  [[ -e "$p" ]] || die "Missing path to package: $p"
+  [[ -e "$p" ]] || { echo "Missing path to package: $p"; exit 1; }
 done
+
+########################################
+# BUILD DETERMINISTIC TARBALL
+########################################
 
 echo "==> Building deterministic ${ASSET_NAME}"
 rm -f "${ASSET_NAME}"
 
 tar --sort=name \
   --owner=0 --group=0 --numeric-owner \
-  --mtime="${MKTIME}" \
+  --mtime="UTC 2026-01-01" \
   -czf "${ASSET_NAME}" ${PACKAGE_PATHS}
+
+########################################
+# SHA256
+########################################
 
 echo "==> Calculating SHA256"
 SHA256="$(sha256sum "${ASSET_NAME}" | awk '{print $1}')"
 
-echo "==> Generating detached signature"
-RELEASE_SIG="$(openssl dgst -sha256 -sign "${SIGNING_KEY}" -binary "${ASSET_NAME}" | base64 -w0)"
+########################################
+# OPTION A SIGNING (ed25519 over SHA256 digest bytes)
+########################################
 
-echo "==> Ensuring GitHub release exists: ${VERSION}"
+echo "==> Generating ed25519 signature (Option A)"
 
-if gh release view "${VERSION}" --repo "${REPO_SLUG}" >/dev/null 2>&1; then
+TMP_DIGEST="$(mktemp)"
+TMP_SIG="$(mktemp)"
+
+# Write raw SHA256 digest bytes
+echo -n "${SHA256}" | xxd -r -p > "${TMP_DIGEST}"
+
+# Sign digest bytes
+openssl pkeyutl -sign \
+  -inkey "${SIGNING_KEY}" \
+  -rawin \
+  -in "${TMP_DIGEST}" \
+  -out "${TMP_SIG}"
+
+RELEASE_SIG="$(base64 -w0 "${TMP_SIG}")"
+
+rm -f "${TMP_DIGEST}" "${TMP_SIG}"
+
+########################################
+# GITHUB RELEASE
+########################################
+
+echo "==> Ensuring GitHub release exists: v${VERSION}"
+
+if gh release view "v${VERSION}" --repo "${REPO_SLUG}" >/dev/null 2>&1; then
   echo "    Release exists."
 else
-  echo "    Release missing — creating it."
-  gh release create "${VERSION}" \
+  gh release create "v${VERSION}" \
     --repo "${REPO_SLUG}" \
-    --title "${VERSION}" \
+    --title "v${VERSION}" \
     --notes ""
 fi
 
 echo "==> Uploading ${ASSET_NAME}"
-gh release upload "${VERSION}" "${ASSET_NAME}" \
+gh release upload "v${VERSION}" "${ASSET_NAME}" \
   --repo "${REPO_SLUG}" \
   --clobber
 
-ARTIFACT_URL="https://github.com/${REPO_SLUG}/releases/download/${VERSION}/${ASSET_NAME}"
+ARTIFACT_URL="https://github.com/${REPO_SLUG}/releases/download/v${VERSION}/${ASSET_NAME}"
+
+########################################
+# OUTPUT CATALOG SNIPPET
+########################################
 
 echo "==> Writing ${OUTPUT_JSON}"
 
 cat > "${OUTPUT_JSON}" <<EOF
 {
   "version": "${VERSION}",
+  "channel": "${CHANNEL}",
   "package_profile": "${PACKAGE_PROFILE}",
   "artifact": {
     "type": "github_release_asset",
@@ -75,10 +116,22 @@ cat > "${OUTPUT_JSON}" <<EOF
   },
   "sha256": "${SHA256}",
   "publisher_key_id": "${PUBLISHER_KEY_ID}",
-  "signature_type": "rsa-sha256",
-  "release_sig": "${RELEASE_SIG}"
+  "signature": {
+    "type": "ed25519",
+    "value": "${RELEASE_SIG}"
+  },
+  "runtime": {
+    "orchestrator": "docker_compose",
+    "strategy": "compose_bundle",
+    "compose_path": "docker/docker-compose.yml"
+  }
 }
 EOF
 
-echo "Done."
-echo "Generated ${OUTPUT_JSON}"
+echo "==========================================="
+echo "Release complete."
+echo "Version: ${VERSION}"
+echo "SHA256: ${SHA256}"
+echo "Artifact: ${ARTIFACT_URL}"
+echo "Catalog snippet written to: ${OUTPUT_JSON}"
+echo "==========================================="

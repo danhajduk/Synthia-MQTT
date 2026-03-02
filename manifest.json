@@ -3,10 +3,10 @@
   "id": "mqtt",
   "name": "Synthia MQTT",
   "description": "MQTT integration layer for Synthia Core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "package_profile": "standalone_service",
   "compatibility": {
-    "core_min_version": "0.6.0",
+    "core_min_version": null,
     "core_max_version": null,
     "dependencies": [],
     "conflicts": []
