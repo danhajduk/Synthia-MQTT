@@ -85,6 +85,7 @@ SERVICE_BASE_URL=http://localhost:18080 MQTT_HOST=10.0.0.100 ./scripts/validate-
 - `Ducuments/models.md`
 - `Ducuments/deployment.md`
 - `Ducuments/scripts.md`
+- `Ducuments/operations.md`
 
 ## Manifest Standard Alignment
 

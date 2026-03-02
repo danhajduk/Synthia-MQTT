@@ -53,3 +53,8 @@ Error context: None.
 Reasoning: Release process failures are mostly procedural, so a normative checklist reduces catalog/signature drift and unsafe activation.
 What and why: Added explicit release checklist steps for deterministic build, SHA256, ed25519 Option A signing, publisher key consistency, catalog alignment, and Supervisor verification behavior.
 ###########
+Task #11.3 :
+Error context: None.
+Reasoning: Operators need explicit ownership boundaries and actionable failure playbooks to recover safely without violating SSAP control/data-plane separation.
+What and why: Added operations doc defining Core/Supervisor/Addon responsibilities plus remediation paths for signature, hash, compose, and announce failures.
+###########
