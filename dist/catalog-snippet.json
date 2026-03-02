@@ -4,17 +4,17 @@
   "repo": "https://github.com/danhajduk/Synthia-MQTT.git",
   "releases": [
     {
-      "version": "0.1.2",
+      "version": "0.1.4",
       "package_profile": "standalone_service",
-      "core_min": "0.6.0",
+      "core_min": "0.0.1",
       "core_max": null,
       "artifact": {
         "type": "github_release_asset",
-        "url": "https://github.com/danhajduk/Synthia-MQTT/releases/download/v0.1.2/addon.tgz"
+        "url": "https://github.com/danhajduk/Synthia-MQTT/releases/download/v0.1.4/addon.tgz"
       },
-      "sha256": "978b2950e8ef92c739f71ad67e5bacc763f2ee044cff959ab35be8c6fb23613c",
+      "sha256": "c8725b2280c4ec0fd5bf7f3cfec014e0b739c46e0c7b7f048e9424dab329654e",
       "publisher_key_id": "6043cb305d17a108",
-      "release_sig": "WF2hueCEshlb78SnFOcai48q6s3q5Qikzvo5tcylx7s88dqxKaZvg8vCz0tnJMXW+p+06TeayNbLa0P1X32sOzUbhKtUqIqJ/LNkUjO0SPt/YJY+5Q91vBiM0JLCTsOxiHFOVmEAdSDCblybPmEWG8IugV+q2CZsUmkO8+X1KNBLZOf9Jv5pfbuOOLNq963VDJSvOlwS7obWUjy9oA/6xVUlh0AV0yTKCZN/eUuJAzg01LmkeS7LeRh+3eZw3qwd6Yq0vuu4xpMtjDHQ21Nv4C04lDyF5k1jz+s9K3HStL0zC7KQW17zOoiL6AdS+KWmjSQPLN/KzS1MOilRQBZtaAF3J23ggDKgLFGBQTR8ddseowHacPG2zBZs+qJ/bUsk1GPipPltmd/t36Ynv970MORZT/KM1GNkHWea1MytavcLBgZ9OYOL6/k2zfeeK+H2smXR2t2T7c1shWGYgZEtm+Kfz7l4/odIrRWqGDc8WezJXgEIrjtsG5riff6aL1Pzp9+Tm+xkIn8au2RqBeplmlwJ14E6gUVAUFJpBq5R/k9HFVsXbh3qO9lk58JZ+lgkKYSSbF1EQdg0zLlct0DvjJTfC/rTzpmaIHX5SOk7V3HPf49U8Mbf6VB9YXHeEzGyRSgHhpKlfeoYImLy56C+XIbMLEVvt05HTqcGOfES4Ms="
+      "release_sig": "fdwl4X1XkyvilHXQX+eGPF4oKCOoLFoJiJi3eoNxy1NlQBb1z0ub4WvnCffkbOriX32bLrdvPgbaEzD+16zEGj3DQ/lMv6e4m5/due5tUD7ogeTUE6DT0WwpS2r9N1qF5Y9u9EHv9Rf3+vmiOjr9/bg9YU6QnL5/21Kq2MDI7w00z5gN2WM+T49wzudkYWDaz1gKd7vfxae0xol9hLXPe2yaLa6W9sdwxj28/URefnqFdVg+Ta01Bf9T+YP0eXx0fOa+9BPNHLGUqeAasDbZzKosVmRj3Go+TLHCMjdUVf6AdZmGJDNM0YPYUau9tffxADjMsaIFJ0fv+j/CNaaE4NJh1ULK09JQSnM/reqeFCgcOQaC+xsH3xQ+u3DOlMhj1aTIsnwdsnea4kbPTn5R+zITDsqxSmjlqqL2wMrrloa9X2shZgAnF2XD0dzYyjOEHjAqFBEXnNXLVCmiWK9loEGh2YyW2Tks9r2nQAQihVQ3BcetcuLLlSGPtJQfKpWsh07raEU1KTAF7VEv5QWthl2fIcEHxPiCVC7Ut2wDjW1Ut37PJK4DsDVgviwxTmzE2xXpC9eThQ3D/zd0YEDYwwBoFFww/gCzGR4mohYNRTqoSdurnrQGZOJFwbEBLLeSvtVrNqtR8ejE+6laN7/ZZv7q7GF9vP2YYC8lRrG3q4k="
     }
   ]
 }
