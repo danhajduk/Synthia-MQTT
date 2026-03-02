@@ -25,6 +25,8 @@ Purpose:
 - Verify retained MQTT announce and health payloads.
 - Fail if announce/health retained flags are missing.
 - Verify announce payload contains `addon_id`, `version`, `api_version`, and `mode`.
+- Verify manifest `package_profile` is `standalone_service`.
+- Validate canonical permission vocabulary and detect undeclared permission literals (best-effort static scan).
 - Validate announce `base_url` against expected external URL.
 - Optionally validate Core proxy health URL reachability.
 

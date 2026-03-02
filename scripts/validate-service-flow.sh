@@ -17,7 +17,8 @@ announce_msg_file="$tmpdir/announce.msg"
 health_msg_file="$tmpdir/health.msg"
 version_file="$tmpdir/version.json"
 permissions_file="$tmpdir/permissions.json"
-manifest_file="$(cd "$(dirname "$0")/.." && pwd)/manifest.json"
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+manifest_file="$repo_root/manifest.json"
 
 sub_args=(-h "$MQTT_HOST" -p "$MQTT_PORT" -W 20 -C 1)
 if [[ -n "$MQTT_USERNAME" ]]; then
@@ -50,11 +51,13 @@ mosquitto_sub "${sub_args[@]}" -F '%r\t%p' -t "${MQTT_BASE_TOPIC}/addons/mqtt/an
 echo "[validate] mqtt health topic"
 mosquitto_sub "${sub_args[@]}" -F '%r\t%p' -t "${MQTT_BASE_TOPIC}/addons/mqtt/health" > "$health_msg_file"
 
-python3 - "$announce_msg_file" "$health_msg_file" "$version_file" "$permissions_file" "$manifest_file" "$EXPECTED_ANNOUNCE_BASE_URL" <<'PY'
+python3 - "$announce_msg_file" "$health_msg_file" "$version_file" "$permissions_file" "$manifest_file" "$repo_root" "$EXPECTED_ANNOUNCE_BASE_URL" <<'PY'
 import json
+import re
 import sys
+from pathlib import Path
 
-announce_path, health_path, version_path, permissions_path, manifest_path, expected_base = sys.argv[1:7]
+announce_path, health_path, version_path, permissions_path, manifest_path, repo_root, expected_base = sys.argv[1:8]
 version_payload = json.load(open(version_path, "r", encoding="utf-8"))
 permissions_payload = json.load(open(permissions_path, "r", encoding="utf-8"))
 manifest = json.load(open(manifest_path, "r", encoding="utf-8"))
@@ -90,9 +93,40 @@ if version_payload.get("manifest_version") != manifest.get("version"):
 if not isinstance(permissions_payload, list):
     raise SystemExit("permissions payload must be an array")
 manifest_permissions = manifest.get("permissions")
+if not isinstance(manifest_permissions, list):
+    raise SystemExit("manifest permissions must be an array")
 if permissions_payload != manifest_permissions:
     raise SystemExit(
         f"permissions mismatch: {permissions_payload} != {manifest_permissions}"
+    )
+
+if manifest.get("package_profile") != "standalone_service":
+    raise SystemExit(
+        f"manifest package_profile mismatch: {manifest.get('package_profile')} != standalone_service"
+    )
+
+allowed_permissions = {
+    "network.egress",
+    "network.ingress",
+    "mqtt.publish",
+    "mqtt.subscribe",
+}
+undeclared_vocabulary = sorted(set(manifest_permissions) - allowed_permissions)
+if undeclared_vocabulary:
+    raise SystemExit(
+        f"manifest contains non-canonical permissions: {undeclared_vocabulary}"
+    )
+
+permission_pattern = re.compile(r"\b(?:network\.(?:egress|ingress)|mqtt\.(?:publish|subscribe))\b")
+used_permissions = set()
+for source_file in list(Path(repo_root, "app").rglob("*.py")) + list(Path(repo_root, "scripts").rglob("*.sh")):
+    source_text = source_file.read_text(encoding="utf-8")
+    used_permissions.update(permission_pattern.findall(source_text))
+
+undeclared_runtime_permissions = sorted(used_permissions - set(manifest_permissions))
+if undeclared_runtime_permissions:
+    raise SystemExit(
+        f"undeclared permission literals found in source: {undeclared_runtime_permissions}"
     )
 
 if not announce_retained:

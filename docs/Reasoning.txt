@@ -38,3 +38,8 @@ Error context: None.
 Reasoning: MQTT contract validation needs retained-state awareness; payload-only checks can pass while retention policy is broken.
 What and why: Added retained flag parsing via mosquitto_sub format output and strict announce field checks against version endpoint metadata.
 ###########
+Task #10.3 :
+Error context: None.
+Reasoning: Compliance checks need to fail early on profile drift and permission misuse before deployment/runtime orchestration.
+What and why: Added package_profile enforcement, canonical permission vocabulary validation, and best-effort static permission-literal scan in validate-service-flow.
+###########
