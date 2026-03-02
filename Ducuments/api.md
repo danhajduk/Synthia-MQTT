@@ -6,9 +6,11 @@ Implements required addon contract endpoints:
 
 - `GET /api/addon/meta`
 - `GET /api/addon/health`
+- `GET /api/addon/version`
 - `GET /api/addon/config/effective`
 - `POST /api/addon/config`
 - `GET /api/addon/capabilities`
+- `GET /api/addon/version` returns `{ addon_id, version, api_version, manifest_version }` from `manifest.json`.
 - `GET /api/addon/config/effective` masks secret values.
 - `POST /api/addon/config` persists runtime config and reloads MQTT client safely.
 

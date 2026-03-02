@@ -1,0 +1,5 @@
+Task #08.1 :
+Error context: FastAPI runtime import verification unavailable locally because fastapi is not installed in this shell environment.
+Reasoning: Expose a dedicated version contract endpoint sourced from manifest.json to guarantee static, declarative metadata and no secret leakage.
+What and why: Added AddonVersion model and GET /api/addon/version returning addon_id/version/api_version/manifest_version from manifest metadata loaded at startup.
+###########

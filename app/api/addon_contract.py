@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import Callable
 
 from fastapi import APIRouter, HTTPException
@@ -7,15 +9,39 @@ from app.models.addon_models import (
     AddonConfigUpdate,
     AddonHealth,
     AddonMeta,
+    AddonVersion,
 )
 from app.services.config_store import ConfigStore
 from app.services.health import HealthService
 
+MANIFEST_PATH = Path(__file__).resolve().parents[2] / "manifest.json"
+SSAP_API_VERSION = "1.0"
+
+
+def _load_manifest_metadata() -> dict[str, str]:
+    with MANIFEST_PATH.open("r", encoding="utf-8") as manifest_file:
+        manifest = json.load(manifest_file)
+    return {
+        "addon_id": str(manifest["id"]),
+        "name": str(manifest.get("name", "Synthia MQTT")),
+        "version": str(manifest["version"]),
+        "description": str(manifest.get("description", "Distributed MQTT and HA discovery service")),
+    }
+
+
+MANIFEST_METADATA = _load_manifest_metadata()
+ADDON_VERSION = AddonVersion(
+    addon_id=MANIFEST_METADATA["addon_id"],
+    version=MANIFEST_METADATA["version"],
+    api_version=SSAP_API_VERSION,
+    manifest_version=MANIFEST_METADATA["version"],
+)
+
 META = AddonMeta(
-    id="mqtt",
-    name="MQTT Service",
-    version="0.1.0",
-    description="Distributed MQTT and HA discovery service",
+    id=MANIFEST_METADATA["addon_id"],
+    name=MANIFEST_METADATA["name"],
+    version=MANIFEST_METADATA["version"],
+    description=MANIFEST_METADATA["description"],
 )
 
 CAPABILITIES = [
@@ -39,6 +65,10 @@ def build_addon_contract_router(
     @router.get("/health", response_model=AddonHealth)
     def get_health() -> AddonHealth:
         return health_service.snapshot()
+
+    @router.get("/version", response_model=AddonVersion)
+    def get_version() -> AddonVersion:
+        return ADDON_VERSION
 
     @router.get("/config/effective", response_model=AddonConfigEffective)
     def get_effective_config() -> AddonConfigEffective:

@@ -10,6 +10,13 @@ class AddonMeta(BaseModel):
     description: str
 
 
+class AddonVersion(BaseModel):
+    addon_id: str
+    version: str
+    api_version: str
+    manifest_version: str
+
+
 class AddonHealth(BaseModel):
     status: Literal["healthy", "degraded", "offline"]
     mqtt_connected: bool
