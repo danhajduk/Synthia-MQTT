@@ -87,6 +87,27 @@ Environment injection boundary:
 - Service tokens and secrets must be injected through env files only.
 - Secrets must not be passed via CLI flags or process arguments.
 
+## SynthiaAddons Layout And Activation Flow
+
+Canonical runtime layout:
+
+```text
+<SYNTHIA_ADDONS_DIR>/services/<addon_id>/
+  desired.json
+  runtime.json
+  versions/<version>/
+  current -> versions/<version>
+```
+
+Activation and rollback flow:
+
+1. Stage artifact under `versions/<version>/addon.tgz`.
+2. Verify artifact SHA-256 and publisher signature before extraction.
+3. Extract to `versions/<version>/extracted/`.
+4. Perform atomic symlink switch of `current` to `versions/<version>`.
+5. Start/reconcile containers from active `current`.
+6. If activation fails, restore previous `current` symlink and write failure state to `runtime.json`.
+
 ## Core Registry Registration
 
 After deployment, register the endpoint in Core:

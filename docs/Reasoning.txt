@@ -23,3 +23,8 @@ Error context: None.
 Reasoning: Lifecycle safety depends on clear ownership boundaries; documentation must prevent Core/addon runtime from mutating orchestrator artifacts.
 What and why: Added compose generation ownership split, hard safety defaults, and env injection constraints to deployment guidance.
 ###########
+Task #09.3 :
+Error context: None.
+Reasoning: Stable activation requires explicit directory/symlink contract so Supervisor actions stay deterministic across upgrades and rollbacks.
+What and why: Added canonical SynthiaAddons structure and staged-verify-extract-activate-rollback flow to deployment documentation.
+###########
