@@ -18,3 +18,8 @@ Error context: None.
 Reasoning: Core/Supervisor handoff needs explicit, versioned artifacts to avoid ambiguous runtime state contracts.
 What and why: Added desired/runtime example and schema files under runtime/ssap and documented atomic desired.json writes plus runtime.json ownership boundaries.
 ###########
+Task #09.2 :
+Error context: None.
+Reasoning: Lifecycle safety depends on clear ownership boundaries; documentation must prevent Core/addon runtime from mutating orchestrator artifacts.
+What and why: Added compose generation ownership split, hard safety defaults, and env injection constraints to deployment guidance.
+###########

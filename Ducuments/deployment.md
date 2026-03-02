@@ -69,6 +69,24 @@ Ownership and write rules:
 - Supervisor writes `runtime.json` only.
 - Addon runtime must not mutate either file.
 
+## Compose Generation Boundaries
+
+- Core writes intent only (`desired.json`) and does not generate compose files.
+- Supervisor generates `docker-compose.yml` from desired state and owns activation.
+- Addon process must not generate or rewrite compose definitions at runtime.
+
+Compose safety defaults for generated services:
+
+- No privileged containers.
+- No host networking.
+- No host PID namespace.
+- Bind HTTP/API ports to localhost unless explicitly overridden by operator policy.
+
+Environment injection boundary:
+
+- Service tokens and secrets must be injected through env files only.
+- Secrets must not be passed via CLI flags or process arguments.
+
 ## Core Registry Registration
 
 After deployment, register the endpoint in Core:
