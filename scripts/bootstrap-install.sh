@@ -7,6 +7,7 @@ DEFAULT_BASE_TOPIC="${DEFAULT_BASE_TOPIC:-synthia}"
 DEFAULT_QOS="${DEFAULT_QOS:-1}"
 DEFAULT_PORT="${DEFAULT_PORT:-18080}"
 REQUESTED_VERSION="latest"
+FORCE_INSTALL="false"
 
 usage() {
   cat <<'EOF'
@@ -20,6 +21,7 @@ Interactive installer that:
 
 Options:
 - --version <tag|latest>  Release tag to install (default: latest)
+- --force                 Re-download/re-extract even if version is already installed
 - -h, --help              Show this help
 EOF
 }
@@ -287,6 +289,9 @@ parse_args() {
         [[ $# -gt 0 ]] || die "--version requires a value"
         REQUESTED_VERSION="$1"
         ;;
+      --force)
+        FORCE_INSTALL="true"
+        ;;
       -h|--help)
         usage
         exit 0
@@ -431,17 +436,62 @@ main() {
   version_dir="$INSTALL_DIR/versions/$version"
   extract_dir="$version_dir/extracted"
   artifact_file="$version_dir/addon.tgz"
+  current_link="$INSTALL_DIR/current"
+  requested_link_target="versions/$version"
+  current_link_target=""
+
+  mkdir -p "$INSTALL_DIR/versions"
+  if [[ -L "$current_link" ]]; then
+    current_link_target="$(readlink "$current_link" || true)"
+  fi
+
+  artifact_exists="false"
+  extract_exists="false"
+  if [[ -f "$artifact_file" ]]; then
+    artifact_exists="true"
+  fi
+  if [[ -d "$extract_dir" ]]; then
+    extract_exists="true"
+  fi
+
+  need_download="true"
+  need_extract="true"
+  if [[ "$FORCE_INSTALL" != "true" ]]; then
+    if [[ "$artifact_exists" == "true" ]]; then
+      need_download="false"
+      echo "[bootstrap] artifact already present, skipping download (use --force to re-download)"
+    fi
+    if [[ "$extract_exists" == "true" ]]; then
+      need_extract="false"
+      echo "[bootstrap] extracted version already present, skipping extract (use --force to re-extract)"
+    fi
+    if [[ "$current_link_target" == "$requested_link_target" && "$need_download" == "false" && "$need_extract" == "false" ]]; then
+      echo "[bootstrap] current already points to requested version and install artifacts are present"
+    fi
+  fi
+
   mkdir -p "$version_dir"
 
-  echo "[bootstrap] downloading ${asset_url}"
-  curl -fsSL "$asset_url" -o "$artifact_file"
-  verify_or_print_checksum "$artifact_file" "$checksum_url" "$tmpdir"
+  if [[ "$need_download" == "true" ]]; then
+    echo "[bootstrap] downloading ${asset_url}"
+    curl -fsSL "$asset_url" -o "$artifact_file"
+    verify_or_print_checksum "$artifact_file" "$checksum_url" "$tmpdir"
+  else
+    verify_or_print_checksum "$artifact_file" "" "$tmpdir"
+  fi
 
-  rm -rf "$extract_dir"
-  mkdir -p "$extract_dir"
-  tar -xzf "$artifact_file" -C "$extract_dir"
+  if [[ "$need_extract" == "true" ]]; then
+    rm -rf "$extract_dir"
+    mkdir -p "$extract_dir"
+    tar -xzf "$artifact_file" -C "$extract_dir"
+  fi
 
-  ln -sfn "versions/$version" "$INSTALL_DIR/current"
+  if [[ "$current_link_target" != "$requested_link_target" ]]; then
+    ln -sfn "$requested_link_target" "$current_link"
+    echo "[bootstrap] updated current symlink -> $requested_link_target"
+  else
+    echo "[bootstrap] current symlink already points to $requested_link_target"
+  fi
 
   active_root="$INSTALL_DIR/current/extracted"
   env_file="$active_root/.env"

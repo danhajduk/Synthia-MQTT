@@ -21,6 +21,9 @@ Purpose:
 
 - Fetch latest GitHub release artifact (`addon.tgz`).
 - Support explicit release selection with `--version <tag|latest>` (default `latest`).
+- Support idempotent re-runs:
+  - skip download/extract when requested version is already installed
+  - use `--force` to re-download/re-extract
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
 - Prompt for runtime choices:
@@ -40,6 +43,12 @@ Install a specific tag:
 
 ```bash
 ./scripts/bootstrap-install.sh --version v0.1.5
+```
+
+Force re-install of a version:
+
+```bash
+./scripts/bootstrap-install.sh --version latest --force
 ```
 
 Help:
