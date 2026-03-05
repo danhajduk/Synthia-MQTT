@@ -8,6 +8,7 @@ const state = {
   testPassed: false,
   applyDone: false,
   registerDone: false,
+  viewMode: "setup",
   external: {
     host: "10.0.0.100",
     port: 1883,
@@ -37,6 +38,16 @@ const state = {
   },
 };
 
+function parsePayload(raw) {
+  const input = raw.trim();
+  if (!input) return "";
+  try {
+    return JSON.parse(input);
+  } catch {
+    return input;
+  }
+}
+
 async function api(path, method = "GET", body) {
   const response = await fetch(path, {
     method,
@@ -60,6 +71,15 @@ function setText(id, value) {
 
 function setResult(id, text) {
   $(id).textContent = text;
+}
+
+function setGlobalError(message) {
+  ["details-error", "test-result", "apply-result", "register-result", "publish-result"].forEach((id) => {
+    const element = $(id);
+    if (element) {
+      element.textContent = message;
+    }
+  });
 }
 
 function saveState() {
@@ -141,6 +161,13 @@ function snapshotFieldsToState() {
   state.core.hasToken = Boolean($("core-token").value);
 }
 
+function setViewMode(viewMode) {
+  state.viewMode = viewMode;
+  $("setup-view").classList.toggle("hidden", viewMode !== "setup");
+  $("dashboard-view").classList.toggle("hidden", viewMode !== "dashboard");
+  saveState();
+}
+
 function syncModeUI() {
   const mode = selectedMode();
   state.mode = mode;
@@ -201,8 +228,7 @@ function validateDetails() {
   return true;
 }
 
-async function loadStatusBanner() {
-  const [install, health] = await Promise.all([api("/api/install/status"), api("/api/addon/health")]);
+function updateSetupStatus(install, health) {
   setText("status-mode", install.mode);
   setText("status-configured", String(install.configured));
   setText("status-verified", String(install.verified));
@@ -210,6 +236,23 @@ async function loadStatusBanner() {
   setText("status-mqtt", String(install.mqtt_connected));
   setText("status-health", health.status);
   setText("status-error", install.last_error || "none");
+}
+
+function updateDashboardStatus(install, health) {
+  setText("dash-status-mode", install.mode);
+  setText("dash-status-configured", String(install.configured));
+  setText("dash-status-verified", String(install.verified));
+  setText("dash-status-registered", String(install.registered_to_core));
+  setText("dash-status-mqtt", String(install.mqtt_connected));
+  setText("dash-status-health", health.status);
+  setText("dash-status-error", install.last_error || "none");
+}
+
+async function loadStatusSnapshot() {
+  const [install, health] = await Promise.all([api("/api/install/status"), api("/api/addon/health")]);
+  updateSetupStatus(install, health);
+  updateDashboardStatus(install, health);
+  return { install, health };
 }
 
 async function runTestStep() {
@@ -238,7 +281,7 @@ async function runTestStep() {
     setResult("test-result", "Embedded config syntax check passed.");
   }
   saveState();
-  await loadStatusBanner();
+  await loadStatusSnapshot();
 }
 
 function buildApplyPayload() {
@@ -295,13 +338,13 @@ async function runApplyStep() {
   state.external.hasPassword = false;
   state.embedded.hasAdminPass = false;
   saveState();
-  await loadStatusBanner();
+  await loadStatusSnapshot();
 }
 
 async function runBrokerRestart() {
   const result = await api("/api/broker/restart", "POST", {});
   setResult("apply-result", result.ok ? "Broker restarted and ready." : `Restart failed: ${result.reason || "unknown"}`);
-  await loadStatusBanner();
+  await loadStatusSnapshot();
 }
 
 async function runCoreRegistration() {
@@ -324,7 +367,7 @@ async function runCoreRegistration() {
   $("core-token").value = "";
   state.core.hasToken = false;
   saveState();
-  await loadStatusBanner();
+  await loadStatusSnapshot();
 }
 
 async function loadDoneSummary() {
@@ -364,15 +407,14 @@ async function copyFrom(targetId) {
   await navigator.clipboard.writeText(value);
 }
 
-async function resetSetup() {
-  await api("/api/install/reset", "POST", {});
-  localStorage.removeItem(STORAGE_KEY);
+function resetStateDefaults() {
   Object.assign(state, {
     currentStep: 1,
     mode: "external",
     testPassed: false,
     applyDone: false,
     registerDone: false,
+    viewMode: "setup",
     external: {
       host: "10.0.0.100",
       port: 1883,
@@ -401,17 +443,44 @@ async function resetSetup() {
       hasToken: false,
     },
   });
+}
+
+async function resetSetup() {
+  await api("/api/install/reset", "POST", {});
+  localStorage.removeItem(STORAGE_KEY);
+  resetStateDefaults();
   fillFieldsFromState();
   syncModeUI();
   setStep(1);
+  setViewMode("setup");
   setResult("details-error", "Setup state reset.");
   setResult("test-result", "-");
   setResult("apply-result", "-");
   setResult("register-result", "-");
-  await loadStatusBanner();
+  await loadStatusSnapshot();
 }
 
-function bindNavigation() {
+async function loadDashboardSummary() {
+  const [config, health, install] = await Promise.all([
+    api("/api/addon/config/effective"),
+    api("/api/addon/health"),
+    api("/api/install/status"),
+  ]);
+  $("finish-output").textContent = JSON.stringify({ config, health, install }, null, 2);
+}
+
+async function publishTest() {
+  const payload = {
+    topic: $("pub-topic").value.trim(),
+    payload: parsePayload($("pub-payload").value),
+    retain: $("pub-retain").checked,
+    qos: Number($("pub-qos").value),
+  };
+  const result = await api("/api/mqtt/publish", "POST", payload);
+  setResult("publish-result", result.ok ? "Publish succeeded." : "Publish failed.");
+}
+
+function bindSetupNavigation() {
   $("next-1").addEventListener("click", () => setStep(2));
   $("back-2").addEventListener("click", () => setStep(1));
   $("next-2").addEventListener("click", () => {
@@ -437,7 +506,7 @@ function bindEvents() {
     });
   });
 
-  $("refresh-status").addEventListener("click", () => run(loadStatusBanner));
+  $("refresh-status").addEventListener("click", () => run(loadStatusSnapshot));
   $("run-test").addEventListener("click", () => run(runTestStep));
   $("run-apply").addEventListener("click", () => run(runApplyStep));
   $("restart-broker").addEventListener("click", () => run(runBrokerRestart));
@@ -456,7 +525,16 @@ function bindEvents() {
     });
   });
 
-  bindNavigation();
+  $("refresh-dashboard").addEventListener("click", () => run(loadStatusSnapshot));
+  $("open-setup").addEventListener("click", () => {
+    setViewMode("setup");
+    setStep(1);
+    run(loadStatusSnapshot);
+  });
+  $("load-finish").addEventListener("click", () => run(loadDashboardSummary));
+  $("test-publish").addEventListener("click", () => run(publishTest));
+
+  bindSetupNavigation();
 }
 
 async function run(action) {
@@ -464,20 +542,27 @@ async function run(action) {
     await action();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    setResult("details-error", message);
-    setResult("test-result", message);
-    setResult("apply-result", message);
-    setResult("register-result", message);
+    setGlobalError(message);
   }
 }
 
-function initialize() {
+async function initialize() {
   loadSavedState();
   fillFieldsFromState();
   bindEvents();
   syncModeUI();
   setStep(state.currentStep);
-  run(loadStatusBanner);
+
+  const forceSetup = new URLSearchParams(window.location.search).get("setup") === "1";
+  const { install } = await loadStatusSnapshot();
+
+  if (forceSetup || !install.configured) {
+    setViewMode("setup");
+    await loadDoneSummary();
+  } else {
+    setViewMode("dashboard");
+    await loadDashboardSummary();
+  }
 }
 
-initialize();
+run(initialize);

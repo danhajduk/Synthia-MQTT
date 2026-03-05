@@ -49,6 +49,7 @@ Both test/apply endpoints keep install-session state (`mode/configured/verified/
 
 Wizard UI integration:
 - `/ui` setup flow is a six-step wizard for mode selection, broker details, test, apply, Core registration, and done summary.
+- `/ui` gating behavior: if install state `configured=false`, setup wizard is shown; if `configured=true`, runtime dashboard is shown.
 - UI persists local non-secret setup state and only stores password/token presence flags.
 - status banner is sourced from install status + addon health and supports explicit setup reset via `/api/install/reset`.
 

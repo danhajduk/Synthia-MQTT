@@ -53,3 +53,8 @@ Error/UX issue: Setup reset action required by task spec was missing a backend e
 Reasoning: Wizard v1 should guide both embedded and external setup end-to-end with durable non-secret browser state, clear status visibility, and explicit reset behavior.
 What and why: Implemented six-step setup wizard UI under `/ui` with mode-specific forms, validation, test/apply/register actions, status banner, done-page copy helpers, and localStorage persistence without raw secrets; added `POST /api/install/reset` plus config-store reset helper so reset clears backend install-session state and returns to external mode defaults.
 ###########
+Task #14.6 :
+Error/UX issue: `/ui` always opened setup wizard, so configured deployments lost the normal post-setup dashboard path.
+Reasoning: Setup gating should be deterministic from backend install state so first-run operators land in setup while configured systems default to runtime dashboard workflows.
+What and why: Added `/ui` client-side gating based on `GET /api/install/status` (`configured` flag), splitting UI into setup and dashboard views; setup remains available, and configured state now defaults to dashboard with status refresh, effective-config summary, and test publish actions.
+###########
