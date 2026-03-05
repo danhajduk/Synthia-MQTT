@@ -21,6 +21,17 @@ Defines models for:
 Defines install workflow models for:
 
 - install status response
+  - includes persisted setup session fields: `mode`, `configured`, `verified`, `registered_to_core`, `last_error`
 - external broker connectivity test request/response
 - install apply request/response for external mode
 - core registry registration request/response
+
+Install session state persistence:
+
+- Stored in `runtime/install_state.json`
+- Canonical keys:
+  - `mode`: `"embedded"` or `"external"`
+  - `configured`: boolean
+  - `verified`: boolean
+  - `registered_to_core`: boolean
+  - `last_error`: string/null

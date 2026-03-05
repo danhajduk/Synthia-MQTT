@@ -27,17 +27,20 @@ def build_install_workflow_router(
 
     @router.get("/status", response_model=InstallStatusResponse)
     def get_status() -> InstallStatusResponse:
-        install_state = config_store.get_install_state()
-        mode = install_state["mode"]
+        install_state = config_store.get_install_session_state()
         health = health_service.snapshot()
+        last_error = health.last_error or install_state.get("last_error")
 
         return InstallStatusResponse(
-            mode=mode,
+            mode=install_state["mode"],
+            configured=bool(install_state["configured"]),
+            verified=bool(install_state["verified"]),
+            registered_to_core=bool(install_state["registered_to_core"]),
             docker_sock_available=False,
             embedded_profile_required=False,
             broker_running=False,
             mqtt_connected=health.mqtt_connected,
-            last_error=health.last_error,
+            last_error=last_error,
         )
 
     @router.post("/test-external", response_model=InstallTestExternalResponse)
@@ -59,8 +62,10 @@ def build_install_workflow_router(
         try:
             config_store.apply_install_config(payload)
         except ValueError as exc:
+            config_store.update_install_session_state(last_error=str(exc))
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except Exception as exc:  # pragma: no cover
+            config_store.update_install_session_state(last_error="Failed to persist install config")
             raise HTTPException(status_code=500, detail="Failed to persist install config") from exc
 
         reload_mqtt_service()

@@ -10,7 +10,9 @@ from app.models.install_models import InstallApplyRequest
 class ConfigStore:
     def __init__(self, config_path: Path | None = None) -> None:
         base_dir = Path(__file__).resolve().parents[2]
+        self._base_dir = base_dir
         self._config_path = config_path or base_dir / "runtime" / "config.json"
+        self._install_state_path = base_dir / "runtime" / "install_state.json"
 
     def get_effective_config(self, mask_secrets: bool = False) -> dict[str, Any]:
         defaults = {
@@ -84,6 +86,31 @@ class ConfigStore:
             "qos_default": qos_default,
         }
 
+    def get_install_session_state(self) -> dict[str, Any]:
+        state = self._default_install_session_state()
+        raw = self._load_install_session_state()
+        if isinstance(raw, dict):
+            state["mode"] = raw.get("mode", state["mode"])
+            state["configured"] = bool(raw.get("configured", state["configured"]))
+            state["verified"] = bool(raw.get("verified", state["verified"]))
+            state["registered_to_core"] = bool(raw.get("registered_to_core", state["registered_to_core"]))
+            state["last_error"] = raw.get("last_error", state["last_error"])
+
+        install_config = self.get_install_state()
+        mode = install_config.get("mode")
+        if mode in {"external", "embedded"}:
+            state["mode"] = mode
+
+        return state
+
+    def update_install_session_state(self, **updates: Any) -> dict[str, Any]:
+        state = self.get_install_session_state()
+        for key in ("mode", "configured", "verified", "registered_to_core", "last_error"):
+            if key in updates:
+                state[key] = updates[key]
+        self._save_install_session_state(state)
+        return state
+
     def apply_install_config(self, request: InstallApplyRequest) -> dict[str, Any]:
         overrides = self._load_overrides()
         data = request.model_dump(exclude_none=True)
@@ -117,6 +144,7 @@ class ConfigStore:
             overrides["mqtt_qos"] = data["qos_default"]
 
         self._save_overrides(overrides)
+        self.update_install_session_state(mode=mode, configured=True, last_error=None)
         return self.get_effective_config()
 
     def _load_overrides(self) -> dict[str, Any]:
@@ -135,6 +163,30 @@ class ConfigStore:
         self._config_path.parent.mkdir(parents=True, exist_ok=True)
         with self._config_path.open("w", encoding="utf-8") as file:
             json.dump(overrides, file, indent=2, sort_keys=True)
+
+    def _load_install_session_state(self) -> dict[str, Any]:
+        if not self._install_state_path.exists():
+            return {}
+        with self._install_state_path.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+        if not isinstance(data, dict):
+            return {}
+        return data
+
+    def _save_install_session_state(self, state: dict[str, Any]) -> None:
+        self._install_state_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._install_state_path.open("w", encoding="utf-8") as file:
+            json.dump(state, file, indent=2, sort_keys=True)
+
+    @staticmethod
+    def _default_install_session_state() -> dict[str, Any]:
+        return {
+            "mode": "external",
+            "configured": False,
+            "verified": False,
+            "registered_to_core": False,
+            "last_error": None,
+        }
 
     @staticmethod
     def _to_bool(raw_value: str) -> bool:

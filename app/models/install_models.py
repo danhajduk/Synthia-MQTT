@@ -5,6 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 class InstallStatusResponse(BaseModel):
     mode: Literal["external", "embedded"]
+    configured: bool
+    verified: bool
+    registered_to_core: bool
     docker_sock_available: bool
     embedded_profile_required: bool
     broker_running: bool

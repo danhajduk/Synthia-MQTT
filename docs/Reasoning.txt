@@ -28,3 +28,8 @@ Error context: Per operator request, deferred running bootstrap validation execu
 Reasoning: Final step should provide a reproducible validation entrypoint and quick-start guidance while allowing validation execution to be coordinated later.
 What and why: Added scripts/validate-bootstrap.sh to run bootstrap with default validation args, check /healthz, and print UI URL; updated README Quick Start and scripts documentation to include bootstrap v2 usage and validation helper.
 ###########
+Task #14.1 :
+Error context: None.
+Reasoning: Wizard flow requires stable backend truth for setup progress independent of transient health snapshots, so install status must include persisted state fields.
+What and why: Added persisted install session state (`runtime/install_state.json`) with `mode/configured/verified/registered_to_core/last_error`, surfaced these fields in `/api/install/status`, and updated install apply error/success paths to keep state synchronized; documented model/state in Ducuments/models.md.
+###########
