@@ -10,10 +10,12 @@ REQUESTED_VERSION="latest"
 FORCE_INSTALL="false"
 ADDON_PORT="$DEFAULT_PORT"
 BIND_HOST="localhost"
+NO_OPEN="false"
+TIMEOUT_SECONDS="60"
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>] [--addon-port <port>] [--bind <host>]
+Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>] [--addon-port <port>] [--bind <host>] [--no-open] [--timeout-seconds <seconds>]
 
 Interactive installer that:
 - downloads latest GitHub release addon.tgz
@@ -26,6 +28,8 @@ Options:
 - --force                 Re-download/re-extract even if version is already installed
 - --addon-port <port>     Host port to bind addon HTTP service to (default: 18080)
 - --bind <host>           Host bind address for addon HTTP service (default: localhost)
+- --no-open               Do not auto-open setup UI in browser
+- --timeout-seconds <n>   Wait timeout for health endpoint readiness (default: 60)
 - -h, --help              Show this help
 EOF
 }
@@ -308,6 +312,16 @@ parse_args() {
         [[ $# -gt 0 ]] || die "--bind requires a value"
         BIND_HOST="$1"
         ;;
+      --no-open)
+        NO_OPEN="true"
+        ;;
+      --timeout-seconds)
+        shift
+        [[ $# -gt 0 ]] || die "--timeout-seconds requires a value"
+        [[ "$1" =~ ^[0-9]+$ ]] || die "--timeout-seconds must be numeric"
+        (( "$1" >= 1 )) || die "--timeout-seconds must be >= 1"
+        TIMEOUT_SECONDS="$1"
+        ;;
       -h|--help)
         usage
         exit 0
@@ -363,6 +377,52 @@ services:
     ports:
       - "${BIND_HOST}:${ADDON_PORT}:8080"
 EOF
+}
+
+wait_for_health() {
+  local health_url="$1"
+  local timeout_seconds="$2"
+  local elapsed=0
+  local interval=2
+
+  echo "[bootstrap] waiting for health endpoint: $health_url (timeout=${timeout_seconds}s)"
+  while (( elapsed < timeout_seconds )); do
+    if curl -fsS "$health_url" >/dev/null 2>&1; then
+      echo "[bootstrap] health endpoint is ready after ${elapsed}s"
+      return 0
+    fi
+    echo "[bootstrap] health not ready yet (${elapsed}s elapsed)"
+    sleep "$interval"
+    (( elapsed += interval ))
+  done
+  return 1
+}
+
+open_browser_url() {
+  local url="$1"
+
+  if [[ "$NO_OPEN" == "true" ]]; then
+    echo "[bootstrap] --no-open set, not opening browser"
+    echo "[bootstrap] setup UI: $url"
+    return 0
+  fi
+
+  if command -v xdg-open >/dev/null 2>&1; then
+    if xdg-open "$url" >/dev/null 2>&1; then
+      echo "[bootstrap] opened setup UI via xdg-open: $url"
+      return 0
+    fi
+  fi
+  if command -v open >/dev/null 2>&1; then
+    if open "$url" >/dev/null 2>&1; then
+      echo "[bootstrap] opened setup UI via open: $url"
+      return 0
+    fi
+  fi
+
+  echo "[bootstrap] browser opener not available or failed"
+  echo "[bootstrap] setup UI: $url"
+  return 0
 }
 
 register_with_core() {
@@ -542,6 +602,16 @@ main() {
     pushd "$active_root" >/dev/null
     docker compose -f "$compose_main" -f "$compose_port_override" up -d --remove-orphans --no-deps mqtt-addon
     popd >/dev/null
+
+    service_base_url="http://${BIND_HOST}:${ADDON_PORT}"
+    health_url="${service_base_url}/healthz"
+    ui_url="${service_base_url}/ui"
+
+    if wait_for_health "$health_url" "$TIMEOUT_SECONDS"; then
+      open_browser_url "$ui_url"
+    else
+      die "health endpoint did not become ready within ${TIMEOUT_SECONDS}s at ${health_url}"
+    fi
   fi
 
   if [[ "$REGISTER_WITH_CORE" == "true" ]]; then

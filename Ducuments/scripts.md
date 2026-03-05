@@ -26,6 +26,8 @@ Purpose:
   - use `--force` to re-download/re-extract
 - Start Docker in addon-only mode (`mqtt-addon` service only) when service startup is selected.
 - Support host binding controls with `--addon-port` and `--bind`.
+- Wait for `healthz` readiness and open setup UI automatically after successful startup.
+- Support `--no-open` and `--timeout-seconds` controls for readiness/open behavior.
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
 - Prompt for runtime choices:
@@ -57,6 +59,12 @@ Start with explicit bind/port:
 
 ```bash
 ./scripts/bootstrap-install.sh --addon-port 19080 --bind 127.0.0.1
+```
+
+Skip browser open and set readiness timeout:
+
+```bash
+./scripts/bootstrap-install.sh --no-open --timeout-seconds 90
 ```
 
 Help:

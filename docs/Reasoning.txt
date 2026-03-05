@@ -18,3 +18,8 @@ Error context: None.
 Reasoning: Task 13 requires bootstrap startup to be explicit addon-only behavior regardless of compose contents, while still letting operators select host bind/port settings.
 What and why: Added `--addon-port` and `--bind` CLI options with validation, generated a compose port override file for mqtt-addon binding, and changed startup to `docker compose ... up --no-deps mqtt-addon` to prevent broker container startup; updated scripts documentation with addon-only and bind/port usage.
 ###########
+Task #13.5 :
+Error context: None.
+Reasoning: Bootstrap completion should reflect actual service readiness, and browser launch behavior must be configurable for headless automation and operator convenience.
+What and why: Added health polling with timeout and progressive status logs, plus UI open behavior using `xdg-open`/`open` with fallback URL printing; added `--no-open` and `--timeout-seconds` CLI controls and documented readiness/open options.
+###########
