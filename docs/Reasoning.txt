@@ -13,3 +13,11 @@ Error context: API docs did not describe new register payload/auth compatibility
 Reasoning: Operators need exact expected payload/header behavior and lifecycle calls documented for troubleshooting.
 What and why: Updated API documentation with name/version payload, dual auth header behavior, and post-register verify call notes.
 ###########
+Task #19.4 :
+Error context: Core registry compatibility changes require a new published package so bootstrap/latest installs include the patch.
+Reasoning: A new version release avoids ambiguity and ensures users pull patched registration behavior immediately.
+What and why: Bumped manifest to `0.1.8`, rebuilt/signed artifacts, and uploaded GitHub release `v0.1.8`; refreshed release metadata output.
+###########
+#############
+All Tasks completed 03/05/2026 15:42:04
+#############
