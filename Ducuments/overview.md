@@ -22,5 +22,6 @@ This service provides a distributed MQTT addon for Synthia.
 
 - `/ui` provides a six-step setup wizard supporting both `external` broker mode and `embedded` broker mode.
 - `/ui` is gated by install state: unconfigured installs open setup, configured installs open the runtime dashboard.
+- Configured dashboard includes a default `Synthia MQTT` placeholder page section.
 - Wizard status banner surfaces install-session flags (`mode`, `configured`, `verified`, `registered_to_core`, `last_error`) plus addon health state.
 - Setup state is persisted locally for operator convenience while keeping raw secrets out of browser storage.

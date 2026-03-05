@@ -8,3 +8,11 @@ Error context: Bootstrap UI URL defaulted to localhost, which does not satisfy r
 Reasoning: Startup health checks can stay local, but operator-facing UI links should default to a full reachable host IP.
 What and why: Switched bootstrap `--bind` default to detected host IP, normalized localhost public host values, changed UI URL output/open behavior to use full host IP, and aligned validation defaults (`SERVICE_BASE_URL`) to detected host IP so bootstrap + validate flow remains green.
 ###########
+Task #15.3 :
+Error/UX issue: No explicit default dashboard placeholder section was present for configured-mode UI.
+Reasoning: A minimal placeholder page ensures a consistent configured landing page even before additional dashboard widgets are defined.
+What and why: Added a `Synthia MQTT` placeholder panel to configured dashboard view and documented the placeholder behavior; rebuilt frontend dist assets.
+###########
+#############
+All Tasks completed 03/05/2026 13:24:11
+#############
