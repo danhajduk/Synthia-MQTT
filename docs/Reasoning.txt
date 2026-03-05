@@ -3,3 +3,13 @@ Error context: Core register endpoint expected additional fields/auth variants (
 Reasoning: register-core should send a superset of compatible payload fields and auth headers so one wizard flow works against both modern and legacy Core variants.
 What and why: Updated Core registry requests to include `name` + `version` payload fields, added `X-Admin-Token` header alongside Bearer auth when token is provided, and propagated manifest name/version from addon metadata; updated API docs accordingly.
 ###########
+Task #19.2 :
+Error context: Core registration did not trigger verify state refresh automatically after successful register.
+Reasoning: A best-effort verify call right after registration keeps Core registry health status in sync with minimal operator steps.
+What and why: Added `verify_addon_endpoint` call immediately after successful register-core using the same auth context; kept registration success path non-blocking.
+###########
+Task #19.3 :
+Error context: API docs did not describe new register payload/auth compatibility and post-register verify behavior.
+Reasoning: Operators need exact expected payload/header behavior and lifecycle calls documented for troubleshooting.
+What and why: Updated API documentation with name/version payload, dual auth header behavior, and post-register verify call notes.
+###########

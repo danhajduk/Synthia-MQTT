@@ -16,7 +16,7 @@ from app.models.install_models import (
     InstallTestExternalResponse,
 )
 from app.services.config_store import ConfigStore
-from app.services.core_registry import register_addon_endpoint
+from app.services.core_registry import register_addon_endpoint, verify_addon_endpoint
 from app.services.health import HealthService
 from app.services.mqtt_client import test_external_connection
 
@@ -166,6 +166,11 @@ def build_install_workflow_router(
             auth_token=auth_token,
         )
         if ok:
+            verify_addon_endpoint(
+                core_base_url=core_base_url,
+                addon_id=addon_id,
+                auth_token=auth_token,
+            )
             config_store.update_install_session_state(registered_to_core=True, last_error=None)
             return CoreRegistryResponse(ok=True, status_code=status_code)
 

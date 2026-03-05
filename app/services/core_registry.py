@@ -90,3 +90,19 @@ def register_addon_endpoint(
             timeout_s=timeout_s,
         )
     return False, legacy_status, legacy_reason
+
+
+def verify_addon_endpoint(
+    core_base_url: str,
+    addon_id: str,
+    auth_token: str | None = None,
+    timeout_s: float = 5.0,
+) -> tuple[bool, int | None, str | None]:
+    core_base = core_base_url.rstrip("/")
+    verify_url = f"{core_base}/api/addons/registry/{addon_id}/verify"
+    return _post_json(
+        url=verify_url,
+        payload_data={},
+        auth_token=auth_token,
+        timeout_s=timeout_s,
+    )

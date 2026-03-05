@@ -45,6 +45,7 @@ Both test/apply endpoints keep install-session state (`mode/configured/verified/
 - maps auth failures to HTTP 401 and unreachable Core to HTTP 502
 - auto-prefixes `http://` when `core_base_url` or `base_url` is provided without URL scheme
 - when `auth_token` is supplied, request includes both `Authorization: Bearer <token>` and `X-Admin-Token: <token>` headers for Core auth compatibility
+- after successful register, addon backend issues a best-effort `POST /api/addons/registry/{addon_id}/verify` call to refresh Core health state
 
 `/api/install/reset` behavior:
 - resets persisted install-session fields to defaults
