@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+from shlex import quote
 from typing import Callable
 
 from fastapi import APIRouter, HTTPException
@@ -41,6 +43,7 @@ def build_install_workflow_router(
     reload_mqtt_service: Callable[[], None],
 ) -> APIRouter:
     router = APIRouter(prefix="/api/install", tags=["install"])
+    repo_root = Path(__file__).resolve().parents[2]
 
     @router.get("/status", response_model=InstallStatusResponse)
     def get_status() -> InstallStatusResponse:
@@ -115,15 +118,22 @@ def build_install_workflow_router(
             return InstallApplyResponse(ok=True)
 
         operator_action = (
+            f"cd {quote(str(repo_root))} && "
             "docker compose -f docker/docker-compose.yml "
             "-f runtime/broker/docker-compose.override.yml up -d --remove-orphans mosquitto mqtt-addon"
         )
+        warning = reason
+        if reason and "No such file or directory: 'docker'" in reason:
+            warning = (
+                "Docker CLI is not available in addon runtime. "
+                "Run the operator action command on host terminal."
+            )
         config_store.update_install_session_state(mode="embedded", configured=False, verified=False, last_error=reason)
         return InstallApplyResponse(
             ok=False,
             requires_operator_action=True,
             operator_action=operator_action,
-            warnings=[reason] if reason else None,
+            warnings=[warning] if warning else None,
         )
 
     @router.post("/register-core", response_model=CoreRegistryResponse)

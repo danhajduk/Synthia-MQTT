@@ -34,7 +34,8 @@ Implements install workflow endpoints:
 `/api/install/apply` supports:
 - external mode: persists external broker config and reconnects the MQTT client.
 - embedded mode: persists embedded broker config, generates runtime broker files + compose override under `runtime/broker/`, and attempts `docker compose up` for `mosquitto` + `mqtt-addon`.
-  - if compose apply fails, response includes `ok=false`, `requires_operator_action=true`, and an operator command hint.
+  - if compose apply fails, response includes `ok=false`, `requires_operator_action=true`, and an operator command hint that includes `cd <addon-root> && docker compose ...` for host execution.
+  - when Docker CLI is unavailable in addon runtime, warning text is normalized to explicitly instruct host-terminal execution.
 Both test/apply endpoints keep install-session state (`mode/configured/verified/last_error`) synchronized for wizard flow.
 `/api/install/register-core` behavior:
 - preferred Core endpoint: `POST /api/addons/registry/{addon_id}/register` with `{ base_url }`
