@@ -42,6 +42,17 @@ Build/update frontend static assets:
 cd frontend && npm run build
 ```
 
+Bootstrap latest addon release with interactive install prompts:
+
+```bash
+./scripts/bootstrap-install.sh
+```
+
+The bootstrap script asks for:
+- whether to install a local MQTT broker container
+- Core host URL (optional, for endpoint registration)
+- addon public base URL, MQTT connection settings, and whether to start services now
+
 ## API Endpoints
 
 - `GET /api/addon/meta`

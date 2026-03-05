@@ -15,6 +15,30 @@ Usage:
 ./scripts/rebuild.sh
 ```
 
+## `scripts/bootstrap-install.sh`
+
+Purpose:
+
+- Fetch latest GitHub release artifact (`addon.tgz`).
+- Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
+- Prompt for runtime choices:
+  - install local MQTT broker (Compose override)
+  - Core host URL for optional registration
+  - addon base URL, MQTT settings, and startup behavior
+- Write `.env` for compose runtime and optionally start containers.
+
+Usage:
+
+```bash
+./scripts/bootstrap-install.sh
+```
+
+Help:
+
+```bash
+./scripts/bootstrap-install.sh --help
+```
+
 ## `scripts/validate-service-flow.sh`
 
 Purpose:

@@ -1,63 +1,8 @@
-Task #08.1 :
-Error context: FastAPI runtime import verification unavailable locally because fastapi is not installed in this shell environment.
-Reasoning: Expose a dedicated version contract endpoint sourced from manifest.json to guarantee static, declarative metadata and no secret leakage.
-What and why: Added AddonVersion model and GET /api/addon/version returning addon_id/version/api_version/manifest_version from manifest metadata loaded at startup.
-###########
-Task #08.2 :
+Task #12 :
 Error context: None.
-Reasoning: Permissions must remain static and declarative, so the endpoint is sourced from manifest.json instead of runtime-derived capability data.
-What and why: Added GET /api/addon/permissions that returns MANIFEST_PERMISSIONS loaded from manifest.json; updated API documentation.
-###########
-Task #08.3 :
-Error context: None.
-Reasoning: Version identity must have one source of truth to prevent API/announce drift and tooling mismatches.
-What and why: Added addon_id/version/api_version/mode announce fields driven by manifest-backed ADDON_VERSION + SSAP_API_VERSION passed from main into MQTT service.
-###########
-Task #09.1 :
-Error context: None.
-Reasoning: Core/Supervisor handoff needs explicit, versioned artifacts to avoid ambiguous runtime state contracts.
-What and why: Added desired/runtime example and schema files under runtime/ssap and documented atomic desired.json writes plus runtime.json ownership boundaries.
-###########
-Task #09.2 :
-Error context: None.
-Reasoning: Lifecycle safety depends on clear ownership boundaries; documentation must prevent Core/addon runtime from mutating orchestrator artifacts.
-What and why: Added compose generation ownership split, hard safety defaults, and env injection constraints to deployment guidance.
-###########
-Task #09.3 :
-Error context: None.
-Reasoning: Stable activation requires explicit directory/symlink contract so Supervisor actions stay deterministic across upgrades and rollbacks.
-What and why: Added canonical SynthiaAddons structure and staged-verify-extract-activate-rollback flow to deployment documentation.
-###########
-Task #10.1 :
-Error context: None.
-Reasoning: Contract drift is easiest to catch in validation tooling by comparing API responses directly against manifest source-of-truth data.
-What and why: Extended validate-service-flow to call /api/addon/version and /api/addon/permissions and fail on missing fields or manifest mismatch; updated script docs.
-###########
-Task #10.2 :
-Error context: None.
-Reasoning: MQTT contract validation needs retained-state awareness; payload-only checks can pass while retention policy is broken.
-What and why: Added retained flag parsing via mosquitto_sub format output and strict announce field checks against version endpoint metadata.
-###########
-Task #10.3 :
-Error context: None.
-Reasoning: Compliance checks need to fail early on profile drift and permission misuse before deployment/runtime orchestration.
-What and why: Added package_profile enforcement, canonical permission vocabulary validation, and best-effort static permission-literal scan in validate-service-flow.
-###########
-Task #11.1 :
-Error context: None.
-Reasoning: README must reflect the enforced API surface and architecture split so operators use the correct contract and lifecycle model.
-What and why: Added /api/addon/version and /api/addon/permissions to API list and documented self-registration + Core control-plane + Supervisor lifecycle roles.
-###########
-Task #11.2 :
-Error context: None.
-Reasoning: Release process failures are mostly procedural, so a normative checklist reduces catalog/signature drift and unsafe activation.
-What and why: Added explicit release checklist steps for deterministic build, SHA256, ed25519 Option A signing, publisher key consistency, catalog alignment, and Supervisor verification behavior.
-###########
-Task #11.3 :
-Error context: None.
-Reasoning: Operators need explicit ownership boundaries and actionable failure playbooks to recover safely without violating SSAP control/data-plane separation.
-What and why: Added operations doc defining Core/Supervisor/Addon responsibilities plus remediation paths for signature, hash, compose, and announce failures.
+Reasoning: A bootstrap installer should handle release fetch + install layout + first-run runtime choices in one guided path so operators can deploy without manual artifact plumbing.
+What and why: Added interactive scripts/bootstrap-install.sh to download latest GitHub release addon.tgz, install under versions/current layout, prompt for broker/Core/runtime settings, write compose .env, optionally start containers, and optionally call Core registration; updated README and script docs.
 ###########
 #############
-All Tasks completed 03/01/2026 18:57:45
+All Tasks completed 03/05/2026 11:33:51
 #############
