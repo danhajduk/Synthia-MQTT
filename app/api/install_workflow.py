@@ -140,8 +140,19 @@ def build_install_workflow_router(
             base_url=payload.base_url,
             auth_token=auth_token,
         )
-        if not ok:
-            raise HTTPException(status_code=502, detail=reason or "Core registry request failed")
-        return CoreRegistryResponse(ok=True, status_code=status_code)
+        if ok:
+            config_store.update_install_session_state(registered_to_core=True, last_error=None)
+            return CoreRegistryResponse(ok=True, status_code=status_code)
+
+        config_store.update_install_session_state(
+            registered_to_core=False,
+            last_error=reason or "Core registry request failed",
+        )
+
+        if status_code in {401, 403}:
+            raise HTTPException(status_code=401, detail="Core authentication failed")
+        if status_code is None:
+            raise HTTPException(status_code=502, detail="Core is unreachable")
+        raise HTTPException(status_code=502, detail=reason or "Core registry request failed")
 
     return router

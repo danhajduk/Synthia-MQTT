@@ -26,8 +26,10 @@
 
 ## `app/services/core_registry.py`
 
-- Posts addon service endpoint registration to Synthia Core `/api/admin/addons/registry`.
-- Sends `addon_id` and externally reachable `base_url`.
+- Registers addon service endpoint in Core using preferred route:
+  - `POST /api/addons/registry/{addon_id}/register` with `{ base_url }`
+- Falls back to legacy route if preferred route is unavailable:
+  - `POST /api/admin/addons/registry` with `{ addon_id, base_url }`
 - Supports optional bearer token for Core admin auth.
 
 ## `app/services/broker_manager.py`

@@ -43,3 +43,8 @@ Error context: None.
 Reasoning: Embedded mode requires a concrete runtime enablement mechanism, not just persisted settings, plus restart flows must feed wizard verification status.
 What and why: Added embedded runtime application that writes `runtime/broker` files, generates compose override, and attempts compose up for `mosquitto` + `mqtt-addon`; enabled `/api/install/apply` embedded branch with operator-action fallback; wired broker restart endpoint to update install-session verification state; updated API/services docs.
 ###########
+Task #14.4 :
+Error context: None.
+Reasoning: Core registration needs compatibility across route variants and explicit install-session registration tracking so wizard completion state remains accurate.
+What and why: Updated Core registry service to prefer `POST /api/addons/registry/{addon_id}/register` with fallback to legacy `/api/admin/addons/registry`; updated `/api/install/register-core` to persist `registered_to_core`/`last_error` and emit clearer auth/unreachable errors; updated API/services docs.
+###########

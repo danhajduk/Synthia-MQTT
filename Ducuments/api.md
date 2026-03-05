@@ -35,7 +35,11 @@ Implements install workflow endpoints:
 - embedded mode: persists embedded broker config, generates runtime broker files + compose override under `runtime/broker/`, and attempts `docker compose up` for `mosquitto` + `mqtt-addon`.
   - if compose apply fails, response includes `ok=false`, `requires_operator_action=true`, and an operator command hint.
 Both test/apply endpoints keep install-session state (`mode/configured/verified/last_error`) synchronized for wizard flow.
-`/api/install/register-core` posts `{ addon_id, base_url }` to Core at `/api/admin/addons/registry`.
+`/api/install/register-core` behavior:
+- preferred Core endpoint: `POST /api/addons/registry/{addon_id}/register` with `{ base_url }`
+- fallback endpoint: `POST /api/admin/addons/registry` with `{ addon_id, base_url }` when preferred route is not available
+- updates install-session `registered_to_core` and `last_error`
+- maps auth failures to HTTP 401 and unreachable Core to HTTP 502
 
 ## `app/api/broker_admin.py`
 
