@@ -3,3 +3,11 @@ Error context: Service docs lagged behind the Core contract documented in addons
 Reasoning: Contract compliance work must keep service-level documentation accurate so operators and developers reference the same payload/auth/verify behavior.
 What and why: Updated `Ducuments/services.md` core-registry section to reflect register payload fields (`base_url,name,version`), legacy fallback variants, dual admin auth header support, and post-register verify behavior.
 ###########
+Task #20.2 :
+Error context: Operator requested a synchronized `0.1.7a` build despite current higher patch version lineage.
+Reasoning: Explicit release request takes precedence; publishing a tagged artifact ensures installer/release references can target the requested channel/version.
+What and why: Set manifest version to `0.1.7a`, rebuilt frontend/package/signature artifacts, uploaded GitHub release `v0.1.7a`, and refreshed `release-output.json` to the new artifact URL and digest.
+###########
+#############
+All Tasks completed 03/05/2026 15:46:04
+#############
