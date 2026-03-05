@@ -3,3 +3,8 @@ Error context: None.
 Reasoning: Implementing bootstrap v2 safely requires explicit baseline documentation of the current script behavior so each follow-up change can be validated against scope constraints.
 What and why: Added Ducuments/bootstrap_install.md documenting current bootstrap prompts/version resolution/install layout/compose startup, plus the v2 target flow and concrete breaking behavior changes required by Task 13.
 ###########
+Task #13.2 :
+Error context: Initial resolver implementation mixed log output with parsed stdout and produced invalid release URL parsing; fixed by routing resolver logs to stderr.
+Reasoning: Release resolution must be robust and deterministic across API failures/rate limits, while keeping script output machine-parseable for downstream steps.
+What and why: Added `--version <tag|latest>`, GitHub API release resolution with HTML fallback for latest, explicit tag resolution via releases/tags API, and checksum handling that verifies against release checksum files when present or prints computed SHA256 otherwise; updated script documentation with new behavior.
+###########

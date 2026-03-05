@@ -6,17 +6,27 @@ DEFAULT_INSTALL_DIR="${DEFAULT_INSTALL_DIR:-$HOME/SynthiaAddons/services/mqtt}"
 DEFAULT_BASE_TOPIC="${DEFAULT_BASE_TOPIC:-synthia}"
 DEFAULT_QOS="${DEFAULT_QOS:-1}"
 DEFAULT_PORT="${DEFAULT_PORT:-18080}"
+REQUESTED_VERSION="latest"
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/bootstrap-install.sh
+Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>]
 
 Interactive installer that:
 - downloads latest GitHub release addon.tgz
 - installs into SSAP-style versions/current layout
 - writes runtime .env
 - optionally starts containers and registers with Core
+
+Options:
+- --version <tag|latest>  Release tag to install (default: latest)
+- -h, --help              Show this help
 EOF
+}
+
+die() {
+  echo "[bootstrap] ERROR: $*" >&2
+  exit 1
 }
 
 require_cmd() {
@@ -73,13 +83,15 @@ prompt_secret_optional() {
   echo "$secret"
 }
 
-json_extract_release() {
+parse_release_metadata() {
   local metadata_file="$1"
-  python3 - "$metadata_file" <<'PY'
+  local preferred_tag="${2:-}"
+  python3 - "$metadata_file" "$preferred_tag" <<'PY'
 import json
 import sys
 
 path = sys.argv[1]
+preferred_tag = sys.argv[2].strip()
 with open(path, "r", encoding="utf-8") as handle:
     data = json.load(handle)
 
@@ -102,10 +114,189 @@ if not tag:
     raise SystemExit("release metadata missing tag_name")
 if not asset_url:
     raise SystemExit("release metadata missing addon .tgz asset")
+if preferred_tag and tag != preferred_tag:
+    raise SystemExit(f"release tag mismatch: expected {preferred_tag}, got {tag}")
 
 print(tag)
 print(asset_url)
 PY
+}
+
+release_api_request() {
+  local url="$1"
+  local outfile="$2"
+  local http_code
+  if ! http_code="$(curl -sS -L -w '%{http_code}' -o "$outfile" "$url")"; then
+    return 1
+  fi
+  echo "$http_code"
+}
+
+resolve_latest_release() {
+  local tmpdir="$1"
+  local metadata_file="$tmpdir/release-latest.json"
+  local releases_html="$tmpdir/releases.html"
+  local http_code
+
+  echo "[bootstrap] resolving latest release via GitHub API" >&2
+  if http_code="$(release_api_request "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" "$metadata_file")"; then
+    if [[ "$http_code" == "200" ]]; then
+      parse_release_metadata "$metadata_file"
+      return 0
+    fi
+    echo "[bootstrap] GitHub API latest endpoint returned HTTP $http_code" >&2
+  else
+    echo "[bootstrap] GitHub API latest endpoint request failed" >&2
+  fi
+
+  echo "[bootstrap] falling back to GitHub Releases HTML parsing" >&2
+  curl -fsSL "https://github.com/${GITHUB_REPO}/releases" -o "$releases_html" || \
+    die "failed to fetch releases page fallback for ${GITHUB_REPO}"
+
+  python3 - "$releases_html" "$GITHUB_REPO" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+html = Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace")
+repo = sys.argv[2]
+repo_re = re.escape(repo)
+
+tag_match = re.search(rf'/{repo_re}/releases/tag/([^"?#/]+)', html)
+if not tag_match:
+    raise SystemExit("unable to resolve latest release tag from HTML")
+tag = tag_match.group(1)
+
+asset_matches = re.findall(rf'https://github\.com/{repo_re}/releases/download/{re.escape(tag)}/([^"?#]+)', html)
+asset_name = ""
+for candidate in asset_matches:
+    if candidate == "addon.tgz":
+        asset_name = candidate
+        break
+if not asset_name:
+    for candidate in asset_matches:
+        if candidate.endswith(".tgz"):
+            asset_name = candidate
+            break
+if not asset_name:
+    asset_name = "addon.tgz"
+
+print(tag)
+print(f"https://github.com/{repo}/releases/download/{tag}/{asset_name}")
+PY
+}
+
+resolve_tag_release() {
+  local requested_tag="$1"
+  local tmpdir="$2"
+  local normalized_tag="$requested_tag"
+  local metadata_file="$tmpdir/release-tag.json"
+  local http_code
+
+  if [[ "$normalized_tag" != v* ]]; then
+    normalized_tag="v${normalized_tag}"
+  fi
+
+  echo "[bootstrap] resolving release tag ${normalized_tag} via GitHub API" >&2
+  if http_code="$(release_api_request "https://api.github.com/repos/${GITHUB_REPO}/releases/tags/${normalized_tag}" "$metadata_file")"; then
+    if [[ "$http_code" == "200" ]]; then
+      parse_release_metadata "$metadata_file" "$normalized_tag"
+      return 0
+    fi
+    die "release tag ${normalized_tag} not found via GitHub API (HTTP ${http_code})"
+  fi
+  die "failed to resolve release tag ${normalized_tag} from GitHub API"
+}
+
+resolve_release() {
+  local requested="$1"
+  local tmpdir="$2"
+  if [[ "$requested" == "latest" ]]; then
+    resolve_latest_release "$tmpdir"
+    return
+  fi
+  resolve_tag_release "$requested" "$tmpdir"
+}
+
+get_sha256() {
+  local file_path="$1"
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file_path" | awk '{print tolower($1)}'
+    return
+  fi
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$file_path" | awk '{print tolower($1)}'
+    return
+  fi
+  die "sha256sum/shasum is required for checksum calculation"
+}
+
+discover_checksum_url() {
+  local asset_url="$1"
+  local base_url="${asset_url%/*}"
+  local asset_name="${asset_url##*/}"
+  local candidates=(
+    "${asset_url}.sha256"
+    "${base_url}/addon.tgz.sha256"
+    "${base_url}/addon.sha256"
+  )
+  if [[ "$asset_name" == *.tgz ]]; then
+    candidates+=("${base_url}/${asset_name%.tgz}.sha256")
+  fi
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if curl -fsSI "$candidate" >/dev/null 2>&1; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+verify_or_print_checksum() {
+  local artifact_file="$1"
+  local checksum_url="$2"
+  local tmpdir="$3"
+  local actual_sha
+
+  actual_sha="$(get_sha256 "$artifact_file")"
+  if [[ -z "$checksum_url" ]]; then
+    echo "[bootstrap] sha256 (computed): $actual_sha"
+    return 0
+  fi
+
+  local checksum_file="$tmpdir/release.sha256"
+  curl -fsSL "$checksum_url" -o "$checksum_file" || die "failed to download checksum file: $checksum_url"
+
+  local expected_sha
+  expected_sha="$(awk '{for (i = 1; i <= NF; i++) if ($i ~ /^[A-Fa-f0-9]{64}$/) {print tolower($i); exit}}' "$checksum_file")"
+  [[ -n "$expected_sha" ]] || die "checksum file did not contain a SHA256 digest: $checksum_url"
+
+  if [[ "$expected_sha" != "$actual_sha" ]]; then
+    die "sha256 mismatch for downloaded artifact (expected ${expected_sha}, got ${actual_sha})"
+  fi
+  echo "[bootstrap] sha256 verified: $actual_sha"
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --version)
+        shift
+        [[ $# -gt 0 ]] || die "--version requires a value"
+        REQUESTED_VERSION="$1"
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        die "unknown option: $1"
+        ;;
+    esac
+    shift
+  done
 }
 
 write_env_file() {
@@ -161,10 +352,7 @@ register_with_core() {
 }
 
 main() {
-  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    usage
-    return 0
-  fi
+  parse_args "$@"
 
   if [[ ! -t 0 ]]; then
     echo "[bootstrap] ERROR: interactive terminal required. Use --help for details." >&2
@@ -224,14 +412,21 @@ main() {
   tmpdir="$(mktemp -d)"
   trap 'rm -rf "$tmpdir"' EXIT
 
-  metadata_file="$tmpdir/release.json"
-  echo "[bootstrap] fetching latest release metadata from GitHub ($GITHUB_REPO)"
-  curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" -o "$metadata_file"
-
-  mapfile -t release_info < <(json_extract_release "$metadata_file")
+  mapfile -t release_info < <(resolve_release "$REQUESTED_VERSION" "$tmpdir")
+  [[ "${#release_info[@]}" -ge 2 ]] || die "failed to resolve release metadata for version=${REQUESTED_VERSION}"
   tag_name="${release_info[0]}"
   asset_url="${release_info[1]}"
   version="${tag_name#v}"
+  echo "[bootstrap] resolved release tag: $tag_name"
+  echo "[bootstrap] resolved artifact url: $asset_url"
+
+  checksum_url=""
+  if checksum_url="$(discover_checksum_url "$asset_url")"; then
+    echo "[bootstrap] checksum source: $checksum_url"
+  else
+    echo "[bootstrap] checksum source: none found (will compute local SHA256)"
+    checksum_url=""
+  fi
 
   version_dir="$INSTALL_DIR/versions/$version"
   extract_dir="$version_dir/extracted"
@@ -240,6 +435,7 @@ main() {
 
   echo "[bootstrap] downloading ${asset_url}"
   curl -fsSL "$asset_url" -o "$artifact_file"
+  verify_or_print_checksum "$artifact_file" "$checksum_url" "$tmpdir"
 
   rm -rf "$extract_dir"
   mkdir -p "$extract_dir"

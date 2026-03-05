@@ -20,17 +20,26 @@ Usage:
 Purpose:
 
 - Fetch latest GitHub release artifact (`addon.tgz`).
+- Support explicit release selection with `--version <tag|latest>` (default `latest`).
+- Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
 - Prompt for runtime choices:
   - install local MQTT broker (Compose override)
   - Core host URL for optional registration
   - addon base URL, MQTT settings, and startup behavior
+- Verify SHA256 from release checksum file when present; otherwise compute and print local digest.
 - Write `.env` for compose runtime and optionally start containers.
 
 Usage:
 
 ```bash
 ./scripts/bootstrap-install.sh
+```
+
+Install a specific tag:
+
+```bash
+./scripts/bootstrap-install.sh --version v0.1.5
 ```
 
 Help:
