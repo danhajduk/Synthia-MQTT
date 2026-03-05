@@ -4,17 +4,17 @@
   "repo": "https://github.com/danhajduk/Synthia-MQTT.git",
   "releases": [
     {
-      "version": "0.1.6",
+      "version": "0.1.7",
       "package_profile": "standalone_service",
       "core_min": "0.0.1",
       "core_max": null,
       "artifact": {
         "type": "github_release_asset",
-        "url": "https://github.com/danhajduk/Synthia-MQTT/releases/download/v0.1.6/addon.tgz"
+        "url": "https://github.com/danhajduk/Synthia-MQTT/releases/download/v0.1.7/addon.tgz"
       },
-      "sha256": "507c400893c92bcab42e9477ca3d4d1aa7075b07c727b4c032ca5b85e75861c0",
+      "sha256": "e8fe543b269ac314018fcb3d5295f6d8c5aa2991822149b5ec543b4ccb2df7b3",
       "publisher_key_id": "6043cb305d17a108",
-      "release_sig": "pyIinAHUA4DgmNhxj62mnSyL6hsMhx9JUfwfQrEDzhmYGF/yLAAnXG3jVlvke2b8W6A8Jlig+Vb5bv7IlEHyZzBZ55Ndt3EJzReIOgOIuqP68nO36kG1idKJEIyX1FJTnGiVbfvBYlVAP71ImbirTzX/5yb5LiXFk0YMf5RCsCjMQKbmDp0eqCfjGgigSlH1WoAsMFlTEwYjuctg5hLlaBpLqYCnGDT4xBQi/IdpCUppRiTTTHqAiVTWt3K2OcXb0n8A+OsN+A3aEjLcweBpWQpMtDb27mE7JuNxaXuM3nItuPavLUFhxMD5a4zzVLhyCyxKLzaay0Pb+bnNEH7ItIQ1j7/5fTdN35jJBi+aNuo7wT57qgxTTwMQdzqZ+vQkZgqRc+cR69rTPlUH6eC4c50AhuLNO2Th44pyWvl22RPmOt8P31vA8FiRWRgeQ7WeOqururiudtgpKp/mpOo5IznXA2cnEbVrynChpDFQmgpM2AwpIsk/tGoi8TZXINYE0aT8z8Y5A1tS2QVbpGdqn6ngn40rOKxWPqspNPtPbJQxT1gF65+p9F53yQ/XbnQ10FOjrnqtlmeWbZhQQdCY4pin815wmxou9KwteBnJqk/IdNxi6f0k/GCszHzft0upYJNij0tw9Is40U1V6ZUxP9Qu5LMaoWrUU+1t5cZmauE="
+      "release_sig": "YoIaY8gwEiQ3dNdEWlobFrfV54gw3kDsTtqZfJSLlpZI2aLoaPSvTfSc3XEm3l9CekWeFjpT2LAdxe4DcZ9wxiaIF6HNQeBwlPyBBd++ZpBndjP43vpcHghXNIuq1UyPBZcLENdwg2p/uw9Pj/gaE908aessKwSFyUPRSO7nQeeNOPGgbtMLSecaG7dLEcafrOdczM1aEJwKJ8QVlPlt0CuSOYnagV3CKxcaNcdhhzFstZZTGQ0mehiifs8Lx9UVP2lZzt3FEpqtWqeF3iCu5OGw+ld5vx/gtfXZ1SN4OyHmlS/Y9gwpcqI+j12cpdgPG/SeSRU0Y1r5GEZVxHfdwhdUMzMcfk00xWFin3vHbkbC6p2Yf6biE4/lbM/OFfaONPJqo6pBlfBdMV3Y10+p9+2JBhL+5kY2B5815ezATosDvzsauc5gPgjtMbgv3Oz6Hfkv1otbaaxKUgimp18dmBbHKBX2pD+/anjlz07MqUlWxhBFamyNwfRFUVYsCWXndKa3ZM3kThB/rDcLW0wwsfUny8Otf0nFvBdkTIa7dfOTPtGyqeOiQpKzDCNqs10iV9y2G374qdyX0G6sz3EHa5fDMhAJ288PhDc3GAjAviyvV4I+ox7mrEgJO/JFlq/2/Ezmclquet2KjlD9UAKCduKmSf+X9YjMePaUY14R6fA="
     }
   ]
 }
