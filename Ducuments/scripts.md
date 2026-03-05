@@ -19,7 +19,7 @@ Usage:
 
 Purpose:
 
-- Run bootstrap in demo/validation mode (`--version latest --no-open` by default).
+- Run bootstrap in demo/validation mode (`--version latest --no-open --non-interactive --addon-port 18081` by default).
 - Verify addon health endpoint after bootstrap.
 - Print setup UI URL.
 
@@ -31,8 +31,9 @@ Usage:
 
 Optional overrides:
 
-- `SERVICE_BASE_URL` (default `http://127.0.0.1:18080`)
-- `BOOTSTRAP_ARGS` (default `--version latest --no-open`)
+- `ADDON_PORT` (default `18081`)
+- `SERVICE_BASE_URL` (default `http://127.0.0.1:$ADDON_PORT`)
+- `BOOTSTRAP_ARGS` (default `--version latest --no-open --non-interactive --addon-port $ADDON_PORT`)
 
 ## `scripts/bootstrap-install.sh`
 
@@ -47,6 +48,7 @@ Purpose:
 - Support host binding controls with `--addon-port` and `--bind`.
 - Wait for `healthz` readiness and open setup UI automatically after successful startup.
 - Support `--no-open` and `--timeout-seconds` controls for readiness/open behavior.
+- Support `--non-interactive` for automation/validation runs without terminal prompts.
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
 - Prompt for runtime choices:

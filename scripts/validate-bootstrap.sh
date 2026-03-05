@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SERVICE_BASE_URL="${SERVICE_BASE_URL:-http://127.0.0.1:18080}"
-BOOTSTRAP_ARGS="${BOOTSTRAP_ARGS:---version latest --no-open}"
+ADDON_PORT="${ADDON_PORT:-18081}"
+SERVICE_BASE_URL="${SERVICE_BASE_URL:-http://127.0.0.1:${ADDON_PORT}}"
+BOOTSTRAP_ARGS="${BOOTSTRAP_ARGS:---version latest --no-open --non-interactive --addon-port ${ADDON_PORT}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BOOTSTRAP_SCRIPT="$REPO_ROOT/scripts/bootstrap-install.sh"

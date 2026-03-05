@@ -58,3 +58,11 @@ Error/UX issue: `/ui` always opened setup wizard, so configured deployments lost
 Reasoning: Setup gating should be deterministic from backend install state so first-run operators land in setup while configured systems default to runtime dashboard workflows.
 What and why: Added `/ui` client-side gating based on `GET /api/install/status` (`configured` flag), splitting UI into setup and dashboard views; setup remains available, and configured state now defaults to dashboard with status refresh, effective-config summary, and test publish actions.
 ###########
+Task #13.7 :
+Error context: Deferred bootstrap validation failed in automation because installer required TTY prompts and default host bind values caused compose/runtime collisions.
+Reasoning: Final closeout needs reproducible non-interactive validation so Task 13 acceptance checks can run after Task 14 without manual input.
+What and why: Added `--non-interactive` mode in bootstrap installer with safe defaults for automated runs, normalized `localhost` compose bind handling, and updated validation helper defaults to use `--non-interactive` on addon port `18081`; reran validate-bootstrap and rebuild successfully.
+###########
+#############
+All Tasks completed 03/05/2026 13:12:17
+#############

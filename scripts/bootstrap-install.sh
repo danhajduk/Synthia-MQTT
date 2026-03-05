@@ -12,10 +12,11 @@ ADDON_PORT="$DEFAULT_PORT"
 BIND_HOST="localhost"
 NO_OPEN="false"
 TIMEOUT_SECONDS="60"
+NON_INTERACTIVE="false"
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>] [--addon-port <port>] [--bind <host>] [--no-open] [--timeout-seconds <seconds>]
+Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>] [--addon-port <port>] [--bind <host>] [--no-open] [--timeout-seconds <seconds>] [--non-interactive]
 
 Interactive installer that:
 - downloads latest GitHub release addon.tgz
@@ -30,6 +31,7 @@ Options:
 - --bind <host>           Host bind address for addon HTTP service (default: localhost)
 - --no-open               Do not auto-open setup UI in browser
 - --timeout-seconds <n>   Wait timeout for health endpoint readiness (default: 60)
+- --non-interactive       Use defaults and skip prompts (for automation/validation)
 - -h, --help              Show this help
 EOF
 }
@@ -322,6 +324,9 @@ parse_args() {
         (( "$1" >= 1 )) || die "--timeout-seconds must be >= 1"
         TIMEOUT_SECONDS="$1"
         ;;
+      --non-interactive)
+        NON_INTERACTIVE="true"
+        ;;
       -h|--help)
         usage
         exit 0
@@ -371,11 +376,15 @@ EOF
 
 write_addon_port_override_compose() {
   local override_file="$1"
+  local compose_bind_host="$BIND_HOST"
+  if [[ "$compose_bind_host" == "localhost" ]]; then
+    compose_bind_host="127.0.0.1"
+  fi
   cat > "$override_file" <<EOF
 services:
   mqtt-addon:
     ports:
-      - "${BIND_HOST}:${ADDON_PORT}:8080"
+      - "${compose_bind_host}:${ADDON_PORT}:8080"
 EOF
 }
 
@@ -445,7 +454,7 @@ register_with_core() {
 main() {
   parse_args "$@"
 
-  if [[ ! -t 0 ]]; then
+  if [[ "$NON_INTERACTIVE" != "true" && ! -t 0 ]]; then
     echo "[bootstrap] ERROR: interactive terminal required. Use --help for details." >&2
     return 1
   fi
@@ -457,46 +466,71 @@ main() {
   echo "Synthia MQTT bootstrap installer"
   echo
 
-  INSTALL_DIR="$(prompt_default "Install root directory" "$DEFAULT_INSTALL_DIR")"
-  PUBLIC_HOST="$(prompt_default "Public hostname or IP for addon API" "$BIND_HOST")"
-  PUBLIC_PORT="$(prompt_default "Public HTTP port for addon API" "$ADDON_PORT")"
-  ANNOUNCE_BASE_URL="$(prompt_default "Addon public base URL for announce/core" "http://${PUBLIC_HOST}:${PUBLIC_PORT}")"
-  MQTT_BASE_TOPIC="$(prompt_default "MQTT base topic" "$DEFAULT_BASE_TOPIC")"
-  MQTT_QOS="$(prompt_default "MQTT QoS (0,1,2)" "$DEFAULT_QOS")"
+  if [[ "$NON_INTERACTIVE" == "true" ]]; then
+    echo "[bootstrap] non-interactive mode enabled (using defaults)"
+    INSTALL_DIR="$DEFAULT_INSTALL_DIR"
+    PUBLIC_HOST="$BIND_HOST"
+    PUBLIC_PORT="$ADDON_PORT"
+    ANNOUNCE_BASE_URL="http://${PUBLIC_HOST}:${PUBLIC_PORT}"
+    MQTT_BASE_TOPIC="$DEFAULT_BASE_TOPIC"
+    MQTT_QOS="$DEFAULT_QOS"
 
-  if prompt_yes_no "Install local MQTT broker with Docker Compose override?" "n"; then
-    INSTALL_LOCAL_BROKER="true"
-    MQTT_HOST="mosquitto"
+    INSTALL_LOCAL_BROKER="false"
+    MQTT_HOST="10.0.0.100"
     MQTT_PORT="1883"
     MQTT_TLS="false"
     MQTT_USERNAME=""
     MQTT_PASSWORD=""
-  else
-    INSTALL_LOCAL_BROKER="false"
-    MQTT_HOST="$(prompt_default "External MQTT host" "10.0.0.100")"
-    MQTT_PORT="$(prompt_default "External MQTT port" "1883")"
-    if prompt_yes_no "Enable MQTT TLS?" "n"; then
-      MQTT_TLS="true"
-    else
-      MQTT_TLS="false"
-    fi
-    MQTT_USERNAME="$(prompt_default "MQTT username (blank allowed)" "")"
-    MQTT_PASSWORD="$(prompt_secret_optional "MQTT password")"
-  fi
 
-  CORE_BASE_URL="$(prompt_default "Core host URL (blank to skip registration)" "")"
-  REGISTER_WITH_CORE="false"
-  CORE_ADMIN_TOKEN=""
-  if [[ -n "$CORE_BASE_URL" ]]; then
-    if prompt_yes_no "Register addon with Core after startup?" "y"; then
-      REGISTER_WITH_CORE="true"
-      CORE_ADMIN_TOKEN="$(prompt_secret_optional "Core admin bearer token")"
-    fi
-  fi
-
-  START_SERVICES="false"
-  if prompt_yes_no "Start addon service after install?" "y"; then
+    CORE_BASE_URL=""
+    REGISTER_WITH_CORE="false"
+    CORE_ADMIN_TOKEN=""
     START_SERVICES="true"
+  else
+    INSTALL_DIR="$(prompt_default "Install root directory" "$DEFAULT_INSTALL_DIR")"
+    PUBLIC_HOST="$(prompt_default "Public hostname or IP for addon API" "$BIND_HOST")"
+    PUBLIC_PORT="$(prompt_default "Public HTTP port for addon API" "$ADDON_PORT")"
+    ANNOUNCE_BASE_URL="$(prompt_default "Addon public base URL for announce/core" "http://${PUBLIC_HOST}:${PUBLIC_PORT}")"
+    MQTT_BASE_TOPIC="$(prompt_default "MQTT base topic" "$DEFAULT_BASE_TOPIC")"
+    MQTT_QOS="$(prompt_default "MQTT QoS (0,1,2)" "$DEFAULT_QOS")"
+
+    if prompt_yes_no "Install local MQTT broker with Docker Compose override?" "n"; then
+      INSTALL_LOCAL_BROKER="true"
+      MQTT_HOST="mosquitto"
+      MQTT_PORT="1883"
+      MQTT_TLS="false"
+      MQTT_USERNAME=""
+      MQTT_PASSWORD=""
+    else
+      INSTALL_LOCAL_BROKER="false"
+      MQTT_HOST="$(prompt_default "External MQTT host" "10.0.0.100")"
+      MQTT_PORT="$(prompt_default "External MQTT port" "1883")"
+      if prompt_yes_no "Enable MQTT TLS?" "n"; then
+        MQTT_TLS="true"
+      else
+        MQTT_TLS="false"
+      fi
+      MQTT_USERNAME="$(prompt_default "MQTT username (blank allowed)" "")"
+      MQTT_PASSWORD="$(prompt_secret_optional "MQTT password")"
+    fi
+
+    CORE_BASE_URL="$(prompt_default "Core host URL (blank to skip registration)" "")"
+    REGISTER_WITH_CORE="false"
+    CORE_ADMIN_TOKEN=""
+    if [[ -n "$CORE_BASE_URL" ]]; then
+      if prompt_yes_no "Register addon with Core after startup?" "y"; then
+        REGISTER_WITH_CORE="true"
+        CORE_ADMIN_TOKEN="$(prompt_secret_optional "Core admin bearer token")"
+      fi
+    fi
+
+    START_SERVICES="false"
+    if prompt_yes_no "Start addon service after install?" "y"; then
+      START_SERVICES="true"
+    fi
+  fi
+
+  if [[ "$START_SERVICES" == "true" ]]; then
     require_cmd docker
   fi
 
