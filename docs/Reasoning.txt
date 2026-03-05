@@ -1,26 +1,5 @@
-Task #16.1 :
-Error context: Release artifact script excluded frontend by default, causing `/ui` assets to be missing in extracted installs.
-Reasoning: Release packaging must always include frontend files and guarantee `frontend/dist` exists before tarball creation.
-What and why: Updated `scripts/release-addon.sh` default package paths to include `frontend` and added an automatic `npm run build` fallback when `frontend/dist` is missing; documented release script behavior in scripts docs.
+Task #18.1 :
+Error context: Core registration failed with HTTP 422 due to schema variants requiring `id`/`name`, and operator input without URL scheme caused avoidable unreachable/validation failures.
+Reasoning: Registration flow should tolerate known Core contract variants and normalize common user input mistakes without adding extra wizard friction.
+What and why: Added URL normalization to auto-prefix `http://` when `core_base_url`/`base_url` lacks scheme; updated registry service fallback to retry legacy admin endpoint with `{id,name,base_url}` payload on 422 after `{addon_id,base_url}` attempt; documented compatibility behavior.
 ###########
-Task #16.2 :
-Error context: Previous release package lacked UI assets and version metadata was behind required release number.
-Reasoning: Releasing `0.1.6` with regenerated signed artifacts ensures installers pull a package that includes frontend UI files.
-What and why: Bumped manifest version to `0.1.6`, rebuilt/signed artifacts via `scripts/sign-addon.sh`, confirmed `frontend/dist` entries inside package tarball, and published `v0.1.6` with refreshed `release-output.json` metadata.
-###########
-#############
-All Tasks completed 03/05/2026 14:06:00
-#############
-Task #17.1 :
-Error/UX issue: Embedded apply operator command was relative-path only, and docker-missing warnings were too raw for operators.
-Reasoning: Operator-action output should be copy/paste safe from any directory and error guidance should clearly direct users to host-terminal execution.
-What and why: Updated install apply failure response to return `cd <addon-root> && docker compose ...` operator action, and normalize docker-missing warning text to an explicit host-terminal instruction; documented API response behavior.
-###########
-Task #17.2 :
-Error/UX issue: Setup UI did not explicitly state host-terminal context for operator command execution.
-Reasoning: Inline UI instruction reduces path/context mistakes when applying embedded broker operator actions.
-What and why: Updated setup Step 4 operator-action label text to explicitly require host-terminal execution from addon root and added small spacing polish; documented this UI guidance behavior and rebuilt frontend dist.
-###########
-#############
-All Tasks completed 03/05/2026 14:18:00
-#############

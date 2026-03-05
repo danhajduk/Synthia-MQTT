@@ -51,13 +51,25 @@ def register_addon_endpoint(
     if status_code in {401, 403} or status_code is None:
         return False, status_code, reason
     # Endpoint missing: fall back to legacy admin registry route.
-    if status_code != 404:
+    if status_code not in {404, 422}:
         return False, status_code, reason
 
     legacy_url = f"{core_base}/api/admin/addons/registry"
-    return _post_json(
+    ok, legacy_status, legacy_reason = _post_json(
         url=legacy_url,
         payload_data={"addon_id": addon_id, "base_url": base_url},
         auth_token=auth_token,
         timeout_s=timeout_s,
     )
+    if ok:
+        return True, legacy_status, None
+
+    # Compatibility fallback for Core variants that require `id` and `name`.
+    if legacy_status == 422:
+        return _post_json(
+            url=legacy_url,
+            payload_data={"id": addon_id, "name": "Synthia MQTT", "base_url": base_url},
+            auth_token=auth_token,
+            timeout_s=timeout_s,
+        )
+    return False, legacy_status, legacy_reason

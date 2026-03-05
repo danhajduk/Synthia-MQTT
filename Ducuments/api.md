@@ -40,8 +40,10 @@ Both test/apply endpoints keep install-session state (`mode/configured/verified/
 `/api/install/register-core` behavior:
 - preferred Core endpoint: `POST /api/addons/registry/{addon_id}/register` with `{ base_url }`
 - fallback endpoint: `POST /api/admin/addons/registry` with `{ addon_id, base_url }` when preferred route is not available
+- compatibility fallback for legacy Core validation: retries legacy endpoint with `{ id, name, base_url }` on HTTP 422
 - updates install-session `registered_to_core` and `last_error`
 - maps auth failures to HTTP 401 and unreachable Core to HTTP 502
+- auto-prefixes `http://` when `core_base_url` or `base_url` is provided without URL scheme
 
 `/api/install/reset` behavior:
 - resets persisted install-session fields to defaults

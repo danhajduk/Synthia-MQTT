@@ -37,6 +37,15 @@ def _diagnostic_code_from_reason(ok: bool, reason: str | None) -> str:
     return "connection_error"
 
 
+def _normalize_http_url(url_value: str) -> str:
+    normalized = url_value.strip()
+    if not normalized:
+        return normalized
+    if "://" not in normalized:
+        return f"http://{normalized}"
+    return normalized
+
+
 def build_install_workflow_router(
     config_store: ConfigStore,
     health_service: HealthService,
@@ -138,16 +147,19 @@ def build_install_workflow_router(
 
     @router.post("/register-core", response_model=CoreRegistryResponse)
     def register_core(payload: CoreRegistryRequest) -> CoreRegistryResponse:
-        core_base_url = (payload.core_base_url or os.getenv("CORE_BASE_URL", "")).strip()
+        core_base_url = _normalize_http_url(payload.core_base_url or os.getenv("CORE_BASE_URL", ""))
+        addon_base_url = _normalize_http_url(payload.base_url)
         addon_id = payload.addon_id.strip()
         auth_token = payload.auth_token or os.getenv("CORE_ADMIN_TOKEN")
         if not core_base_url:
             raise HTTPException(status_code=400, detail="core_base_url is required (or set CORE_BASE_URL)")
+        if not addon_base_url:
+            raise HTTPException(status_code=400, detail="base_url is required")
 
         ok, status_code, reason = register_addon_endpoint(
             core_base_url=core_base_url,
             addon_id=addon_id,
-            base_url=payload.base_url,
+            base_url=addon_base_url,
             auth_token=auth_token,
         )
         if ok:
