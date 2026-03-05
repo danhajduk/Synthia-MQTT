@@ -27,10 +27,12 @@
 ## `app/services/core_registry.py`
 
 - Registers addon service endpoint in Core using preferred route:
-  - `POST /api/addons/registry/{addon_id}/register` with `{ base_url }`
+  - `POST /api/addons/registry/{addon_id}/register` with `{ base_url, name, version }`
 - Falls back to legacy route if preferred route is unavailable:
-  - `POST /api/admin/addons/registry` with `{ addon_id, base_url }`
-- Supports optional bearer token for Core admin auth.
+  - `POST /api/admin/addons/registry` with `{ addon_id, base_url, name, version }`
+  - Retries legacy route with `{ id, name, version, base_url }` on HTTP 422 for Core compatibility variants.
+- Sends admin auth using both `Authorization: Bearer <token>` and `X-Admin-Token: <token>` when token is supplied.
+- Triggers best-effort `POST /api/addons/registry/{addon_id}/verify` after successful registration.
 
 ## `app/services/broker_manager.py`
 

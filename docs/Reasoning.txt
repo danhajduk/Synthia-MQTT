@@ -1,23 +1,5 @@
-Task #19.1 :
-Error context: Core register endpoint expected additional fields/auth variants (`name`, `version`, `X-Admin-Token`) and registration continued to fail across Core implementations.
-Reasoning: register-core should send a superset of compatible payload fields and auth headers so one wizard flow works against both modern and legacy Core variants.
-What and why: Updated Core registry requests to include `name` + `version` payload fields, added `X-Admin-Token` header alongside Bearer auth when token is provided, and propagated manifest name/version from addon metadata; updated API docs accordingly.
+Task #20.1 :
+Error context: Service docs lagged behind the Core contract documented in addons.md and recent core-registry implementation changes.
+Reasoning: Contract compliance work must keep service-level documentation accurate so operators and developers reference the same payload/auth/verify behavior.
+What and why: Updated `Ducuments/services.md` core-registry section to reflect register payload fields (`base_url,name,version`), legacy fallback variants, dual admin auth header support, and post-register verify behavior.
 ###########
-Task #19.2 :
-Error context: Core registration did not trigger verify state refresh automatically after successful register.
-Reasoning: A best-effort verify call right after registration keeps Core registry health status in sync with minimal operator steps.
-What and why: Added `verify_addon_endpoint` call immediately after successful register-core using the same auth context; kept registration success path non-blocking.
-###########
-Task #19.3 :
-Error context: API docs did not describe new register payload/auth compatibility and post-register verify behavior.
-Reasoning: Operators need exact expected payload/header behavior and lifecycle calls documented for troubleshooting.
-What and why: Updated API documentation with name/version payload, dual auth header behavior, and post-register verify call notes.
-###########
-Task #19.4 :
-Error context: Core registry compatibility changes require a new published package so bootstrap/latest installs include the patch.
-Reasoning: A new version release avoids ambiguity and ensures users pull patched registration behavior immediately.
-What and why: Bumped manifest to `0.1.8`, rebuilt/signed artifacts, and uploaded GitHub release `v0.1.8`; refreshed release metadata output.
-###########
-#############
-All Tasks completed 03/05/2026 15:42:04
-#############
