@@ -222,6 +222,10 @@ pre {
   background: #fbf8f2;
 }
 
+#operator-wrap p {
+  margin: 10px 0 6px;
+}
+
 .hidden {
   display: none;
 }

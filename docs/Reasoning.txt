@@ -16,3 +16,11 @@ Error/UX issue: Embedded apply operator command was relative-path only, and dock
 Reasoning: Operator-action output should be copy/paste safe from any directory and error guidance should clearly direct users to host-terminal execution.
 What and why: Updated install apply failure response to return `cd <addon-root> && docker compose ...` operator action, and normalize docker-missing warning text to an explicit host-terminal instruction; documented API response behavior.
 ###########
+Task #17.2 :
+Error/UX issue: Setup UI did not explicitly state host-terminal context for operator command execution.
+Reasoning: Inline UI instruction reduces path/context mistakes when applying embedded broker operator actions.
+What and why: Updated setup Step 4 operator-action label text to explicitly require host-terminal execution from addon root and added small spacing polish; documented this UI guidance behavior and rebuilt frontend dist.
+###########
+#############
+All Tasks completed 03/05/2026 14:18:00
+#############

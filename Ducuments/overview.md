@@ -24,4 +24,5 @@ This service provides a distributed MQTT addon for Synthia.
 - `/ui` is gated by install state: unconfigured installs open setup, configured installs open the runtime dashboard.
 - Configured dashboard includes a default `Synthia MQTT` placeholder page section.
 - Wizard status banner surfaces install-session flags (`mode`, `configured`, `verified`, `registered_to_core`, `last_error`) plus addon health state.
+- Embedded apply warnings include explicit operator guidance to run compose commands on host terminal from addon root path.
 - Setup state is persisted locally for operator convenience while keeping raw secrets out of browser storage.
