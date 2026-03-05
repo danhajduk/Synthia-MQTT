@@ -8,10 +8,12 @@ DEFAULT_QOS="${DEFAULT_QOS:-1}"
 DEFAULT_PORT="${DEFAULT_PORT:-18080}"
 REQUESTED_VERSION="latest"
 FORCE_INSTALL="false"
+ADDON_PORT="$DEFAULT_PORT"
+BIND_HOST="localhost"
 
 usage() {
   cat <<'EOF'
-Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>]
+Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>] [--addon-port <port>] [--bind <host>]
 
 Interactive installer that:
 - downloads latest GitHub release addon.tgz
@@ -22,6 +24,8 @@ Interactive installer that:
 Options:
 - --version <tag|latest>  Release tag to install (default: latest)
 - --force                 Re-download/re-extract even if version is already installed
+- --addon-port <port>     Host port to bind addon HTTP service to (default: 18080)
+- --bind <host>           Host bind address for addon HTTP service (default: localhost)
 - -h, --help              Show this help
 EOF
 }
@@ -292,6 +296,18 @@ parse_args() {
       --force)
         FORCE_INSTALL="true"
         ;;
+      --addon-port)
+        shift
+        [[ $# -gt 0 ]] || die "--addon-port requires a value"
+        [[ "$1" =~ ^[0-9]+$ ]] || die "--addon-port must be numeric"
+        (( "$1" >= 1 && "$1" <= 65535 )) || die "--addon-port must be between 1 and 65535"
+        ADDON_PORT="$1"
+        ;;
+      --bind)
+        shift
+        [[ $# -gt 0 ]] || die "--bind requires a value"
+        BIND_HOST="$1"
+        ;;
       -h|--help)
         usage
         exit 0
@@ -339,6 +355,16 @@ services:
 EOF
 }
 
+write_addon_port_override_compose() {
+  local override_file="$1"
+  cat > "$override_file" <<EOF
+services:
+  mqtt-addon:
+    ports:
+      - "${BIND_HOST}:${ADDON_PORT}:8080"
+EOF
+}
+
 register_with_core() {
   local service_base="$1"
   local core_base="$2"
@@ -372,8 +398,8 @@ main() {
   echo
 
   INSTALL_DIR="$(prompt_default "Install root directory" "$DEFAULT_INSTALL_DIR")"
-  PUBLIC_HOST="$(prompt_default "Public hostname or IP for addon API" "localhost")"
-  PUBLIC_PORT="$(prompt_default "Public HTTP port for addon API" "$DEFAULT_PORT")"
+  PUBLIC_HOST="$(prompt_default "Public hostname or IP for addon API" "$BIND_HOST")"
+  PUBLIC_PORT="$(prompt_default "Public HTTP port for addon API" "$ADDON_PORT")"
   ANNOUNCE_BASE_URL="$(prompt_default "Addon public base URL for announce/core" "http://${PUBLIC_HOST}:${PUBLIC_PORT}")"
   MQTT_BASE_TOPIC="$(prompt_default "MQTT base topic" "$DEFAULT_BASE_TOPIC")"
   MQTT_QOS="$(prompt_default "MQTT QoS (0,1,2)" "$DEFAULT_QOS")"
@@ -500,22 +526,21 @@ main() {
 
   compose_main="$active_root/docker/docker-compose.yml"
   compose_override="$active_root/docker/docker-compose.bootstrap.yml"
+  compose_port_override="$active_root/docker/docker-compose.port-override.yml"
+  write_addon_port_override_compose "$compose_port_override"
 
   if [[ "$INSTALL_LOCAL_BROKER" == "true" ]]; then
     write_broker_override_compose "$compose_override"
     echo "[bootstrap] wrote broker override compose: $compose_override"
+    echo "[bootstrap] note: bootstrap startup uses addon-only mode and does not start broker containers"
   else
     rm -f "$compose_override"
   fi
 
   if [[ "$START_SERVICES" == "true" ]]; then
-    echo "[bootstrap] starting containers"
+    echo "[bootstrap] starting addon-only container"
     pushd "$active_root" >/dev/null
-    if [[ "$INSTALL_LOCAL_BROKER" == "true" ]]; then
-      docker compose -f "$compose_main" -f "$compose_override" up -d --remove-orphans
-    else
-      docker compose -f "$compose_main" up -d --remove-orphans
-    fi
+    docker compose -f "$compose_main" -f "$compose_port_override" up -d --remove-orphans --no-deps mqtt-addon
     popd >/dev/null
   fi
 

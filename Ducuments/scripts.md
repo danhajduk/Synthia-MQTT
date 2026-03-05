@@ -24,6 +24,8 @@ Purpose:
 - Support idempotent re-runs:
   - skip download/extract when requested version is already installed
   - use `--force` to re-download/re-extract
+- Start Docker in addon-only mode (`mqtt-addon` service only) when service startup is selected.
+- Support host binding controls with `--addon-port` and `--bind`.
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
 - Prompt for runtime choices:
@@ -49,6 +51,12 @@ Force re-install of a version:
 
 ```bash
 ./scripts/bootstrap-install.sh --version latest --force
+```
+
+Start with explicit bind/port:
+
+```bash
+./scripts/bootstrap-install.sh --addon-port 19080 --bind 127.0.0.1
 ```
 
 Help:

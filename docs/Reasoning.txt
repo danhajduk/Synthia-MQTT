@@ -13,3 +13,8 @@ Error context: None.
 Reasoning: Bootstrap reruns should be safe and fast, avoiding redundant download/extract work while still allowing explicit refresh behavior.
 What and why: Added deterministic idempotent install behavior that skips download/extract when the selected version is already installed, reports when `current` already points to the requested version, and adds `--force` to re-download/re-extract; updated script docs with idempotency and force usage.
 ###########
+Task #13.4 :
+Error context: None.
+Reasoning: Task 13 requires bootstrap startup to be explicit addon-only behavior regardless of compose contents, while still letting operators select host bind/port settings.
+What and why: Added `--addon-port` and `--bind` CLI options with validation, generated a compose port override file for mqtt-addon binding, and changed startup to `docker compose ... up --no-deps mqtt-addon` to prevent broker container startup; updated scripts documentation with addon-only and bind/port usage.
+###########
