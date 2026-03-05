@@ -47,7 +47,7 @@ def reload_mqtt_service() -> None:
 app.include_router(build_addon_contract_router(config_store, health_service, reload_mqtt_service))
 app.include_router(build_mqtt_publish_router(lambda: mqtt_service))
 app.include_router(build_ha_discovery_router(lambda: mqtt_service))
-app.include_router(build_broker_admin_router())
+app.include_router(build_broker_admin_router(config_store))
 app.include_router(build_install_workflow_router(config_store, health_service, reload_mqtt_service))
 
 ui_dist = Path(__file__).resolve().parents[1] / "frontend" / "dist"

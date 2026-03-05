@@ -1,4 +1,5 @@
 import socket
+import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -53,6 +54,63 @@ class BrokerManager:
 
     def docker_socket_available(self) -> bool:
         return DOCKER_SOCKET_PATH.exists()
+
+
+def write_embedded_compose_override(override_file: Path, broker_dir: Path, port: int) -> None:
+    override_file.parent.mkdir(parents=True, exist_ok=True)
+    override_file.write_text(
+        "\n".join(
+            [
+                "services:",
+                "  mosquitto:",
+                "    image: eclipse-mosquitto:2",
+                "    container_name: synthia-mosquitto",
+                "    restart: unless-stopped",
+                "    ports:",
+                f'      - "{port}:1883"',
+                "    volumes:",
+                f"      - {broker_dir.resolve()}/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro",
+                f"      - {broker_dir.resolve()}/pwfile:/mosquitto/config/passwordfile:ro",
+                f"      - {broker_dir.resolve()}/aclfile:/mosquitto/config/aclfile:ro",
+                "",
+                "  mqtt-addon:",
+                "    depends_on:",
+                "      - mosquitto",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def enable_embedded_broker_stack(
+    repo_root: Path,
+    override_file: Path,
+) -> tuple[bool, str | None]:
+    compose_file = repo_root / "docker" / "docker-compose.yml"
+    cmd = [
+        "docker",
+        "compose",
+        "-f",
+        str(compose_file),
+        "-f",
+        str(override_file),
+        "up",
+        "-d",
+        "--remove-orphans",
+        "mosquitto",
+        "mqtt-addon",
+    ]
+    try:
+        subprocess.run(cmd, cwd=repo_root, check=True, capture_output=True, text=True)
+        return True, None
+    except subprocess.CalledProcessError as exc:
+        stderr = (exc.stderr or "").strip()
+        stdout = (exc.stdout or "").strip()
+        reason = stderr or stdout or str(exc)
+        return False, reason[:500]
+    except Exception as exc:  # pragma: no cover
+        return False, str(exc)
 
 
 def write_embedded_broker_files(

@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import APIRouter
 from filelock import Timeout
 
+from app.services.config_store import ConfigStore
 from app.services.broker_manager import BrokerManager, wait_for_port
 from app.services.lock import broker_lock
 
@@ -53,11 +54,20 @@ def restart_broker_flow() -> dict[str, bool | int | str | None]:
         }
 
 
-def build_broker_admin_router() -> APIRouter:
+def build_broker_admin_router(config_store: ConfigStore) -> APIRouter:
     router = APIRouter(prefix="/api/broker", tags=["broker"])
 
     @router.post("/restart")
     def restart_broker() -> dict[str, bool | int | str | None]:
-        return restart_broker_flow()
+        result = restart_broker_flow()
+        if bool(result.get("ok")):
+            config_store.update_install_session_state(mode="embedded", verified=True, last_error=None)
+        else:
+            config_store.update_install_session_state(
+                mode="embedded",
+                verified=False,
+                last_error=str(result.get("reason") or "Broker restart failed"),
+            )
+        return result
 
     return router

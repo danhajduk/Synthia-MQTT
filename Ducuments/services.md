@@ -6,6 +6,8 @@
 - Persists overrides to `runtime/config.json`.
 - Masks sensitive fields for effective-config API responses.
 - Persists external install workflow settings and derives MQTT runtime settings.
+- Persists install-session state to `runtime/install_state.json`.
+- For embedded mode, writes runtime broker config files under `runtime/broker/` and applies compose override startup for `mosquitto` + `mqtt-addon`.
 
 ## `app/services/health.py`
 
@@ -32,3 +34,4 @@
 
 - Handles embedded broker restart attempts with docker socket checks.
 - Generates runtime embedded broker files under `runtime/broker/`.
+- Generates embedded compose override file and executes compose up for embedded enablement flow.

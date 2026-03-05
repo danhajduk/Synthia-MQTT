@@ -79,27 +79,51 @@ def build_install_workflow_router(
 
     @router.post("/apply", response_model=InstallApplyResponse)
     def apply_install(payload: InstallApplyRequest) -> InstallApplyResponse:
-        if payload.mode != "external":
-            raise HTTPException(status_code=400, detail="Embedded install mode is not supported for this artifact")
-
         try:
             config_store.apply_install_config(payload)
         except ValueError as exc:
-            config_store.update_install_session_state(mode="external", configured=False, last_error=str(exc))
+            config_store.update_install_session_state(mode=payload.mode, configured=False, last_error=str(exc))
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except Exception as exc:  # pragma: no cover
             config_store.update_install_session_state(
-                mode="external",
+                mode=payload.mode,
                 configured=False,
                 last_error="Failed to persist install config",
             )
             raise HTTPException(status_code=500, detail="Failed to persist install config") from exc
 
-        reload_mqtt_service()
-        config_store.update_install_session_state(mode="external", configured=True, last_error=None)
+        if payload.mode == "external":
+            reload_mqtt_service()
+            config_store.update_install_session_state(mode="external", configured=True, last_error=None)
+            return InstallApplyResponse(ok=True)
 
+        try:
+            ok, reason = config_store.apply_embedded_runtime(payload)
+        except ValueError as exc:
+            config_store.update_install_session_state(mode="embedded", configured=False, last_error=str(exc))
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except Exception as exc:  # pragma: no cover
+            config_store.update_install_session_state(
+                mode="embedded",
+                configured=False,
+                last_error="Failed to apply embedded broker runtime",
+            )
+            raise HTTPException(status_code=500, detail="Failed to apply embedded broker runtime") from exc
+
+        if ok:
+            config_store.update_install_session_state(mode="embedded", configured=True, verified=True, last_error=None)
+            return InstallApplyResponse(ok=True)
+
+        operator_action = (
+            "docker compose -f docker/docker-compose.yml "
+            "-f runtime/broker/docker-compose.override.yml up -d --remove-orphans mosquitto mqtt-addon"
+        )
+        config_store.update_install_session_state(mode="embedded", configured=False, verified=False, last_error=reason)
         return InstallApplyResponse(
-            ok=True,
+            ok=False,
+            requires_operator_action=True,
+            operator_action=operator_action,
+            warnings=[reason] if reason else None,
         )
 
     @router.post("/register-core", response_model=CoreRegistryResponse)

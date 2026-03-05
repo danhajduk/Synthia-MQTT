@@ -5,6 +5,11 @@ from typing import Any
 
 from app.models.addon_models import AddonConfigUpdate
 from app.models.install_models import InstallApplyRequest
+from app.services.broker_manager import (
+    enable_embedded_broker_stack,
+    write_embedded_broker_files,
+    write_embedded_compose_override,
+)
 
 
 class ConfigStore:
@@ -52,7 +57,7 @@ class ConfigStore:
         overrides = self._load_overrides()
 
         mode = overrides.get("mode")
-        if mode != "external":
+        if mode not in {"external", "embedded"}:
             mode = "external"
 
         external = overrides.get("external") or {
@@ -115,8 +120,8 @@ class ConfigStore:
         overrides = self._load_overrides()
         data = request.model_dump(exclude_none=True)
         mode = data["mode"]
-        if mode != "external":
-            raise ValueError("Only external install mode is supported for this artifact")
+        if mode not in {"external", "embedded"}:
+            raise ValueError("Unsupported install mode")
 
         overrides["mode"] = mode
         if "external" in data:
@@ -137,6 +142,13 @@ class ConfigStore:
             overrides["mqtt_tls"] = external["tls"]
             overrides["mqtt_username"] = external.get("username")
             overrides["mqtt_password"] = external.get("password")
+        else:
+            embedded = data["embedded"]
+            overrides["mqtt_host"] = "mosquitto"
+            overrides["mqtt_port"] = 1883
+            overrides["mqtt_tls"] = False
+            overrides["mqtt_username"] = embedded.get("admin_user")
+            overrides["mqtt_password"] = embedded.get("admin_pass")
 
         if "base_topic" in data:
             overrides["mqtt_base_topic"] = data["base_topic"]
@@ -146,6 +158,22 @@ class ConfigStore:
         self._save_overrides(overrides)
         self.update_install_session_state(mode=mode, configured=True, last_error=None)
         return self.get_effective_config()
+
+    def apply_embedded_runtime(self, request: InstallApplyRequest) -> tuple[bool, str | None]:
+        data = request.model_dump(exclude_none=True)
+        if data.get("mode") != "embedded" or "embedded" not in data:
+            raise ValueError("embedded config is required when mode is embedded")
+
+        embedded = data["embedded"]
+        port = int(embedded["port"])
+        broker_dir = self._base_dir / "runtime" / "broker"
+        override_file = self._base_dir / "runtime" / "broker" / "docker-compose.override.yml"
+
+        write_embedded_broker_files(broker_dir=broker_dir, embedded_config=embedded)
+        write_embedded_compose_override(override_file=override_file, broker_dir=broker_dir, port=port)
+
+        ok, reason = enable_embedded_broker_stack(repo_root=self._base_dir, override_file=override_file)
+        return ok, reason
 
     def _load_overrides(self) -> dict[str, Any]:
         if not self._config_path.exists():

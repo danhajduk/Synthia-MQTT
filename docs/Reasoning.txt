@@ -38,3 +38,8 @@ Error context: None.
 Reasoning: External setup UX needs machine-readable diagnostics for connection failures and consistent install-session state transitions during test/apply actions.
 What and why: Extended `/api/install/test-external` response with `diagnostic_code` and mapped reason strings into stable codes; updated test/apply handlers to synchronize `mode/configured/verified/last_error` state in `runtime/install_state.json`; documented API and model updates.
 ###########
+Task #14.3 :
+Error context: None.
+Reasoning: Embedded mode requires a concrete runtime enablement mechanism, not just persisted settings, plus restart flows must feed wizard verification status.
+What and why: Added embedded runtime application that writes `runtime/broker` files, generates compose override, and attempts compose up for `mosquitto` + `mqtt-addon`; enabled `/api/install/apply` embedded branch with operator-action fallback; wired broker restart endpoint to update install-session verification state; updated API/services docs.
+###########
