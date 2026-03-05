@@ -147,6 +147,21 @@ Optional overrides:
 
 Purpose:
 
+- Build and upload release artifact (`addon.tgz`) to GitHub release tag `v<version>`.
+- Package backend + docker + frontend assets (including UI files).
+- Auto-build frontend assets when `frontend/dist` is missing.
+- Emit release snippet JSON (`release-output.json` by default).
+
+Usage:
+
+```bash
+./scripts/release-addon.sh 0.1.6
+```
+
+## `scripts/release-addon.sh`
+
+Purpose:
+
 - Build deterministic release artifact and upload to GitHub release.
 - Emit `release-output.json` including `package_profile`.
 

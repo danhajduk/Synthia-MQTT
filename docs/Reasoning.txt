@@ -1,18 +1,13 @@
-Task #15.1 :
-Error context: None.
-Reasoning: New bootstrap runs should install relative to the operator workdir as requested, while keeping an env override for custom deployments.
-What and why: Changed bootstrap default install root to `${PWD}/SynthiaAddons/Synthia-MQTT` so installs land under the current working directory by default; documented the new default and override behavior in scripts docs.
+Task #16.1 :
+Error context: Release artifact script excluded frontend by default, causing `/ui` assets to be missing in extracted installs.
+Reasoning: Release packaging must always include frontend files and guarantee `frontend/dist` exists before tarball creation.
+What and why: Updated `scripts/release-addon.sh` default package paths to include `frontend` and added an automatic `npm run build` fallback when `frontend/dist` is missing; documented release script behavior in scripts docs.
 ###########
-Task #15.2 :
-Error context: Bootstrap UI URL defaulted to localhost, which does not satisfy remote/operator access expectation.
-Reasoning: Startup health checks can stay local, but operator-facing UI links should default to a full reachable host IP.
-What and why: Switched bootstrap `--bind` default to detected host IP, normalized localhost public host values, changed UI URL output/open behavior to use full host IP, and aligned validation defaults (`SERVICE_BASE_URL`) to detected host IP so bootstrap + validate flow remains green.
-###########
-Task #15.3 :
-Error/UX issue: No explicit default dashboard placeholder section was present for configured-mode UI.
-Reasoning: A minimal placeholder page ensures a consistent configured landing page even before additional dashboard widgets are defined.
-What and why: Added a `Synthia MQTT` placeholder panel to configured dashboard view and documented the placeholder behavior; rebuilt frontend dist assets.
+Task #16.2 :
+Error context: Previous release package lacked UI assets and version metadata was behind required release number.
+Reasoning: Releasing `0.1.6` with regenerated signed artifacts ensures installers pull a package that includes frontend UI files.
+What and why: Bumped manifest version to `0.1.6`, rebuilt/signed artifacts via `scripts/sign-addon.sh`, confirmed `frontend/dist` entries inside package tarball, and published `v0.1.6` with refreshed `release-output.json` metadata.
 ###########
 #############
-All Tasks completed 03/05/2026 13:24:11
+All Tasks completed 03/05/2026 14:06:00
 #############

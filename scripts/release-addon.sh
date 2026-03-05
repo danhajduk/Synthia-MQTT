@@ -17,7 +17,7 @@ CHANNEL="${CHANNEL:-stable}"
 OUTPUT_JSON="${OUTPUT_JSON:-release-output.json}"
 
 # What gets packaged (compose-bundle profile)
-PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json docker app requirements.txt}"
+PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json docker app frontend requirements.txt}"
 
 ########################################
 # VALIDATION
@@ -34,6 +34,18 @@ command -v gh >/dev/null || { echo "gh CLI missing"; exit 1; }
 for p in ${PACKAGE_PATHS}; do
   [[ -e "$p" ]] || { echo "Missing path to package: $p"; exit 1; }
 done
+
+if echo " ${PACKAGE_PATHS} " | grep -q " frontend "; then
+  if [[ ! -d "frontend/dist" ]]; then
+    if command -v npm >/dev/null 2>&1 && [[ -f "frontend/package.json" ]]; then
+      echo "==> Building frontend assets"
+      (cd frontend && npm run build)
+    else
+      echo "frontend/dist missing and npm unavailable; cannot package UI assets"
+      exit 1
+    fi
+  fi
+fi
 
 ########################################
 # BUILD DETERMINISTIC TARBALL
