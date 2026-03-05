@@ -51,6 +51,7 @@ Purpose:
 - Support `--non-interactive` for automation/validation runs without terminal prompts.
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
+- Default install root is `${PWD}/SynthiaAddons/Synthia-MQTT` (override with `DEFAULT_INSTALL_DIR` env).
 - Prompt for runtime choices:
   - install local MQTT broker (Compose override)
   - Core host URL for optional registration
