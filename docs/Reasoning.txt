@@ -1,8 +1,5 @@
-Task #12 :
+Task #13.1 :
 Error context: None.
-Reasoning: A bootstrap installer should handle release fetch + install layout + first-run runtime choices in one guided path so operators can deploy without manual artifact plumbing.
-What and why: Added interactive scripts/bootstrap-install.sh to download latest GitHub release addon.tgz, install under versions/current layout, prompt for broker/Core/runtime settings, write compose .env, optionally start containers, and optionally call Core registration; updated README and script docs.
+Reasoning: Implementing bootstrap v2 safely requires explicit baseline documentation of the current script behavior so each follow-up change can be validated against scope constraints.
+What and why: Added Ducuments/bootstrap_install.md documenting current bootstrap prompts/version resolution/install layout/compose startup, plus the v2 target flow and concrete breaking behavior changes required by Task 13.
 ###########
-#############
-All Tasks completed 03/05/2026 11:33:51
-#############
