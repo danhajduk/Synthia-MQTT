@@ -15,6 +15,25 @@ Usage:
 ./scripts/rebuild.sh
 ```
 
+## `scripts/validate-bootstrap.sh`
+
+Purpose:
+
+- Run bootstrap in demo/validation mode (`--version latest --no-open` by default).
+- Verify addon health endpoint after bootstrap.
+- Print setup UI URL.
+
+Usage:
+
+```bash
+./scripts/validate-bootstrap.sh
+```
+
+Optional overrides:
+
+- `SERVICE_BASE_URL` (default `http://127.0.0.1:18080`)
+- `BOOTSTRAP_ARGS` (default `--version latest --no-open`)
+
 ## `scripts/bootstrap-install.sh`
 
 Purpose:

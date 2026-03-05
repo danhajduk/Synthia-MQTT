@@ -23,3 +23,8 @@ Error context: None.
 Reasoning: Bootstrap completion should reflect actual service readiness, and browser launch behavior must be configurable for headless automation and operator convenience.
 What and why: Added health polling with timeout and progressive status logs, plus UI open behavior using `xdg-open`/`open` with fallback URL printing; added `--no-open` and `--timeout-seconds` CLI controls and documented readiness/open options.
 ###########
+Task #13.6 :
+Error context: Per operator request, deferred running bootstrap validation execution until after Task 14.
+Reasoning: Final step should provide a reproducible validation entrypoint and quick-start guidance while allowing validation execution to be coordinated later.
+What and why: Added scripts/validate-bootstrap.sh to run bootstrap with default validation args, check /healthz, and print UI URL; updated README Quick Start and scripts documentation to include bootstrap v2 usage and validation helper.
+###########

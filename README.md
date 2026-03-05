@@ -18,6 +18,26 @@ This artifact runs as a standalone external service and does not manage an embed
 
 ## Quick Start
 
+Bootstrap v2 (latest release, addon-only startup, readiness-aware UI handoff):
+
+```bash
+./scripts/bootstrap-install.sh --version latest
+```
+
+Optional bootstrap controls:
+
+```bash
+./scripts/bootstrap-install.sh --version latest --no-open --timeout-seconds 90 --addon-port 19080 --bind 127.0.0.1
+```
+
+Bootstrap demo validation script:
+
+```bash
+./scripts/validate-bootstrap.sh
+```
+
+Manual compose startup (alternative to bootstrap):
+
 ```bash
 MQTT_HOST=10.0.0.100 MQTT_PORT=1883 docker compose -f docker/docker-compose.yml up -d
 ```
