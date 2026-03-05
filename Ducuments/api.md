@@ -24,6 +24,7 @@ Implements install workflow endpoints:
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
 - `POST /api/install/register-core`
+- `POST /api/install/reset`
 
 `/api/install/test-external` returns:
 - `ok` (boolean)
@@ -40,6 +41,16 @@ Both test/apply endpoints keep install-session state (`mode/configured/verified/
 - fallback endpoint: `POST /api/admin/addons/registry` with `{ addon_id, base_url }` when preferred route is not available
 - updates install-session `registered_to_core` and `last_error`
 - maps auth failures to HTTP 401 and unreachable Core to HTTP 502
+
+`/api/install/reset` behavior:
+- resets persisted install-session fields to defaults
+- sets default mode to `external`
+- returns `{ ok: true, mode: "external" }`
+
+Wizard UI integration:
+- `/ui` setup flow is a six-step wizard for mode selection, broker details, test, apply, Core registration, and done summary.
+- UI persists local non-secret setup state and only stores password/token presence flags.
+- status banner is sourced from install status + addon health and supports explicit setup reset via `/api/install/reset`.
 
 ## `app/api/broker_admin.py`
 

@@ -17,3 +17,9 @@ This service provides a distributed MQTT addon for Synthia.
 - The addon runs with `package_profile: standalone_service`.
 - Canonical permissions are `network.egress`, `mqtt.publish`, and `mqtt.subscribe`.
 - Artifact signing/release scripts consume manifest `compatibility`, `package_profile`, and `paths`.
+
+## Setup Wizard v1
+
+- `/ui` provides a six-step setup wizard supporting both `external` broker mode and `embedded` broker mode.
+- Wizard status banner surfaces install-session flags (`mode`, `configured`, `verified`, `registered_to_core`, `last_error`) plus addon health state.
+- Setup state is persisted locally for operator convenience while keeping raw secrets out of browser storage.

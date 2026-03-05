@@ -10,92 +10,175 @@
     <main class="layout">
       <header class="hero">
         <h1>Synthia MQTT Setup Wizard</h1>
-        <p>Configure broker mode, validate connectivity, and apply live settings.</p>
+        <p>Choose broker mode, validate connectivity, apply config, and register with Core.</p>
       </header>
 
-      <section class="panel">
-        <h2>Step 1: Status</h2>
+      <section class="panel banner">
+        <h2>Install Status</h2>
         <div class="status-grid">
           <div><span>Mode</span><strong id="status-mode">-</strong></div>
-          <div><span>Docker socket</span><strong id="status-docker">-</strong></div>
-          <div><span>Broker running</span><strong id="status-broker">-</strong></div>
-          <div><span>MQTT connected</span><strong id="status-mqtt">-</strong></div>
-          <div><span>Addon health</span><strong id="status-health">-</strong></div>
-          <div><span>Last error</span><strong id="status-error">-</strong></div>
-        </div>
-        <button id="refresh-status" type="button">Refresh Status</button>
-      </section>
-
-      <section class="panel">
-        <h2>Step 2: Select Mode</h2>
-        <div class="mode-pick">
-          <label><input type="radio" name="mode" value="external" checked /> External broker</label>
-          <label><input type="radio" name="mode" value="embedded" /> Embedded broker</label>
-        </div>
-      </section>
-
-      <section class="panel" id="external-panel">
-        <h2>Step 3 (External): Test and Apply</h2>
-        <div class="form-grid">
-          <label>Host <input id="external-host" type="text" value="localhost" /></label>
-          <label>Port <input id="external-port" type="number" min="1" max="65535" value="1883" /></label>
-          <label class="check"><input id="external-tls" type="checkbox" /> TLS</label>
-          <label>Username <input id="external-user" type="text" /></label>
-          <label>Password <input id="external-pass" type="password" /></label>
-          <label>Base topic <input id="base-topic" type="text" value="synthia" /></label>
-          <label>HA discovery prefix <input id="ha-prefix" type="text" value="homeassistant" /></label>
-          <label>Default QoS <input id="qos-default" type="number" min="0" max="2" value="1" /></label>
+          <div><span>Configured</span><strong id="status-configured">-</strong></div>
+          <div><span>Verified</span><strong id="status-verified">-</strong></div>
+          <div><span>Registered</span><strong id="status-registered">-</strong></div>
+          <div><span>MQTT Connected</span><strong id="status-mqtt">-</strong></div>
+          <div><span>Addon Health</span><strong id="status-health">-</strong></div>
+          <div><span>Last Error</span><strong id="status-error">-</strong></div>
         </div>
         <div class="actions">
-          <button id="test-external" type="button">Test Connection</button>
-          <button id="apply-external" type="button">Apply External</button>
-        </div>
-        <p id="external-result" class="result">-</p>
-      </section>
-
-      <section class="panel hidden" id="embedded-panel">
-        <h2>Step 3 (Embedded): Configure and Apply</h2>
-        <div class="form-grid">
-          <label class="check"><input id="embedded-anon" type="checkbox" /> Allow anonymous</label>
-          <label class="check"><input id="embedded-persist" type="checkbox" checked /> Persistence</label>
-          <label>Log type <input id="embedded-log" type="text" value="stdout" /></label>
-          <label>Broker port <input id="embedded-port" type="number" min="1" max="65535" value="1883" /></label>
-          <label>Admin user <input id="embedded-user" type="text" /></label>
-          <label>Admin pass <input id="embedded-pass" type="password" /></label>
-          <label>Base topic <input id="base-topic-embedded" type="text" value="synthia" /></label>
-          <label>HA discovery prefix <input id="ha-prefix-embedded" type="text" value="homeassistant" /></label>
-          <label>Default QoS <input id="qos-default-embedded" type="number" min="0" max="2" value="1" /></label>
-        </div>
-        <div class="actions">
-          <button id="apply-embedded" type="button">Apply Embedded</button>
-          <button id="restart-broker" type="button" class="hidden">Restart Broker</button>
-        </div>
-        <p id="embedded-result" class="result">-</p>
-        <div id="operator-wrap" class="hidden">
-          <p>Operator action required:</p>
-          <textarea id="operator-action" readonly></textarea>
+          <button id="refresh-status" type="button">Refresh Status</button>
+          <button id="reset-setup" type="button" class="secondary">Reset Setup</button>
         </div>
       </section>
 
       <section class="panel">
-        <h2>Step 4: Finish</h2>
-        <button id="load-finish" type="button">Load Effective Config + Health</button>
-        <pre id="finish-output">{}</pre>
-      </section>
+        <h2>Wizard</h2>
+        <ol class="steps">
+          <li id="marker-1">1. Mode</li>
+          <li id="marker-2">2. Broker Details</li>
+          <li id="marker-3">3. Test</li>
+          <li id="marker-4">4. Apply</li>
+          <li id="marker-5">5. Core Registration</li>
+          <li id="marker-6">6. Done</li>
+        </ol>
 
-      <section class="panel">
-        <h2>Test Publish</h2>
-        <div class="form-grid">
-          <label>Topic <input id="pub-topic" type="text" value="synthia/test" /></label>
-          <label>Payload (JSON or text) <input id="pub-payload" type="text" value='{"hello":"world"}' /></label>
-          <label class="check"><input id="pub-retain" type="checkbox" checked /> Retain</label>
-          <label>QoS <input id="pub-qos" type="number" min="0" max="2" value="1" /></label>
-        </div>
-        <button id="test-publish" type="button">Publish</button>
-        <p id="publish-result" class="result">-</p>
+        <section class="step-panel" id="step-1">
+          <h3>Step 1: Choose Mode</h3>
+          <div class="mode-pick">
+            <label><input type="radio" name="mode" value="external" checked /> Use external broker</label>
+            <label><input type="radio" name="mode" value="embedded" /> Use built-in broker</label>
+          </div>
+          <div class="nav-row">
+            <button id="next-1" type="button">Next</button>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" id="step-2">
+          <h3>Step 2: Broker Details</h3>
+          <div id="external-form">
+            <div class="form-grid">
+              <label>Host <input id="external-host" type="text" value="10.0.0.100" /></label>
+              <label>Port <input id="external-port" type="number" min="1" max="65535" value="1883" /></label>
+              <label class="check"><input id="external-tls" type="checkbox" /> TLS</label>
+              <label>Username <input id="external-user" type="text" /></label>
+              <label>Password <input id="external-pass" type="password" /></label>
+              <label>Base topic <input id="external-base-topic" type="text" value="synthia" /></label>
+              <label>HA prefix <input id="external-ha-prefix" type="text" value="homeassistant" /></label>
+              <label>Default QoS <input id="external-qos" type="number" min="0" max="2" value="1" /></label>
+            </div>
+          </div>
+          <div id="embedded-form" class="hidden">
+            <div class="form-grid">
+              <label class="check"><input id="embedded-anon" type="checkbox" /> Allow anonymous</label>
+              <label class="check"><input id="embedded-persist" type="checkbox" checked /> Persistence</label>
+              <label>Log type <input id="embedded-log" type="text" value="stdout" /></label>
+              <label>Broker host port <input id="embedded-port" type="number" min="1" max="65535" value="1883" /></label>
+              <label>Admin user <input id="embedded-user" type="text" /></label>
+              <label>Admin pass <input id="embedded-pass" type="password" /></label>
+              <label>Base topic <input id="embedded-base-topic" type="text" value="synthia" /></label>
+              <label>HA prefix <input id="embedded-ha-prefix" type="text" value="homeassistant" /></label>
+              <label>Default QoS <input id="embedded-qos" type="number" min="0" max="2" value="1" /></label>
+            </div>
+          </div>
+          <p id="details-error" class="result">-</p>
+          <div class="nav-row">
+            <button id="back-2" type="button" class="secondary">Back</button>
+            <button id="next-2" type="button">Next</button>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" id="step-3">
+          <h3>Step 3: Test</h3>
+          <p>External mode tests broker connectivity. Embedded mode validates broker config only.</p>
+          <div class="actions">
+            <button id="run-test" type="button">Run Test</button>
+          </div>
+          <p id="test-result" class="result">-</p>
+          <div class="nav-row">
+            <button id="back-3" type="button" class="secondary">Back</button>
+            <button id="next-3" type="button">Next</button>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" id="step-4">
+          <h3>Step 4: Apply</h3>
+          <p>Apply selected broker mode settings to the addon runtime.</p>
+          <div class="actions">
+            <button id="run-apply" type="button">Apply Configuration</button>
+            <button id="restart-broker" type="button" class="hidden">Restart Broker</button>
+          </div>
+          <p id="apply-result" class="result">-</p>
+          <div id="operator-wrap" class="hidden">
+            <p>Operator action required:</p>
+            <textarea id="operator-action" readonly></textarea>
+          </div>
+          <div class="nav-row">
+            <button id="back-4" type="button" class="secondary">Back</button>
+            <button id="next-4" type="button">Next</button>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" id="step-5">
+          <h3>Step 5: Core Registration</h3>
+          <label class="check"
+            ><input id="register-enabled" type="checkbox" /> Register addon with Core now</label
+          >
+          <div class="form-grid">
+            <label>Core base URL <input id="core-base-url" type="text" value="http://localhost:3000" /></label>
+            <label>Addon base URL <input id="addon-base-url" type="text" value="http://localhost:18080" /></label>
+            <label>Admin token <input id="core-token" type="password" /></label>
+          </div>
+          <div class="actions">
+            <button id="run-register" type="button">Register With Core</button>
+          </div>
+          <p id="register-result" class="result">-</p>
+          <div class="nav-row">
+            <button id="back-5" type="button" class="secondary">Back</button>
+            <button id="next-5" type="button">Next</button>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" id="step-6">
+          <h3>Step 6: Done</h3>
+          <p>Setup summary (secrets are masked):</p>
+          <div class="summary-grid">
+            <div>
+              <span>Selected mode</span>
+              <strong id="summary-mode">-</strong>
+            </div>
+            <div>
+              <span>Broker host</span>
+              <strong id="summary-host">-</strong>
+              <button data-copy="summary-host" type="button" class="copy-btn">Copy</button>
+            </div>
+            <div>
+              <span>Broker port</span>
+              <strong id="summary-port">-</strong>
+              <button data-copy="summary-port" type="button" class="copy-btn">Copy</button>
+            </div>
+            <div>
+              <span>Core URL</span>
+              <strong id="summary-core-url">-</strong>
+              <button data-copy="summary-core-url" type="button" class="copy-btn">Copy</button>
+            </div>
+            <div>
+              <span>Addon URL</span>
+              <strong id="summary-addon-url">-</strong>
+              <button data-copy="summary-addon-url" type="button" class="copy-btn">Copy</button>
+            </div>
+            <div>
+              <span>Password status</span>
+              <strong id="summary-pass">masked</strong>
+            </div>
+          </div>
+          <pre id="done-output">{}</pre>
+          <div class="nav-row">
+            <button id="back-6" type="button" class="secondary">Back</button>
+            <button id="reload-done" type="button">Reload Summary</button>
+          </div>
+        </section>
       </section>
     </main>
 
     <script type="module" src="/ui/app.js"></script>
   </body>
-</html>
+ </html>

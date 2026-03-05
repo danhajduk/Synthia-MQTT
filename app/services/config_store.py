@@ -116,6 +116,13 @@ class ConfigStore:
         self._save_install_session_state(state)
         return state
 
+    def reset_install_session_state(self, mode: str = "external") -> dict[str, Any]:
+        state = self._default_install_session_state()
+        if mode in {"external", "embedded"}:
+            state["mode"] = mode
+        self._save_install_session_state(state)
+        return state
+
     def apply_install_config(self, request: InstallApplyRequest) -> dict[str, Any]:
         overrides = self._load_overrides()
         data = request.model_dump(exclude_none=True)

@@ -155,4 +155,9 @@ def build_install_workflow_router(
             raise HTTPException(status_code=502, detail="Core is unreachable")
         raise HTTPException(status_code=502, detail=reason or "Core registry request failed")
 
+    @router.post("/reset")
+    def reset_install_state() -> dict[str, bool | str]:
+        config_store.reset_install_session_state(mode="external")
+        return {"ok": True, "mode": "external"}
+
     return router

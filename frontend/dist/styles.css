@@ -36,6 +36,10 @@ body {
   color: var(--muted);
 }
 
+.banner {
+  border-left: 4px solid var(--accent);
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -75,6 +79,39 @@ body {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+}
+
+.steps {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px;
+}
+
+.steps li {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.steps li.active {
+  background: #e4f2e9;
+  color: var(--ink);
+  border-color: #9ec1ac;
+}
+
+.steps li.done {
+  background: #f5f3ee;
+  color: var(--ink);
+}
+
+.step-panel h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
 }
 
 .form-grid {
@@ -126,9 +163,50 @@ button {
   flex-wrap: wrap;
 }
 
+.nav-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: flex-end;
+}
+
+button.secondary {
+  background: #6f756f;
+}
+
 .result {
   margin: 10px 0 0;
   color: var(--muted);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.summary-grid div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.summary-grid span {
+  color: var(--muted);
+  display: block;
+  font-size: 0.82rem;
+}
+
+.summary-grid strong {
+  display: block;
+  margin-top: 4px;
+  word-break: break-all;
+}
+
+.copy-btn {
+  margin-top: 8px;
+  padding: 5px 8px;
+  font-size: 0.8rem;
 }
 
 #operator-action,
