@@ -3,3 +3,8 @@ Error context: None.
 Reasoning: New bootstrap runs should install relative to the operator workdir as requested, while keeping an env override for custom deployments.
 What and why: Changed bootstrap default install root to `${PWD}/SynthiaAddons/Synthia-MQTT` so installs land under the current working directory by default; documented the new default and override behavior in scripts docs.
 ###########
+Task #15.2 :
+Error context: Bootstrap UI URL defaulted to localhost, which does not satisfy remote/operator access expectation.
+Reasoning: Startup health checks can stay local, but operator-facing UI links should default to a full reachable host IP.
+What and why: Switched bootstrap `--bind` default to detected host IP, normalized localhost public host values, changed UI URL output/open behavior to use full host IP, and aligned validation defaults (`SERVICE_BASE_URL`) to detected host IP so bootstrap + validate flow remains green.
+###########

@@ -2,7 +2,11 @@
 set -euo pipefail
 
 ADDON_PORT="${ADDON_PORT:-18081}"
-SERVICE_BASE_URL="${SERVICE_BASE_URL:-http://127.0.0.1:${ADDON_PORT}}"
+DEFAULT_HOST_IP="${DEFAULT_HOST_IP:-$(hostname -I 2>/dev/null | awk '{print $1}')}"
+if [[ -z "$DEFAULT_HOST_IP" ]]; then
+  DEFAULT_HOST_IP="127.0.0.1"
+fi
+SERVICE_BASE_URL="${SERVICE_BASE_URL:-http://${DEFAULT_HOST_IP}:${ADDON_PORT}}"
 BOOTSTRAP_ARGS="${BOOTSTRAP_ARGS:---version latest --no-open --non-interactive --addon-port ${ADDON_PORT}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"

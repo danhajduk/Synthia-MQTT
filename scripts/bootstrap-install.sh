@@ -9,7 +9,10 @@ DEFAULT_PORT="${DEFAULT_PORT:-18080}"
 REQUESTED_VERSION="latest"
 FORCE_INSTALL="false"
 ADDON_PORT="$DEFAULT_PORT"
-BIND_HOST="localhost"
+BIND_HOST="${DEFAULT_BIND_HOST:-$(hostname -I 2>/dev/null | awk '{print $1}')}"
+if [[ -z "$BIND_HOST" ]]; then
+  BIND_HOST="127.0.0.1"
+fi
 NO_OPEN="false"
 TIMEOUT_SECONDS="60"
 NON_INTERACTIVE="false"
@@ -28,7 +31,7 @@ Options:
 - --version <tag|latest>  Release tag to install (default: latest)
 - --force                 Re-download/re-extract even if version is already installed
 - --addon-port <port>     Host port to bind addon HTTP service to (default: 18080)
-- --bind <host>           Host bind address for addon HTTP service (default: localhost)
+- --bind <host>           Host bind address for addon HTTP service (default: detected host IP)
 - --no-open               Do not auto-open setup UI in browser
 - --timeout-seconds <n>   Wait timeout for health endpoint readiness (default: 60)
 - --non-interactive       Use defaults and skip prompts (for automation/validation)
@@ -530,6 +533,10 @@ main() {
     fi
   fi
 
+  if [[ "$PUBLIC_HOST" == "localhost" || "$PUBLIC_HOST" == "127.0.0.1" ]]; then
+    PUBLIC_HOST="$BIND_HOST"
+  fi
+
   if [[ "$START_SERVICES" == "true" ]]; then
     require_cmd docker
   fi
@@ -639,7 +646,7 @@ main() {
 
     service_base_url="http://${BIND_HOST}:${ADDON_PORT}"
     health_url="${service_base_url}/healthz"
-    ui_url="${service_base_url}/ui"
+    ui_url="http://${PUBLIC_HOST}:${ADDON_PORT}/ui"
 
     if wait_for_health "$health_url" "$TIMEOUT_SECONDS"; then
       open_browser_url "$ui_url"

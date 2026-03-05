@@ -32,7 +32,8 @@ Usage:
 Optional overrides:
 
 - `ADDON_PORT` (default `18081`)
-- `SERVICE_BASE_URL` (default `http://127.0.0.1:$ADDON_PORT`)
+- `DEFAULT_HOST_IP` (default first value from `hostname -I`, fallback `127.0.0.1`)
+- `SERVICE_BASE_URL` (default `http://$DEFAULT_HOST_IP:$ADDON_PORT`)
 - `BOOTSTRAP_ARGS` (default `--version latest --no-open --non-interactive --addon-port $ADDON_PORT`)
 
 ## `scripts/bootstrap-install.sh`
@@ -45,10 +46,11 @@ Purpose:
   - skip download/extract when requested version is already installed
   - use `--force` to re-download/re-extract
 - Start Docker in addon-only mode (`mqtt-addon` service only) when service startup is selected.
-- Support host binding controls with `--addon-port` and `--bind`.
+- Support host binding controls with `--addon-port` and `--bind` (`--bind` defaults to detected host IP).
 - Wait for `healthz` readiness and open setup UI automatically after successful startup.
 - Support `--no-open` and `--timeout-seconds` controls for readiness/open behavior.
 - Support `--non-interactive` for automation/validation runs without terminal prompts.
+- UI URL output uses full host IP by default instead of `localhost`.
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
 - Default install root is `${PWD}/SynthiaAddons/Synthia-MQTT` (override with `DEFAULT_INSTALL_DIR` env).
