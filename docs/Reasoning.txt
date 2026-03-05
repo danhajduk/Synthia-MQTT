@@ -1,13 +1,5 @@
-Task #18.1 :
-Error context: Core registration failed with HTTP 422 due to schema variants requiring `id`/`name`, and operator input without URL scheme caused avoidable unreachable/validation failures.
-Reasoning: Registration flow should tolerate known Core contract variants and normalize common user input mistakes without adding extra wizard friction.
-What and why: Added URL normalization to auto-prefix `http://` when `core_base_url`/`base_url` lacks scheme; updated registry service fallback to retry legacy admin endpoint with `{id,name,base_url}` payload on 422 after `{addon_id,base_url}` attempt; documented compatibility behavior.
+Task #19.1 :
+Error context: Core register endpoint expected additional fields/auth variants (`name`, `version`, `X-Admin-Token`) and registration continued to fail across Core implementations.
+Reasoning: register-core should send a superset of compatible payload fields and auth headers so one wizard flow works against both modern and legacy Core variants.
+What and why: Updated Core registry requests to include `name` + `version` payload fields, added `X-Admin-Token` header alongside Bearer auth when token is provided, and propagated manifest name/version from addon metadata; updated API docs accordingly.
 ###########
-Task #18.2 :
-Error context: Core registration patch requires a fresh published artifact for installers to pick up compatibility fixes.
-Reasoning: Cutting a new release version avoids cache/tag ambiguity and ensures bootstrap latest resolves to patched registry behavior.
-What and why: Bumped manifest to `0.1.7`, rebuilt/signed artifacts, verified frontend dist files inside package, and uploaded GitHub release `v0.1.7`; refreshed release metadata output.
-###########
-#############
-All Tasks completed 03/05/2026 14:39:53
-#############

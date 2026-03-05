@@ -5,6 +5,7 @@ from typing import Callable
 
 from fastapi import APIRouter, HTTPException
 
+from app.api.addon_contract import MANIFEST_METADATA
 from app.models.install_models import (
     CoreRegistryRequest,
     CoreRegistryResponse,
@@ -160,6 +161,8 @@ def build_install_workflow_router(
             core_base_url=core_base_url,
             addon_id=addon_id,
             base_url=addon_base_url,
+            addon_name=MANIFEST_METADATA["name"],
+            addon_version=MANIFEST_METADATA["version"],
             auth_token=auth_token,
         )
         if ok:

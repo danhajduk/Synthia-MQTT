@@ -38,12 +38,13 @@ Implements install workflow endpoints:
   - when Docker CLI is unavailable in addon runtime, warning text is normalized to explicitly instruct host-terminal execution.
 Both test/apply endpoints keep install-session state (`mode/configured/verified/last_error`) synchronized for wizard flow.
 `/api/install/register-core` behavior:
-- preferred Core endpoint: `POST /api/addons/registry/{addon_id}/register` with `{ base_url }`
-- fallback endpoint: `POST /api/admin/addons/registry` with `{ addon_id, base_url }` when preferred route is not available
-- compatibility fallback for legacy Core validation: retries legacy endpoint with `{ id, name, base_url }` on HTTP 422
+- preferred Core endpoint: `POST /api/addons/registry/{addon_id}/register` with `{ base_url, name, version }`
+- fallback endpoint: `POST /api/admin/addons/registry` with `{ addon_id, base_url, name, version }` when preferred route is not available
+- compatibility fallback for legacy Core validation: retries legacy endpoint with `{ id, name, version, base_url }` on HTTP 422
 - updates install-session `registered_to_core` and `last_error`
 - maps auth failures to HTTP 401 and unreachable Core to HTTP 502
 - auto-prefixes `http://` when `core_base_url` or `base_url` is provided without URL scheme
+- when `auth_token` is supplied, request includes both `Authorization: Bearer <token>` and `X-Admin-Token: <token>` headers for Core auth compatibility
 
 `/api/install/reset` behavior:
 - resets persisted install-session fields to defaults

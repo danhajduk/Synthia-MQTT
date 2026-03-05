@@ -12,6 +12,7 @@ def _post_json(
     headers = {"Content-Type": "application/json"}
     if auth_token:
         headers["Authorization"] = f"Bearer {auth_token}"
+        headers["X-Admin-Token"] = auth_token
 
     req = request.Request(url=url, data=payload, headers=headers, method="POST")
     try:
@@ -32,6 +33,8 @@ def register_addon_endpoint(
     core_base_url: str,
     addon_id: str,
     base_url: str,
+    addon_name: str,
+    addon_version: str,
     auth_token: str | None = None,
     timeout_s: float = 5.0,
 ) -> tuple[bool, int | None, str | None]:
@@ -41,7 +44,11 @@ def register_addon_endpoint(
     preferred_url = f"{core_base}/api/addons/registry/{addon_id}/register"
     ok, status_code, reason = _post_json(
         url=preferred_url,
-        payload_data={"base_url": base_url},
+        payload_data={
+            "base_url": base_url,
+            "name": addon_name,
+            "version": addon_version,
+        },
         auth_token=auth_token,
         timeout_s=timeout_s,
     )
@@ -57,7 +64,12 @@ def register_addon_endpoint(
     legacy_url = f"{core_base}/api/admin/addons/registry"
     ok, legacy_status, legacy_reason = _post_json(
         url=legacy_url,
-        payload_data={"addon_id": addon_id, "base_url": base_url},
+        payload_data={
+            "addon_id": addon_id,
+            "base_url": base_url,
+            "name": addon_name,
+            "version": addon_version,
+        },
         auth_token=auth_token,
         timeout_s=timeout_s,
     )
@@ -68,7 +80,12 @@ def register_addon_endpoint(
     if legacy_status == 422:
         return _post_json(
             url=legacy_url,
-            payload_data={"id": addon_id, "name": "Synthia MQTT", "base_url": base_url},
+            payload_data={
+                "id": addon_id,
+                "name": addon_name,
+                "version": addon_version,
+                "base_url": base_url,
+            },
             auth_token=auth_token,
             timeout_s=timeout_s,
         )
