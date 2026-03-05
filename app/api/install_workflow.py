@@ -18,6 +18,23 @@ from app.services.health import HealthService
 from app.services.mqtt_client import test_external_connection
 
 
+def _diagnostic_code_from_reason(ok: bool, reason: str | None) -> str:
+    if ok:
+        return "ok"
+    if not reason:
+        return "unknown_error"
+    normalized = reason.lower()
+    if "timed out" in normalized:
+        return "timeout"
+    if "refused" in normalized:
+        return "connection_refused"
+    if "name or service not known" in normalized or "nodename nor servname" in normalized:
+        return "dns_error"
+    if "mqtt connect failed with rc=" in normalized:
+        return "mqtt_connect_failed"
+    return "connection_error"
+
+
 def build_install_workflow_router(
     config_store: ConfigStore,
     health_service: HealthService,
@@ -52,7 +69,13 @@ def build_install_workflow_router(
             username=payload.username,
             password=payload.password,
         )
-        return InstallTestExternalResponse(ok=ok, reason=reason)
+        diagnostic_code = _diagnostic_code_from_reason(ok=ok, reason=reason)
+        config_store.update_install_session_state(
+            mode="external",
+            verified=ok,
+            last_error=None if ok else reason,
+        )
+        return InstallTestExternalResponse(ok=ok, diagnostic_code=diagnostic_code, reason=reason)
 
     @router.post("/apply", response_model=InstallApplyResponse)
     def apply_install(payload: InstallApplyRequest) -> InstallApplyResponse:
@@ -62,13 +85,18 @@ def build_install_workflow_router(
         try:
             config_store.apply_install_config(payload)
         except ValueError as exc:
-            config_store.update_install_session_state(last_error=str(exc))
+            config_store.update_install_session_state(mode="external", configured=False, last_error=str(exc))
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except Exception as exc:  # pragma: no cover
-            config_store.update_install_session_state(last_error="Failed to persist install config")
+            config_store.update_install_session_state(
+                mode="external",
+                configured=False,
+                last_error="Failed to persist install config",
+            )
             raise HTTPException(status_code=500, detail="Failed to persist install config") from exc
 
         reload_mqtt_service()
+        config_store.update_install_session_state(mode="external", configured=True, last_error=None)
 
         return InstallApplyResponse(
             ok=True,

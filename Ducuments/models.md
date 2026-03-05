@@ -23,6 +23,7 @@ Defines install workflow models for:
 - install status response
   - includes persisted setup session fields: `mode`, `configured`, `verified`, `registered_to_core`, `last_error`
 - external broker connectivity test request/response
+  - test response includes `diagnostic_code` with machine-readable outcome classification
 - install apply request/response for external mode
 - core registry registration request/response
 

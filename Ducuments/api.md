@@ -25,7 +25,13 @@ Implements install workflow endpoints:
 - `POST /api/install/apply`
 - `POST /api/install/register-core`
 
-`/api/install/apply` now accepts only external mode for this artifact, persists external broker config, and reconnects the MQTT client.
+`/api/install/test-external` returns:
+- `ok` (boolean)
+- `diagnostic_code` (string; one of `ok`, `timeout`, `connection_refused`, `dns_error`, `mqtt_connect_failed`, `connection_error`, `unknown_error`)
+- `reason` (optional diagnostic message)
+
+`/api/install/apply` accepts only external mode for this artifact, persists external broker config, and reconnects the MQTT client.
+Both test/apply endpoints keep install-session state (`mode/configured/verified/last_error`) synchronized for wizard flow.
 `/api/install/register-core` posts `{ addon_id, base_url }` to Core at `/api/admin/addons/registry`.
 
 ## `app/api/broker_admin.py`

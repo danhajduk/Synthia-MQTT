@@ -33,3 +33,8 @@ Error context: None.
 Reasoning: Wizard flow requires stable backend truth for setup progress independent of transient health snapshots, so install status must include persisted state fields.
 What and why: Added persisted install session state (`runtime/install_state.json`) with `mode/configured/verified/registered_to_core/last_error`, surfaced these fields in `/api/install/status`, and updated install apply error/success paths to keep state synchronized; documented model/state in Ducuments/models.md.
 ###########
+Task #14.2 :
+Error context: None.
+Reasoning: External setup UX needs machine-readable diagnostics for connection failures and consistent install-session state transitions during test/apply actions.
+What and why: Extended `/api/install/test-external` response with `diagnostic_code` and mapped reason strings into stable codes; updated test/apply handlers to synchronize `mode/configured/verified/last_error` state in `runtime/install_state.json`; documented API and model updates.
+###########

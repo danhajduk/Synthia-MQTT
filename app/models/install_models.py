@@ -38,6 +38,7 @@ class EmbeddedBrokerConfig(BaseModel):
 
 class InstallTestExternalResponse(BaseModel):
     ok: bool
+    diagnostic_code: str
     reason: str | None = None
 
 
