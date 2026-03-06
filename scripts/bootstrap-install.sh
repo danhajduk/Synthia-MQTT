@@ -2,6 +2,9 @@
 set -euo pipefail
 
 GITHUB_REPO="${GITHUB_REPO:-danhajduk/Synthia-MQTT}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_MAIN_ADDON_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+MAIN_ADDON_ROOT="${MAIN_ADDON_ROOT:-$DEFAULT_MAIN_ADDON_ROOT}"
 DEFAULT_INSTALL_DIR="${DEFAULT_INSTALL_DIR:-$PWD/SynthiaAddons/Synthia-MQTT}"
 DEFAULT_BASE_TOPIC="${DEFAULT_BASE_TOPIC:-synthia}"
 DEFAULT_QOS="${DEFAULT_QOS:-1}"
@@ -23,13 +26,13 @@ Usage: ./scripts/bootstrap-install.sh [--version <tag|latest>] [--addon-port <po
 
 Interactive installer that:
 - downloads latest GitHub release addon.tgz
-- installs into SSAP-style versions/current layout
+- installs into SSAP-style versions/current layout (without extracting addon.tgz)
 - writes runtime .env
 - optionally starts containers and registers with Core
 
 Options:
 - --version <tag|latest>  Release tag to install (default: latest)
-- --force                 Re-download/re-extract even if version is already installed
+- --force                 Re-download and re-prepare version layout even if already installed
 - --addon-port <port>     Host port to bind addon HTTP service to (default: 18080)
 - --bind <host>           Host bind address for addon HTTP service (default: detected host IP)
 - --no-open               Do not auto-open setup UI in browser
@@ -543,6 +546,59 @@ write_desired_file() {
 EOF
 }
 
+prepare_extracted_layout() {
+  local version_dir="$1"
+  local extract_dir="$version_dir/extracted"
+  local source_root="$2"
+  local compose_link="$version_dir/docker-compose.yml"
+
+  [[ -d "$source_root" ]] || die "main addon source root not found: $source_root"
+  [[ -d "$source_root/app" ]] || die "main addon source missing app/: $source_root"
+  [[ -d "$source_root/docker" ]] || die "main addon source missing docker/: $source_root"
+  [[ -f "$source_root/requirements.txt" ]] || die "main addon source missing requirements.txt: $source_root"
+
+  rm -rf "$extract_dir"
+  mkdir -p "$extract_dir/runtime"
+
+  ln -sfn "$source_root/app" "$extract_dir/app"
+  ln -sfn "$source_root/docker" "$extract_dir/docker"
+  if [[ -d "$source_root/frontend" ]]; then
+    ln -sfn "$source_root/frontend" "$extract_dir/frontend"
+  fi
+  ln -sfn "$source_root/manifest.json" "$extract_dir/manifest.json"
+  ln -sfn "$source_root/requirements.txt" "$extract_dir/requirements.txt"
+
+  if [[ -f "$source_root/docker/Dockerfile" ]]; then
+    ln -sfn "$source_root/docker/Dockerfile" "$extract_dir/Dockerfile"
+  fi
+
+  ln -sfn "$extract_dir/docker/docker-compose.yml" "$compose_link"
+  echo "$source_root" > "$version_dir/.source_root"
+  echo "[bootstrap] prepared source-linked extracted layout at: $extract_dir"
+}
+
+write_runtime_file() {
+  local runtime_file="$1"
+  local addon_id="$2"
+  local version="$3"
+  local announce_base="$4"
+
+  cat > "$runtime_file" <<EOF
+{
+  "ssap_version": "1.0",
+  "addon_id": "${addon_id}",
+  "mode": "standalone_service",
+  "status": "deployed",
+  "active_version": "${version}",
+  "desired_state": "running",
+  "endpoint": {
+    "base_url": "${announce_base}"
+  },
+  "last_error": null
+}
+EOF
+}
+
 wait_for_health() {
   local health_url="$1"
   local timeout_seconds="$2"
@@ -615,7 +671,6 @@ main() {
   fi
 
   require_cmd curl
-  require_cmd tar
   require_cmd python3
 
   echo "Synthia MQTT bootstrap installer"
@@ -725,26 +780,30 @@ main() {
   fi
 
   artifact_exists="false"
-  extract_exists="false"
+  extract_layout_exists="false"
+  compose_link_exists="false"
   if [[ -f "$artifact_file" ]]; then
     artifact_exists="true"
   fi
-  if [[ -d "$extract_dir" ]]; then
-    extract_exists="true"
+  if [[ -d "$extract_dir" && -f "$version_dir/.source_root" ]]; then
+    extract_layout_exists="true"
+  fi
+  if [[ -L "$version_dir/docker-compose.yml" ]]; then
+    compose_link_exists="true"
   fi
 
   need_download="true"
-  need_extract="true"
+  need_layout_prepare="true"
   if [[ "$FORCE_INSTALL" != "true" ]]; then
     if [[ "$artifact_exists" == "true" ]]; then
       need_download="false"
       echo "[bootstrap] artifact already present, skipping download (use --force to re-download)"
     fi
-    if [[ "$extract_exists" == "true" ]]; then
-      need_extract="false"
-      echo "[bootstrap] extracted version already present, skipping extract (use --force to re-extract)"
+    if [[ "$extract_layout_exists" == "true" && "$compose_link_exists" == "true" ]]; then
+      need_layout_prepare="false"
+      echo "[bootstrap] extracted source-link layout already present, skipping prepare (use --force to re-prepare)"
     fi
-    if [[ "$current_link_target" == "$requested_link_target" && "$need_download" == "false" && "$need_extract" == "false" ]]; then
+    if [[ "$current_link_target" == "$requested_link_target" && "$need_download" == "false" && "$need_layout_prepare" == "false" ]]; then
       echo "[bootstrap] current already points to requested version and install artifacts are present"
     fi
   fi
@@ -759,10 +818,8 @@ main() {
     verify_or_print_checksum "$artifact_file" "" "$tmpdir"
   fi
 
-  if [[ "$need_extract" == "true" ]]; then
-    rm -rf "$extract_dir"
-    mkdir -p "$extract_dir"
-    tar -xzf "$artifact_file" -C "$extract_dir"
+  if [[ "$need_layout_prepare" == "true" ]]; then
+    prepare_extracted_layout "$version_dir" "$MAIN_ADDON_ROOT"
   fi
 
   if [[ "$current_link_target" != "$requested_link_target" ]]; then
@@ -803,6 +860,10 @@ main() {
     "$desired_project_name" \
     "$ADDON_PORT"
   echo "[bootstrap] wrote desired file: $desired_file"
+
+  runtime_file="$INSTALL_DIR/runtime.json"
+  write_runtime_file "$runtime_file" "$addon_id" "$version" "$ANNOUNCE_BASE_URL"
+  echo "[bootstrap] wrote runtime file: $runtime_file"
 
   env_file="$active_root/.env"
   write_env_file "$env_file"

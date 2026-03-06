@@ -27,12 +27,14 @@
 - Layout:
   - `versions/<version>/addon.tgz`
   - `versions/<version>/extracted/`
+  - `versions/<version>/docker-compose.yml`
   - `current -> versions/<version>` symlink
   - `desired.json` at addon root
+  - `runtime.json` at addon root
   - `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink
 - Behavior on re-run:
   - always re-downloads selected artifact
-  - always deletes/re-extracts `extracted/`
+  - always re-prepares source-linked `extracted/` layout (no tar extraction)
   - always force-updates `current` symlink
 
 ### Compose startup behavior

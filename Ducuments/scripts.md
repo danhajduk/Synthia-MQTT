@@ -43,8 +43,8 @@ Purpose:
 - Fetch latest GitHub release artifact (`addon.tgz`).
 - Support explicit release selection with `--version <tag|latest>` (default `latest`).
 - Support idempotent re-runs:
-  - skip download/extract when requested version is already installed
-  - use `--force` to re-download/re-extract
+  - skip download/layout prepare when requested version is already installed
+  - use `--force` to re-download/re-prepare
 - Start Docker in addon-only mode (`mqtt-addon` service only) when service startup is selected.
 - Support host binding controls with `--addon-port` and `--bind` (`--bind` defaults to detected host IP).
 - Wait for `healthz` readiness and open setup UI automatically after successful startup.
@@ -54,8 +54,12 @@ Purpose:
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
 - Install into `${PWD}/SynthiaAddons/Synthia-MQTT` by default (override with `DEFAULT_INSTALL_DIR` env).
 - Maintain version layout under install root: `versions/<version>/...` and `current -> versions/<version>`.
+- Keep `addon.tgz` as the downloaded artifact (no tar extraction step).
+- Prepare `versions/<version>/extracted` as a source-linked runtime workspace from `MAIN_ADDON_ROOT` (default: repo root).
+- Create `versions/<version>/docker-compose.yml` symlink to `versions/<version>/extracted/docker/docker-compose.yml`.
 - Create `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink for SSAP `services` path compatibility.
 - Write `desired.json` at addon root (`./SynthiaAddons/Synthia-MQTT/desired.json`) with full SSAP v1.0 required fields (`install_source.release.signature`, `runtime`, and `config.env` included).
+- Write `runtime.json` at addon root (`./SynthiaAddons/Synthia-MQTT/runtime.json`) with deployed runtime state metadata.
 - Prompt for runtime choices:
   - install local MQTT broker (Compose override)
   - Core host URL for optional registration
