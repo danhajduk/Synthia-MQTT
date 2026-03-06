@@ -42,6 +42,8 @@ Manual compose startup (alternative to bootstrap):
 MQTT_HOST=10.0.0.100 MQTT_PORT=1883 docker compose -f docker/docker-compose.yml up -d
 ```
 
+`docker/docker-compose.yml` builds the service image using `docker/Dockerfile`.
+
 Set `ANNOUNCE_BASE_URL` to the externally reachable API URL so MQTT announce payloads expose the correct address.
 
 Health check:
