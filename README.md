@@ -133,3 +133,20 @@ SERVICE_BASE_URL=http://localhost:18080 MQTT_HOST=10.0.0.100 ./scripts/validate-
 - `package_profile = standalone_service`
 - canonical permissions: `network.egress`, `mqtt.publish`, `mqtt.subscribe`
 - `entrypoints.service = app/main.py` and `entrypoints.ui = frontend`
+
+## Artifact Extraction Layout
+
+`addon.tgz` now extracts with this canonical structure:
+
+```text
+<artifact-root>/
+  manifest.json
+  requirements.txt
+  Dockerfile
+  app/
+  frontend/        (optional)
+    dist/
+  docker/          (optional)
+    Dockerfile     (optional)
+    docker-compose.yml (optional)
+```

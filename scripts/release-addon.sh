@@ -54,10 +54,25 @@ fi
 echo "==> Building deterministic ${ASSET_NAME}"
 rm -f "${ASSET_NAME}"
 
+STAGE_DIR="$(mktemp -d)"
+cleanup_stage() {
+  rm -rf "${STAGE_DIR}"
+}
+trap cleanup_stage EXIT
+
+for p in ${PACKAGE_PATHS}; do
+  cp -a "$p" "${STAGE_DIR}/"
+done
+
+if [[ -f "${STAGE_DIR}/docker/Dockerfile" && ! -f "${STAGE_DIR}/Dockerfile" ]]; then
+  cp "${STAGE_DIR}/docker/Dockerfile" "${STAGE_DIR}/Dockerfile"
+fi
+
 tar --sort=name \
   --owner=0 --group=0 --numeric-owner \
   --mtime="UTC 2026-01-01" \
-  -czf "${ASSET_NAME}" ${PACKAGE_PATHS}
+  -C "${STAGE_DIR}" \
+  -czf "${ASSET_NAME}" .
 
 ########################################
 # SHA256

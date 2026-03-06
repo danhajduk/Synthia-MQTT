@@ -231,7 +231,21 @@ echo "Artifact URL: $ARTIFACT_URL"
 echo "Include:"
 printf " - %s\n" "${FILES[@]}"
 
-tar -czf "$ARTIFACT" "${FILES[@]}"
+STAGE_DIR="$(mktemp -d)"
+cleanup_stage() {
+  rm -rf "$STAGE_DIR"
+}
+trap cleanup_stage EXIT
+
+for f in "${FILES[@]}"; do
+  cp -a "$f" "$STAGE_DIR/"
+done
+
+if [[ -f "$STAGE_DIR/docker/Dockerfile" && ! -f "$STAGE_DIR/Dockerfile" ]]; then
+  cp "$STAGE_DIR/docker/Dockerfile" "$STAGE_DIR/Dockerfile"
+fi
+
+tar -czf "$ARTIFACT" -C "$STAGE_DIR" .
 
 SHA256="$(sha256sum "$ARTIFACT" | awk '{print $1}')"
 echo "$SHA256  $ASSET_NAME" | tee "$SHAFILE"

@@ -1,8 +1,8 @@
-Task #31 :
-Error context: New pending task requested release publish on version `0.1.7d` after bootstrap layout updates.
-Reasoning: Use the established deterministic release pipeline to keep artifact/hash/signature metadata aligned with repository release process.
-What and why: Bumped manifest to `0.1.7d` and published GitHub release `v0.1.7d`; `release-output.json` now points to the new artifact and checksum.
+Task #32 :
+Error context: Artifact extraction needed a canonical top-level Dockerfile while keeping existing docker assets.
+Reasoning: Stage package contents before tar creation so layout normalization is deterministic and does not require repository file duplication.
+What and why: Updated release/sign scripts to copy selected paths into a temp stage and map docker/Dockerfile to root Dockerfile; documented expected extracted tree in README.
 ###########
 #############
-All Tasks completed 03/05/2026 17:58:22
+All Tasks completed 03/05/2026 20:25:36
 #############
