@@ -68,6 +68,8 @@ Bootstrap latest addon release with interactive install prompts:
 ./scripts/bootstrap-install.sh
 ```
 
+Current published release target: `v0.1.8`.
+
 Bootstrap install layout (current):
 - install root: `./SynthiaAddons/Synthia-MQTT`
 - root files: `desired.json`, `runtime.json`, `current -> versions/<version>`
