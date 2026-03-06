@@ -3,8 +3,6 @@ set -euo pipefail
 
 GITHUB_REPO="${GITHUB_REPO:-danhajduk/Synthia-MQTT}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_MAIN_ADDON_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-MAIN_ADDON_ROOT="${MAIN_ADDON_ROOT:-$DEFAULT_MAIN_ADDON_ROOT}"
 DEFAULT_INSTALL_DIR="${DEFAULT_INSTALL_DIR:-$PWD/SynthiaAddons/Synthia-MQTT}"
 DEFAULT_BASE_TOPIC="${DEFAULT_BASE_TOPIC:-synthia}"
 DEFAULT_QOS="${DEFAULT_QOS:-1}"
@@ -19,6 +17,32 @@ fi
 NO_OPEN="false"
 TIMEOUT_SECONDS="60"
 NON_INTERACTIVE="false"
+
+resolve_main_addon_root() {
+  local script_dir="$1"
+  local requested_root="${2:-}"
+  local candidates=()
+  local candidate
+
+  if [[ -n "$requested_root" ]]; then
+    candidates+=("$requested_root")
+  fi
+  candidates+=(
+    "$script_dir"
+    "$script_dir/.."
+    "$PWD"
+  )
+
+  for candidate in "${candidates[@]}"; do
+    if [[ -d "$candidate/app" && -d "$candidate/docker" && -f "$candidate/requirements.txt" ]]; then
+      cd "$candidate" >/dev/null 2>&1
+      pwd
+      return 0
+    fi
+  done
+
+  return 1
+}
 
 usage() {
   cat <<'EOF'
@@ -664,6 +688,10 @@ register_with_core() {
 
 main() {
   parse_args "$@"
+
+  if ! MAIN_ADDON_ROOT="$(resolve_main_addon_root "$SCRIPT_DIR" "${MAIN_ADDON_ROOT:-}")"; then
+    die "unable to resolve MAIN_ADDON_ROOT (set MAIN_ADDON_ROOT to addon source root with app/, docker/, requirements.txt)"
+  fi
 
   if [[ "$NON_INTERACTIVE" != "true" && ! -t 0 ]]; then
     echo "[bootstrap] ERROR: interactive terminal required. Use --help for details." >&2

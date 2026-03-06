@@ -1,18 +1,8 @@
-Task #24 :
-Error context: New install requirements mandate keeping artifact-only downloads while still exposing runnable layout (`current`, `extracted`, compose link) and runtime state files.
-Reasoning: Prepare a source-linked extracted workspace instead of untarring release contents, so install layout matches requested shape while preserving deterministic artifact storage.
-What and why: Updated bootstrap to skip tar extraction, prepare `versions/<version>/extracted` as source-linked workspace from `MAIN_ADDON_ROOT`, create `versions/<version>/docker-compose.yml`, and write root `runtime.json`; updated bootstrap/script docs accordingly.
-###########
-Task #25 :
-Error context: Requested follow-up release `0.1.7c` needed immediate cut/publish after bootstrap layout changes.
-Reasoning: Reuse deterministic release script to keep hash/signature/artifact metadata aligned with current publishing process.
-What and why: Bumped manifest to `0.1.7c` and published GitHub release `v0.1.7c` with updated `release-output.json` metadata.
-###########
-Task #26 :
-Error context: New bootstrap/install/release behavior introduced in Tasks 24-25 required consolidated docs so operators can follow the updated layout and overrides.
-Reasoning: Keep documentation synchronized immediately after behavior changes to prevent drift between runtime expectations and operator runbooks.
-What and why: Updated README and bootstrap/scripts docs with no-extract layout details (`runtime.json`, `docker-compose.yml` link, `MAIN_ADDON_ROOT` override), plus finalized task run notes.
+Task #27 :
+Error context: Bootstrap failed with `main addon source missing app/: /home/dan` when script path/cwd differed from expected repo layout.
+Reasoning: Root-path inference must be resilient to invocation location to keep no-extract source-link install behavior usable in host workflows.
+What and why: Added `MAIN_ADDON_ROOT` auto-detection across script dir, script parent, and cwd (with required path checks), with clear override guidance; updated script docs accordingly.
 ###########
 #############
-All Tasks completed 03/05/2026 17:25:00
+All Tasks completed 03/05/2026 17:28:37
 #############
