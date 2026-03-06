@@ -157,6 +157,7 @@ Purpose:
 
 - Build and upload release artifact (`addon.tgz`) to GitHub release tag `v<version>`.
 - Package backend + docker + frontend assets (including UI files).
+- Include `docker/Dockerfile` in `addon.tgz` via packaged `docker/` directory.
 - Auto-build frontend assets when `frontend/dist` is missing.
 - Emit release snippet JSON (`release-output.json` by default).
 
