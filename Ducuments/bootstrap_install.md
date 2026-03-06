@@ -31,7 +31,7 @@
   - `current -> versions/<version>` symlink
   - `desired.json` at addon root
   - `runtime.json` at addon root
-  - `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink
+  - `./SynthiaAddons/service/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink
 - Behavior on re-run:
   - always re-downloads selected artifact
   - always re-prepares source-linked `extracted/` layout (no tar extraction)

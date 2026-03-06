@@ -1,8 +1,5 @@
-Task #29 :
-Error context: Current release artifact had no `docker/Dockerfile`, which blocked packaging completeness for docker build-based deployments.
-Reasoning: Add Dockerfile under existing packaged `docker/` path so it is automatically included by release packaging without changing package path rules.
-What and why: Added `docker/Dockerfile` with Python runtime + uvicorn startup and updated scripts docs; verified by rebuilding `addon.tgz` and confirming `docker/Dockerfile` exists in archive listing.
+Task #30 :
+Error context: New requested install layout requires service symlink path under `./SynthiaAddons/service/<addon_id>` while preserving artifact-first install flow.
+Reasoning: Keep existing install behaviors that already satisfy folder/version/artifact requirements and adjust only the symlink path + docs to match the new layout request.
+What and why: Updated bootstrap symlink root to `./SynthiaAddons/service`, and synced README/bootstrap/scripts docs to the same path.
 ###########
-#############
-All Tasks completed 03/05/2026 17:44:29
-#############

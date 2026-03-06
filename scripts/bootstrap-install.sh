@@ -864,7 +864,7 @@ main() {
   active_root="$INSTALL_DIR/current/extracted"
   manifest_file="$active_root/manifest.json"
   addon_id="$(resolve_addon_id "$manifest_file")"
-  services_root="$PWD/SynthiaAddons/services"
+  services_root="$PWD/SynthiaAddons/service"
   ensure_services_symlink "$services_root" "$addon_id" "$INSTALL_DIR"
 
   artifact_sha="$(get_sha256 "$artifact_file")"
