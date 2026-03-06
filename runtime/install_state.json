@@ -1,0 +1,7 @@
+{
+  "configured": false,
+  "last_error": "[Errno 2] No such file or directory: 'docker'",
+  "mode": "embedded",
+  "registered_to_core": false,
+  "verified": false
+}
