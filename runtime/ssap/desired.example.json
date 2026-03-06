@@ -29,12 +29,14 @@
         "proto": "tcp",
         "purpose": "http_api"
       }
-    ]
+    ],
+    "bind_localhost": true
   },
   "config": {
     "env": {
       "CORE_URL": "http://127.0.0.1:9001",
-      "SYNTHIA_ADDON_ID": "mqtt"
+      "SYNTHIA_ADDON_ID": "mqtt",
+      "SYNTHIA_SERVICE_TOKEN": "${SYNTHIA_SERVICE_TOKEN}"
     }
   }
 }

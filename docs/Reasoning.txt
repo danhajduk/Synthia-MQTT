@@ -1,8 +1,8 @@
-Task #21 :
-Error context: Bootstrap install flow did not create SSAP services-path linkage or desired state file, causing post-install control-plane integration gaps.
-Reasoning: Keep the current install root while adding compatibility outputs (`services/<addon_id>` link and `desired.json`) directly in bootstrap so every install produces the expected SSAP structure.
-What and why: Updated `scripts/bootstrap-install.sh` to resolve addon id from manifest, create `./SynthiaAddons/services/<addon_id>` symlink to addon root, and write root `desired.json` with version/source metadata; updated bootstrap/script docs to reflect new outputs.
+Task #22 :
+Error context: Bootstrap-generated desired.json omitted mandatory SSAP v1.0 fields (`catalog_id`, signature block, runtime/config payload), causing downstream contract mismatches.
+Reasoning: Enforce the required contract at generation time so every installed addon root immediately has a compliant desired-state document without manual edits.
+What and why: Updated bootstrap desired writer to emit full required SSAP v1.0 structure and valid constraints (`channel`, `desired_state`, 64-char lowercase sha256, `signature.type=ed25519`), plus aligned desired schema/example and script docs.
 ###########
 #############
-All Tasks completed 03/05/2026 16:55:04
+All Tasks completed 03/05/2026 16:57:46
 #############

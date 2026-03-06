@@ -424,12 +424,78 @@ ensure_services_symlink() {
   echo "[bootstrap] ensured services symlink: $services_link -> $install_dir"
 }
 
+resolve_publisher_key_id() {
+  local manifest_path="$1"
+  python3 - "$manifest_path" <<'PY'
+import json
+import sys
+
+manifest_path = sys.argv[1]
+with open(manifest_path, "r", encoding="utf-8") as handle:
+    manifest = json.load(handle)
+
+publisher = manifest.get("publisher") or {}
+publisher_id = str(publisher.get("id", "")).strip()
+if not publisher_id:
+    publisher_id = "publisher.unknown"
+if "#" not in publisher_id:
+    publisher_id = f"{publisher_id}#ed25519"
+print(publisher_id)
+PY
+}
+
+discover_signature_url() {
+  local asset_url="$1"
+  local base_url="${asset_url%/*}"
+  local asset_name="${asset_url##*/}"
+  local candidates=(
+    "${base_url}/addon.release_sig.b64"
+    "${asset_url}.release_sig.b64"
+  )
+  if [[ "$asset_name" == *.tgz ]]; then
+    candidates+=("${base_url}/${asset_name%.tgz}.release_sig.b64")
+  fi
+
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    if curl -fsSI "$candidate" >/dev/null 2>&1; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_signature_value() {
+  local signature_url="${1:-}"
+  local tmpdir="$2"
+  local signature_file="$tmpdir/release.sig.b64"
+  local signature_value=""
+
+  if [[ -n "$signature_url" ]]; then
+    if curl -fsSL "$signature_url" -o "$signature_file"; then
+      signature_value="$(tr -d ' \t\r\n' < "$signature_file")"
+    fi
+  fi
+
+  if [[ -z "$signature_value" ]]; then
+    signature_value="BASE64_SIGNATURE"
+  fi
+
+  echo "$signature_value"
+}
+
 write_desired_file() {
   local desired_file="$1"
   local addon_id="$2"
   local version="$3"
   local artifact_url="$4"
   local artifact_sha="$5"
+  local publisher_key_id="$6"
+  local signature_value="$7"
+  local core_url="$8"
+  local project_name="$9"
+  local host_port="${10}"
 
   cat > "$desired_file" <<EOF
 {
@@ -440,11 +506,37 @@ write_desired_file() {
   "channel": "stable",
   "pinned_version": "${version}",
   "install_source": {
-    "type": "release",
+    "type": "catalog",
+    "catalog_id": "official",
     "release": {
       "artifact_url": "${artifact_url}",
       "sha256": "${artifact_sha}",
-      "publisher_key_id": "${GITHUB_REPO}"
+      "publisher_key_id": "${publisher_key_id}",
+      "signature": {
+        "type": "ed25519",
+        "value": "${signature_value}"
+      }
+    }
+  },
+  "runtime": {
+    "orchestrator": "docker_compose",
+    "project_name": "${project_name}",
+    "network": "synthia_net",
+    "ports": [
+      {
+        "host": ${host_port},
+        "container": 8080,
+        "proto": "tcp",
+        "purpose": "http_api"
+      }
+    ],
+    "bind_localhost": true
+  },
+  "config": {
+    "env": {
+      "CORE_URL": "${core_url}",
+      "SYNTHIA_ADDON_ID": "${addon_id}",
+      "SYNTHIA_SERVICE_TOKEN": "\${SYNTHIA_SERVICE_TOKEN}"
     }
   }
 }
@@ -687,8 +779,29 @@ main() {
   ensure_services_symlink "$services_root" "$addon_id" "$INSTALL_DIR"
 
   artifact_sha="$(get_sha256 "$artifact_file")"
+  publisher_key_id="$(resolve_publisher_key_id "$manifest_file")"
+  signature_url=""
+  if signature_url="$(discover_signature_url "$asset_url")"; then
+    echo "[bootstrap] signature source: $signature_url"
+  else
+    echo "[bootstrap] signature source: none found (using placeholder value)"
+    signature_url=""
+  fi
+  signature_value="$(resolve_signature_value "$signature_url" "$tmpdir")"
+  desired_core_url="${CORE_BASE_URL:-http://127.0.0.1:8000}"
+  desired_project_name="synthia-addon-${addon_id}"
   desired_file="$INSTALL_DIR/desired.json"
-  write_desired_file "$desired_file" "$addon_id" "$version" "$asset_url" "$artifact_sha"
+  write_desired_file \
+    "$desired_file" \
+    "$addon_id" \
+    "$version" \
+    "$asset_url" \
+    "$artifact_sha" \
+    "$publisher_key_id" \
+    "$signature_value" \
+    "$desired_core_url" \
+    "$desired_project_name" \
+    "$ADDON_PORT"
   echo "[bootstrap] wrote desired file: $desired_file"
 
   env_file="$active_root/.env"

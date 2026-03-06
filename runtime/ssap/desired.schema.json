@@ -2,40 +2,73 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SSAP desired.json",
   "type": "object",
-  "required": ["ssap_version", "addon_id", "mode", "desired_state"],
+  "required": [
+    "ssap_version",
+    "addon_id",
+    "mode",
+    "desired_state",
+    "channel",
+    "pinned_version",
+    "install_source",
+    "runtime",
+    "config"
+  ],
   "properties": {
     "ssap_version": { "const": "1.0" },
     "addon_id": { "type": "string" },
     "mode": { "const": "standalone_service" },
     "desired_state": { "enum": ["running", "stopped"] },
-    "channel": { "type": "string" },
+    "channel": { "enum": ["stable", "beta", "nightly"] },
     "pinned_version": { "type": ["string", "null"] },
     "install_source": {
       "type": "object",
+      "required": ["type", "catalog_id", "release"],
       "properties": {
+        "type": { "const": "catalog" },
+        "catalog_id": { "type": "string" },
         "release": {
           "type": "object",
+          "required": ["artifact_url", "sha256", "publisher_key_id", "signature"],
           "properties": {
             "artifact_url": { "type": "string" },
-            "sha256": { "type": "string" },
-            "publisher_key_id": { "type": "string" }
-          },
-          "required": ["artifact_url", "sha256", "publisher_key_id"]
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "publisher_key_id": { "type": "string" },
+            "signature": {
+              "type": "object",
+              "required": ["type", "value"],
+              "properties": {
+                "type": { "const": "ed25519" },
+                "value": { "type": "string" }
+              }
+            }
+          }
         }
       }
     },
     "runtime": {
       "type": "object",
+      "required": ["orchestrator", "project_name", "network", "ports", "bind_localhost"],
       "properties": {
+        "orchestrator": { "const": "docker_compose" },
         "project_name": { "type": "string" },
         "network": { "type": "string" },
-        "ports": { "type": "array" }
+        "ports": { "type": "array" },
+        "bind_localhost": { "type": "boolean" }
       }
     },
     "config": {
       "type": "object",
+      "required": ["env"],
       "properties": {
-        "env": { "type": "object" }
+        "env": {
+          "type": "object",
+          "required": ["CORE_URL", "SYNTHIA_ADDON_ID", "SYNTHIA_SERVICE_TOKEN"],
+          "properties": {
+            "CORE_URL": { "type": "string" },
+            "SYNTHIA_ADDON_ID": { "type": "string" },
+            "SYNTHIA_SERVICE_TOKEN": { "type": "string" }
+          }
+        }
       }
     }
   }

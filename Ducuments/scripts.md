@@ -55,7 +55,7 @@ Purpose:
 - Install into `${PWD}/SynthiaAddons/Synthia-MQTT` by default (override with `DEFAULT_INSTALL_DIR` env).
 - Maintain version layout under install root: `versions/<version>/...` and `current -> versions/<version>`.
 - Create `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink for SSAP `services` path compatibility.
-- Write `desired.json` at addon root (`./SynthiaAddons/Synthia-MQTT/desired.json`) with SSAP desired-state metadata.
+- Write `desired.json` at addon root (`./SynthiaAddons/Synthia-MQTT/desired.json`) with full SSAP v1.0 required fields (`install_source.release.signature`, `runtime`, and `config.env` included).
 - Prompt for runtime choices:
   - install local MQTT broker (Compose override)
   - Core host URL for optional registration
