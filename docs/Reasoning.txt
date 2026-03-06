@@ -1,5 +1,8 @@
-Task #30 :
-Error context: New requested install layout requires service symlink path under `./SynthiaAddons/service/<addon_id>` while preserving artifact-first install flow.
-Reasoning: Keep existing install behaviors that already satisfy folder/version/artifact requirements and adjust only the symlink path + docs to match the new layout request.
-What and why: Updated bootstrap symlink root to `./SynthiaAddons/service`, and synced README/bootstrap/scripts docs to the same path.
+Task #31 :
+Error context: New pending task requested release publish on version `0.1.7d` after bootstrap layout updates.
+Reasoning: Use the established deterministic release pipeline to keep artifact/hash/signature metadata aligned with repository release process.
+What and why: Bumped manifest to `0.1.7d` and published GitHub release `v0.1.7d`; `release-output.json` now points to the new artifact and checksum.
 ###########
+#############
+All Tasks completed 03/05/2026 17:58:22
+#############
