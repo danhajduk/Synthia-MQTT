@@ -1,8 +1,8 @@
-Task #27 :
-Error context: Bootstrap failed with `main addon source missing app/: /home/dan` when script path/cwd differed from expected repo layout.
-Reasoning: Root-path inference must be resilient to invocation location to keep no-extract source-link install behavior usable in host workflows.
-What and why: Added `MAIN_ADDON_ROOT` auto-detection across script dir, script parent, and cwd (with required path checks), with clear override guidance; updated script docs accordingly.
+Task #28 :
+Error context: Running `./bootstrap-install.sh` from `~/Projects` still failed root detection because repo content was in `~/Projects/Synthia-MQTT`.
+Reasoning: Auto-detection must cover common launcher layouts where the script is outside repo root but repo-name subdirectory exists.
+What and why: Extended `MAIN_ADDON_ROOT` candidate search to include `<script-dir>/<repo-name>`, `<script-dir>/../<repo-name>`, and `<cwd>/<repo-name>`; updated script docs accordingly.
 ###########
 #############
-All Tasks completed 03/05/2026 17:28:37
+All Tasks completed 03/05/2026 17:32:12
 #############

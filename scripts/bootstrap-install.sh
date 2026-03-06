@@ -21,6 +21,7 @@ NON_INTERACTIVE="false"
 resolve_main_addon_root() {
   local script_dir="$1"
   local requested_root="${2:-}"
+  local repo_name="${GITHUB_REPO##*/}"
   local candidates=()
   local candidate
 
@@ -31,6 +32,9 @@ resolve_main_addon_root() {
     "$script_dir"
     "$script_dir/.."
     "$PWD"
+    "$script_dir/$repo_name"
+    "$script_dir/../$repo_name"
+    "$PWD/$repo_name"
   )
 
   for candidate in "${candidates[@]}"; do
