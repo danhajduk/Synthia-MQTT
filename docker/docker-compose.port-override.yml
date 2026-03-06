@@ -1,0 +1,4 @@
+services:
+  mqtt-addon:
+    ports:
+      - "10.0.0.100:18081:8080"
