@@ -245,6 +245,10 @@ if [[ -f "$STAGE_DIR/docker/Dockerfile" && ! -f "$STAGE_DIR/Dockerfile" ]]; then
   cp "$STAGE_DIR/docker/Dockerfile" "$STAGE_DIR/Dockerfile"
 fi
 
+if [[ -f "$STAGE_DIR/docker/docker-compose.yml" && ! -f "$STAGE_DIR/docker-compose.yml" ]]; then
+  cp "$STAGE_DIR/docker/docker-compose.yml" "$STAGE_DIR/docker-compose.yml"
+fi
+
 tar -czf "$ARTIFACT" -C "$STAGE_DIR" .
 
 SHA256="$(sha256sum "$ARTIFACT" | awk '{print $1}')"

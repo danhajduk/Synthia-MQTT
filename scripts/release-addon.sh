@@ -68,6 +68,10 @@ if [[ -f "${STAGE_DIR}/docker/Dockerfile" && ! -f "${STAGE_DIR}/Dockerfile" ]]; 
   cp "${STAGE_DIR}/docker/Dockerfile" "${STAGE_DIR}/Dockerfile"
 fi
 
+if [[ -f "${STAGE_DIR}/docker/docker-compose.yml" && ! -f "${STAGE_DIR}/docker-compose.yml" ]]; then
+  cp "${STAGE_DIR}/docker/docker-compose.yml" "${STAGE_DIR}/docker-compose.yml"
+fi
+
 tar --sort=name \
   --owner=0 --group=0 --numeric-owner \
   --mtime="UTC 2026-01-01" \

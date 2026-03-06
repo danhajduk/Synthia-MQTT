@@ -148,6 +148,7 @@ SERVICE_BASE_URL=http://localhost:18080 MQTT_HOST=10.0.0.100 ./scripts/validate-
   manifest.json
   requirements.txt
   Dockerfile
+  docker-compose.yml
   app/
   frontend/        (optional)
     dist/

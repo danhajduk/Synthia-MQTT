@@ -1,8 +1,8 @@
-Task #34 :
-Error context: Bootstrap install layout was missing versions/<version>/docker-compose.yml even though operators expect that file at the version root.
-Reasoning: Extract docker/docker-compose.yml directly from the downloaded artifact into the version directory to keep install output deterministic without full untar.
-What and why: Updated bootstrap-install to require tar and write versions/<version>/docker-compose.yml from addon.tgz; fixed tmpdir trap scope bug, bumped manifest to 0.1.9, and updated README release target/layout note.
+Task #35 :
+Error context: Downloaded artifact extraction showed docker-compose.yml only under docker/ while operator expected it at artifact root.
+Reasoning: Mirror docker/docker-compose.yml to root during packaging, matching the existing root Dockerfile mapping pattern.
+What and why: Updated release and signing packaging stages to copy docker/docker-compose.yml to root docker-compose.yml when present, and documented root compose in artifact extraction layout.
 ###########
 #############
-All Tasks completed 03/05/2026 21:11:48
+All Tasks completed 03/05/2026 21:19:40
 #############
