@@ -68,6 +68,13 @@ Bootstrap latest addon release with interactive install prompts:
 ./scripts/bootstrap-install.sh
 ```
 
+Bootstrap install layout (current):
+- install root: `./SynthiaAddons/Synthia-MQTT`
+- root files: `desired.json`, `runtime.json`, `current -> versions/<version>`
+- version files: `versions/<version>/addon.tgz`, `versions/<version>/extracted`, `versions/<version>/docker-compose.yml`
+- `extracted` is a source-linked runtime workspace prepared from `MAIN_ADDON_ROOT` (defaults to repo root); `addon.tgz` is retained and not untarred.
+- services link: `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT`
+
 The bootstrap script asks for:
 - whether to install a local MQTT broker container
 - Core host URL (optional, for endpoint registration)

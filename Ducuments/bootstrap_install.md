@@ -26,7 +26,7 @@
 - Installs to: `${PWD}/SynthiaAddons/Synthia-MQTT` by default.
 - Layout:
   - `versions/<version>/addon.tgz`
-  - `versions/<version>/extracted/`
+  - `versions/<version>/extracted/` (source-linked runtime workspace, not tar extraction output)
   - `versions/<version>/docker-compose.yml`
   - `current -> versions/<version>` symlink
   - `desired.json` at addon root
@@ -36,6 +36,11 @@
   - always re-downloads selected artifact
   - always re-prepares source-linked `extracted/` layout (no tar extraction)
   - always force-updates `current` symlink
+
+### Source-link behavior
+- The script uses `MAIN_ADDON_ROOT` for source-linked runtime layout preparation.
+- Default: repository root derived from script location.
+- Override: set `MAIN_ADDON_ROOT=/absolute/path/to/Synthia-MQTT` before running bootstrap.
 
 ### Compose startup behavior
 - Uses extracted release compose file:

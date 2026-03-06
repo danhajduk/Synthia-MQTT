@@ -57,6 +57,7 @@ Purpose:
 - Keep `addon.tgz` as the downloaded artifact (no tar extraction step).
 - Prepare `versions/<version>/extracted` as a source-linked runtime workspace from `MAIN_ADDON_ROOT` (default: repo root).
 - Create `versions/<version>/docker-compose.yml` symlink to `versions/<version>/extracted/docker/docker-compose.yml`.
+- `MAIN_ADDON_ROOT` can be overridden to point bootstrap at a different local addon source tree.
 - Create `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink for SSAP `services` path compatibility.
 - Write `desired.json` at addon root (`./SynthiaAddons/Synthia-MQTT/desired.json`) with full SSAP v1.0 required fields (`install_source.release.signature`, `runtime`, and `config.env` included).
 - Write `runtime.json` at addon root (`./SynthiaAddons/Synthia-MQTT/runtime.json`) with deployed runtime state metadata.
