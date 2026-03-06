@@ -1,8 +1,8 @@
-Task #22 :
-Error context: Bootstrap-generated desired.json omitted mandatory SSAP v1.0 fields (`catalog_id`, signature block, runtime/config payload), causing downstream contract mismatches.
-Reasoning: Enforce the required contract at generation time so every installed addon root immediately has a compliant desired-state document without manual edits.
-What and why: Updated bootstrap desired writer to emit full required SSAP v1.0 structure and valid constraints (`channel`, `desired_state`, 64-char lowercase sha256, `signature.type=ed25519`), plus aligned desired schema/example and script docs.
+Task #23 :
+Error context: Requested release channel/version needed a new publish target (`0.1.7b`) after contract fixes, but manifest and release tag had not been cut yet.
+Reasoning: Use the existing deterministic release script so artifact hash/signature/upload outputs stay consistent with repository release process.
+What and why: Bumped manifest version to `0.1.7b` and published GitHub release `v0.1.7b` via `scripts/release-addon.sh`, generating a new signed `addon.tgz` and refreshed release metadata output.
 ###########
 #############
-All Tasks completed 03/05/2026 16:57:46
+All Tasks completed 03/05/2026 16:59:14
 #############
