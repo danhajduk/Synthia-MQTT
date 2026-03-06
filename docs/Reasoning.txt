@@ -1,8 +1,8 @@
 Task #34 :
-Error context: Requested compose packaging to explicitly use docker/Dockerfile.
-Reasoning: Point service build to docker/Dockerfile so artifact-contained compose is explicit and compatible with systems expecting that path.
-What and why: Updated docker/docker-compose.yml to use build context with dockerfile docker/Dockerfile and removed source-mount runtime command overrides; documented compose build source in README.
+Error context: Bootstrap install layout was missing versions/<version>/docker-compose.yml even though operators expect that file at the version root.
+Reasoning: Extract docker/docker-compose.yml directly from the downloaded artifact into the version directory to keep install output deterministic without full untar.
+What and why: Updated bootstrap-install to require tar and write versions/<version>/docker-compose.yml from addon.tgz; fixed tmpdir trap scope bug, bumped manifest to 0.1.9, and updated README release target/layout note.
 ###########
 #############
-All Tasks completed 03/05/2026 21:03:57
+All Tasks completed 03/05/2026 21:11:48
 #############

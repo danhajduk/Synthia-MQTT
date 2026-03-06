@@ -70,13 +70,14 @@ Bootstrap latest addon release with interactive install prompts:
 ./scripts/bootstrap-install.sh
 ```
 
-Current published release target: `v0.1.8`.
+Current published release target: `v0.1.9`.
 
 Bootstrap install layout (current):
 - install root: `./SynthiaAddons/Synthia-MQTT`
 - root files: `desired.json`, `runtime.json`, `current -> versions/<version>`
 - version files: `versions/<version>/addon.tgz`, `versions/<version>/extracted`, `versions/<version>/docker-compose.yml`
 - `extracted` is a source-linked runtime workspace prepared from `MAIN_ADDON_ROOT` (defaults to repo root); `addon.tgz` is retained and not untarred.
+- bootstrap also extracts `docker/docker-compose.yml` from the artifact into `versions/<version>/docker-compose.yml`.
 - service link: `./SynthiaAddons/service/<addon_id> -> ./SynthiaAddons/Synthia-MQTT`
 
 The bootstrap script asks for:

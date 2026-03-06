@@ -59,6 +59,23 @@ require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "required command not found: $1"
 }
 
+extract_compose_file() {
+  local artifact_file="$1"
+  local compose_file="$2"
+
+  if tar -tzf "$artifact_file" ./docker/docker-compose.yml >/dev/null 2>&1; then
+    tar -xOf "$artifact_file" ./docker/docker-compose.yml > "$compose_file"
+    return
+  fi
+
+  if tar -tzf "$artifact_file" docker/docker-compose.yml >/dev/null 2>&1; then
+    tar -xOf "$artifact_file" docker/docker-compose.yml > "$compose_file"
+    return
+  fi
+
+  die "artifact missing docker/docker-compose.yml"
+}
+
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -292,10 +309,11 @@ main() {
 
   require_cmd curl
   require_cmd python3
+  require_cmd tar
 
   local tmpdir
   tmpdir="$(mktemp -d)"
-  trap 'rm -rf "$tmpdir"' EXIT
+  trap 'rm -rf "'"${tmpdir}"'"' EXIT
 
   mapfile -t release_info < <(resolve_release "$REQUESTED_VERSION" "$tmpdir")
   [[ "${#release_info[@]}" -ge 2 ]] || die "failed to resolve release metadata"
@@ -306,6 +324,7 @@ main() {
 
   local version_dir="${INSTALL_ROOT}/versions/${version}"
   local artifact_file="${version_dir}/addon.tgz"
+  local compose_file="${version_dir}/docker-compose.yml"
   local desired_file="${INSTALL_ROOT}/desired.json"
   local current_link="${INSTALL_ROOT}/current"
   local services_link="${SERVICES_ROOT}/${ADDON_ID}"
@@ -324,6 +343,9 @@ main() {
   local artifact_sha
   artifact_sha="$(get_sha256 "${artifact_file}")"
   echo "[bootstrap] sha256: ${artifact_sha}"
+
+  echo "[bootstrap] extracting compose file -> ${compose_file}"
+  extract_compose_file "${artifact_file}" "${compose_file}"
 
   local signature_url=""
   if signature_url="$(discover_signature_url "${asset_url}")"; then
@@ -350,6 +372,7 @@ main() {
   echo "[bootstrap] install root: $(realpath "${INSTALL_ROOT}")"
   echo "[bootstrap] artifact: $(realpath "${artifact_file}")"
   echo "[bootstrap] desired.json: $(realpath "${desired_file}")"
+  echo "[bootstrap] docker-compose.yml: $(realpath "${compose_file}")"
   echo "[bootstrap] current -> $(readlink "${current_link}")"
   echo "[bootstrap] service link: ${services_link} -> $(readlink "${services_link}")"
 }
