@@ -52,8 +52,10 @@ Purpose:
 - Support `--non-interactive` for automation/validation runs without terminal prompts.
 - UI URL output uses full host IP by default instead of `localhost`.
 - Resolve latest release using GitHub API with Releases HTML fallback if API resolution fails.
-- Install into `services/<addon_id>/versions/<version>` and update `current` symlink.
-- Default install root is `${PWD}/SynthiaAddons/Synthia-MQTT` (override with `DEFAULT_INSTALL_DIR` env).
+- Install into `${PWD}/SynthiaAddons/Synthia-MQTT` by default (override with `DEFAULT_INSTALL_DIR` env).
+- Maintain version layout under install root: `versions/<version>/...` and `current -> versions/<version>`.
+- Create `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink for SSAP `services` path compatibility.
+- Write `desired.json` at addon root (`./SynthiaAddons/Synthia-MQTT/desired.json`) with SSAP desired-state metadata.
 - Prompt for runtime choices:
   - install local MQTT broker (Compose override)
   - Core host URL for optional registration

@@ -23,11 +23,13 @@
 - No fallback path if API is unavailable/rate-limited.
 
 ### Download and install location
-- Installs to: `~/SynthiaAddons/services/mqtt` by default.
+- Installs to: `${PWD}/SynthiaAddons/Synthia-MQTT` by default.
 - Layout:
   - `versions/<version>/addon.tgz`
   - `versions/<version>/extracted/`
   - `current -> versions/<version>` symlink
+  - `desired.json` at addon root
+  - `./SynthiaAddons/services/<addon_id> -> ./SynthiaAddons/Synthia-MQTT` symlink
 - Behavior on re-run:
   - always re-downloads selected artifact
   - always deletes/re-extracts `extracted/`

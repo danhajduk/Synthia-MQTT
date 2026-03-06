@@ -391,6 +391,66 @@ services:
 EOF
 }
 
+resolve_addon_id() {
+  local manifest_path="$1"
+  python3 - "$manifest_path" <<'PY'
+import json
+import sys
+
+manifest_path = sys.argv[1]
+with open(manifest_path, "r", encoding="utf-8") as handle:
+    manifest = json.load(handle)
+
+addon_id = str(manifest.get("id", "")).strip()
+if not addon_id:
+    raise SystemExit("manifest id is missing")
+print(addon_id)
+PY
+}
+
+ensure_services_symlink() {
+  local services_root="$1"
+  local addon_id="$2"
+  local install_dir="$3"
+  local services_link="$services_root/$addon_id"
+
+  mkdir -p "$services_root"
+
+  if [[ -e "$services_link" && ! -L "$services_link" ]]; then
+    die "services link target already exists and is not a symlink: $services_link"
+  fi
+
+  ln -sfn "$install_dir" "$services_link"
+  echo "[bootstrap] ensured services symlink: $services_link -> $install_dir"
+}
+
+write_desired_file() {
+  local desired_file="$1"
+  local addon_id="$2"
+  local version="$3"
+  local artifact_url="$4"
+  local artifact_sha="$5"
+
+  cat > "$desired_file" <<EOF
+{
+  "ssap_version": "1.0",
+  "addon_id": "${addon_id}",
+  "mode": "standalone_service",
+  "desired_state": "running",
+  "channel": "stable",
+  "pinned_version": "${version}",
+  "install_source": {
+    "type": "release",
+    "release": {
+      "artifact_url": "${artifact_url}",
+      "sha256": "${artifact_sha}",
+      "publisher_key_id": "${GITHUB_REPO}"
+    }
+  }
+}
+EOF
+}
+
 wait_for_health() {
   local health_url="$1"
   local timeout_seconds="$2"
@@ -621,6 +681,16 @@ main() {
   fi
 
   active_root="$INSTALL_DIR/current/extracted"
+  manifest_file="$active_root/manifest.json"
+  addon_id="$(resolve_addon_id "$manifest_file")"
+  services_root="$PWD/SynthiaAddons/services"
+  ensure_services_symlink "$services_root" "$addon_id" "$INSTALL_DIR"
+
+  artifact_sha="$(get_sha256 "$artifact_file")"
+  desired_file="$INSTALL_DIR/desired.json"
+  write_desired_file "$desired_file" "$addon_id" "$version" "$asset_url" "$artifact_sha"
+  echo "[bootstrap] wrote desired file: $desired_file"
+
   env_file="$active_root/.env"
   write_env_file "$env_file"
   echo "[bootstrap] wrote runtime env file: $env_file"
