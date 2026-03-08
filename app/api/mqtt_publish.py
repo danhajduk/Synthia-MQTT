@@ -14,7 +14,7 @@ from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
 from app.services.registration_store import RegistrationStore
 from app.services.telemetry_reporter import TelemetryReporter
-from app.services.topic_permissions import topic_allowed_by_scopes
+from app.services.topic_permissions import TopicPermissionError, topic_allowed_by_scopes, validate_publish_topic
 from app.services.token_auth import ServiceTokenClaims
 
 
@@ -45,8 +45,13 @@ def build_mqtt_publish_router(
             raise HTTPException(status_code=403, detail=reason or "Policy denied MQTT publish")
 
         topic = request.topic.strip()
-        if not topic:
-            raise HTTPException(status_code=422, detail="Topic must not be empty")
+        try:
+            topic = validate_publish_topic(
+                topic,
+                addon_id=claims.sub if claims.sub != "anonymous" else None,
+            )
+        except TopicPermissionError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:
@@ -97,6 +102,10 @@ def build_mqtt_publish_router(
             if request.topic and request.topic.strip()
             else f"synthia/addons/{request.addon_id.strip()}/{message_type}"
         )
+        try:
+            topic = validate_publish_topic(topic, addon_id=request.addon_id.strip())
+        except TopicPermissionError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
         if not topic_allowed_by_scopes(topic, registration.permissions.publish):
             raise HTTPException(status_code=403, detail=f"Topic not allowed by registration publish scopes: {topic}")
 

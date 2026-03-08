@@ -8,6 +8,7 @@ from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
 from app.services.registration_store import RegistrationStore
 from app.services.telemetry_reporter import TelemetryReporter
+from app.services.topic_permissions import TopicPermissionError, validate_publish_topic
 from app.services.token_auth import ServiceTokenClaims
 
 
@@ -98,8 +99,13 @@ def build_ha_discovery_router(
         if mqtt_service is None:
             raise HTTPException(status_code=500, detail="MQTT service unavailable")
 
+        try:
+            topic = validate_publish_topic(request.topic.strip(), addon_id=request.addon_id)
+        except TopicPermissionError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
         ok = mqtt_service.publish(
-            topic=request.topic.strip(),
+            topic=topic,
             payload=request.payload,
             retain=request.retain,
             qos=request.qos,

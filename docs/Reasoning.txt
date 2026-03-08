@@ -1,8 +1,9 @@
-Task #54 :
-Reasoning: HA discovery/state publishing must be explicitly governed per registration so access is auditable and enforceable by mode.
+Task #55 :
+Reasoning: Topic governance needs a centralized validation layer with explicit, consistent errors so bad topic contracts are rejected early across direct, gateway, and HA publish paths.
 What and why:
-- Added HA mode grant to registration contract/records: `none`, `gateway_managed`, `direct_allowed`.
-- Updated HA discovery sensor endpoint to require `addon_id` and enforce registration `ha_mode != none`.
-- Added HA gateway state helper endpoint: `POST /api/ha/discovery/state/publish` with same HA mode enforcement.
-- Wired telemetry tracking for HA state publish and updated API/README docs.
+- Extended topic-permission module with publish-topic validation helpers.
+- Enforced validation in direct publish, gateway publish, and HA gateway state publish APIs.
+- Added lifecycle pattern checks for `/announce` and `/health` under addon namespaces.
+- Validation now rejects wildcard publish topics, reserved namespace publish attempts, and non-owned addon namespace topics with HTTP 400 reasons.
+- Updated docs to describe validation behavior and failure semantics.
 ###########

@@ -121,6 +121,12 @@ Gateway publish endpoint:
   - `topic`: `synthia/addons/<addon_id>/<message_type>`
   - `qos`: addon config default (`mqtt_qos`)
   - `retain`: `true`
+- topic validation layer now rejects:
+  - wildcard usage on publish topics (`+`, `#`)
+  - reserved namespace publish attempts (`synthia/system/*`, `synthia/core/*`, etc.)
+  - non-owned addon namespace publish topics
+  - invalid lifecycle topic patterns (nested `/announce` or `/health`)
+- validation failures return HTTP `400` with explicit reason text
 
 MQTT registration endpoint:
 

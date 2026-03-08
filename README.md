@@ -83,6 +83,8 @@ For external broker mode, `POST /api/install/apply` requires a prior successful
 Direct modes provision stable long-term broker credentials and support rotation with `reprovision=true`.
 Registration applies ACL/topic realization with publish/subscribe separation and reserved namespace restrictions.
 Registrations also include HA mode grants (`none`, `gateway_managed`, `direct_allowed`) enforced by HA gateway helper endpoints.
+Publish APIs now enforce topic validation (ownership, reserved namespace restrictions, lifecycle topic pattern checks)
+and return explicit HTTP 400 errors for invalid topic contracts.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
