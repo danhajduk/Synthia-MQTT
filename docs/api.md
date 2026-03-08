@@ -254,3 +254,8 @@ Reporting behavior:
 - periodic flush retries are background-driven
 - failed deliveries stay buffered for future retries
 - runtime continues operating when Core is offline (no request-path failure on telemetry post failure)
+
+## Runtime Validation Notes
+
+- Internal health sampling now uses service model `HealthSnapshot` (`app/services/health.py`).
+- API routes (`/api/addon/health`, `/api/install/status`) map snapshot fields into external API response contracts.

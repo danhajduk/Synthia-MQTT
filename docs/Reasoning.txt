@@ -1,8 +1,8 @@
-Task #065 :
+Task #066 :
 
-Reasoning: Two recent regressions (manifest packaging omission and health snapshot contract coupling) needed automated local guards to prevent reintroduction.
+Reasoning: Local docs were mostly aligned already, but active source-of-truth pages needed explicit coverage of the latest runtime packaging and validation guard changes for completeness.
 
 What and why:
-Added `tests/test_regression_guards.py` with checks for Dockerfile manifest copy and health snapshot shape, and wired these tests into `scripts/validate-service-flow.sh` so local validation catches these regressions early.
+Updated active docs (`docs/core.md`, `docs/api.md`) to reflect manifest packaging requirement, regression guard validation path, and internal health snapshot modeling mapped to API contracts.
 
 ###########
