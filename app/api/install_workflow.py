@@ -18,6 +18,7 @@ from app.models.install_models import (
     InstallTestExternalResponse,
 )
 from app.services.config_store import ConfigStore
+from app.services.broker_manager import BrokerManager
 from app.services.core_registry import register_addon_endpoint, verify_addon_endpoint
 from app.services.health import HealthService
 from app.services.mqtt_client import test_external_connection
@@ -79,6 +80,9 @@ def build_install_workflow_router(
         health = health_service.snapshot()
         last_error = health.last_error or install_state.get("last_error")
         setup_state = str(install_state.get("setup_state") or "unconfigured")
+        broker_manager = BrokerManager()
+        docker_sock_available = broker_manager.docker_socket_available()
+        broker_running = broker_manager.broker_running() if install_state["mode"] == "embedded" else False
 
         if not bool(install_state["configured"]) and setup_state != "configuring":
             setup_state = "unconfigured"
@@ -97,9 +101,9 @@ def build_install_workflow_router(
             verified=bool(install_state["verified"]),
             registered_to_core=bool(install_state["registered_to_core"]),
             direct_mqtt_supported=direct_mqtt_supported,
-            docker_sock_available=False,
+            docker_sock_available=docker_sock_available,
             embedded_profile_required=False,
-            broker_running=False,
+            broker_running=broker_running,
             mqtt_connected=health.mqtt_connected,
             last_error=last_error,
         )
@@ -199,6 +203,7 @@ def build_install_workflow_router(
             raise HTTPException(status_code=500, detail="Failed to apply embedded broker runtime") from exc
 
         if ok:
+            reload_mqtt_service()
             config_store.update_install_session_state(
                 mode="embedded",
                 setup_state="ready",

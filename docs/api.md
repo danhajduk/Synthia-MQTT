@@ -56,6 +56,8 @@ Implemented install modes:
 - `setup_state`: `unconfigured | configuring | ready | error | degraded`
 - `setup_guidance`: operator-facing guidance for next action
 - `direct_mqtt_supported`: expected direct MQTT support for selected mode
+- `docker_sock_available`: whether Docker socket is available to manage embedded broker
+- `broker_running`: current embedded broker container running status (embedded mode)
 
 Fresh installs report `setup_state=unconfigured` until mode/config is applied.
 

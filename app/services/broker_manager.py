@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 DOCKER_SOCKET_PATH = Path("/var/run/docker.sock")
-DEFAULT_CONTAINER_NAME = "synthia-mosquitto"
+DEFAULT_CONTAINER_NAME = "synthia-addon-mqtt-mosquitto"
 OPERATOR_ACTION = (
     "docker compose -f docker/docker-compose.yml --profile embedded restart mosquitto"
 )
@@ -55,6 +55,22 @@ class BrokerManager:
     def docker_socket_available(self) -> bool:
         return DOCKER_SOCKET_PATH.exists()
 
+    def broker_running(self) -> bool:
+        if not DOCKER_SOCKET_PATH.exists():
+            return False
+        try:
+            import docker
+        except Exception:
+            return False
+
+        try:
+            client = docker.from_env()
+            container = client.containers.get(self.container_name)
+            state = container.attrs.get("State") or {}
+            return bool(state.get("Running"))
+        except Exception:
+            return False
+
 
 def write_embedded_compose_override(override_file: Path, broker_dir: Path, port: int) -> None:
     override_file.parent.mkdir(parents=True, exist_ok=True)
@@ -64,7 +80,7 @@ def write_embedded_compose_override(override_file: Path, broker_dir: Path, port:
                 "services:",
                 "  mosquitto:",
                 "    image: eclipse-mosquitto:2",
-                "    container_name: synthia-mosquitto",
+                "    container_name: synthia-addon-mqtt-mosquitto",
                 "    restart: unless-stopped",
                 "    ports:",
                 f'      - "{port}:1883"',

@@ -1,8 +1,8 @@
-Task #44.2 :
-Reasoning: Task 44 requires explicit operator control to persist chosen broker mode and clear visibility of direct-MQTT expectations for that mode.
+Task #45.1 :
+Reasoning: Embedded broker management requires a stable container identity and observable runtime status in install health snapshots.
 What and why:
-- Added setup step action to save selected mode through `POST /api/install/mode`.
-- Added mode guidance text indicating direct MQTT expectation for embedded vs external mode.
-- Kept mode persistence tied to backend state so selection survives restart and is visible in status snapshots.
-- Rebuilt frontend distribution assets.
+- Standardized embedded broker container name to `synthia-addon-mqtt-mosquitto` for compose override generation and broker management operations.
+- Added runtime broker inspection (`docker socket available` and `broker running`) to `GET /api/install/status`.
+- Reloaded MQTT client after successful embedded apply so the addon reconnects using embedded-mode runtime configuration.
+- Updated deployment/API docs for the stable container name and new status fields.
 ###########
