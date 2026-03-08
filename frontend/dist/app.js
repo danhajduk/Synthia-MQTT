@@ -100,6 +100,40 @@ function setGlobalError(message) {
   });
 }
 
+function hasCoreThemeTokens() {
+  const rootStyle = getComputedStyle(document.documentElement);
+  return [
+    "--color-bg",
+    "--color-panel",
+    "--color-border",
+    "--color-text",
+    "--color-primary",
+  ].every((token) => rootStyle.getPropertyValue(token).trim().length > 0);
+}
+
+function applyThemeMode(hasCoreTheme) {
+  document.documentElement.classList.toggle("core-theme-detected", hasCoreTheme);
+  document.documentElement.classList.toggle("core-theme-fallback", !hasCoreTheme);
+  setText("theme-mode", hasCoreTheme ? "Theme: Core CSS tokens detected in iframe" : "Theme: local fallback CSS");
+
+  document.querySelectorAll(".panel").forEach((element) => {
+    element.classList.toggle("card", hasCoreTheme);
+  });
+  document.querySelectorAll("button").forEach((element) => {
+    element.classList.toggle("btn", hasCoreTheme);
+    element.classList.toggle("btn-primary", hasCoreTheme && !element.classList.contains("secondary"));
+  });
+}
+
+function startThemeDetection() {
+  applyThemeMode(hasCoreThemeTokens());
+  const observer = new MutationObserver(() => {
+    applyThemeMode(hasCoreThemeTokens());
+  });
+  observer.observe(document.head, { childList: true, subtree: true });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class"] });
+}
+
 function saveState() {
   const persist = {
     ...state,
@@ -778,6 +812,7 @@ async function run(action) {
 
 async function initialize() {
   loadSavedState();
+  startThemeDetection();
   fillFieldsFromState();
   bindEvents();
   syncModeUI();

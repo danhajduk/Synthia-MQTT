@@ -1,10 +1,13 @@
 :root {
-  --bg: #f4efe7;
-  --panel: #fffdf9;
-  --ink: #1f2a1f;
-  --accent: #2f6b48;
-  --muted: #6b7269;
-  --line: #d2c7b6;
+  --local-color-bg: 35 41% 93%;
+  --local-color-panel: 40 100% 99%;
+  --local-color-text: 128 15% 14%;
+  --local-color-text-muted: 108 4% 43%;
+  --local-color-border: 38 24% 77%;
+  --local-color-primary: 146 39% 30%;
+  --local-color-danger: 0 47% 56%;
+  --local-color-warning: 39 59% 44%;
+  --font-fallback: "Segoe UI", Tahoma, sans-serif;
 }
 
 * {
@@ -13,9 +16,13 @@
 
 body {
   margin: 0;
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  color: var(--ink);
-  background: radial-gradient(circle at top right, #fdf2dd, var(--bg));
+  font-family: var(--font-sans, var(--font-fallback));
+  color: hsl(var(--color-text, var(--local-color-text)));
+  background: radial-gradient(
+    circle at top right,
+    hsl(var(--color-panel, var(--local-color-panel))),
+    hsl(var(--color-bg, var(--local-color-bg)))
+  );
 }
 
 .layout {
@@ -33,16 +40,16 @@ body {
 
 .hero p {
   margin: 8px 0 0;
-  color: var(--muted);
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
 }
 
 .banner {
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid hsl(var(--color-primary, var(--local-color-primary)));
 }
 
 .panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: hsl(var(--color-panel, var(--local-color-panel)));
+  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: 12px;
   padding: 14px;
 }
@@ -54,7 +61,7 @@ body {
 
 .placeholder p {
   margin: 0;
-  color: var(--muted);
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
 }
 
 .status-grid {
@@ -65,13 +72,13 @@ body {
 }
 
 .status-grid div {
-  border: 1px solid var(--line);
+  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: 8px;
   padding: 8px;
 }
 
 .status-grid span {
-  color: var(--muted);
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
   display: block;
   font-size: 0.85rem;
 }
@@ -96,22 +103,22 @@ body {
 }
 
 .steps li {
-  border: 1px solid var(--line);
+  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: 8px;
   padding: 6px 8px;
   font-size: 0.85rem;
-  color: var(--muted);
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
 }
 
 .steps li.active {
-  background: #e4f2e9;
-  color: var(--ink);
-  border-color: #9ec1ac;
+  background: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 14%, white);
+  color: hsl(var(--color-text, var(--local-color-text)));
+  border-color: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 42%, white);
 }
 
 .steps li.done {
-  background: #f5f3ee;
-  color: var(--ink);
+  background: color-mix(in srgb, hsl(var(--color-panel, var(--local-color-panel))) 80%, hsl(var(--color-bg, var(--local-color-bg))));
+  color: hsl(var(--color-text, var(--local-color-text)));
 }
 
 .step-panel h3 {
@@ -149,7 +156,7 @@ pre {
 input,
 select,
 textarea {
-  border: 1px solid var(--line);
+  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: 8px;
   padding: 7px 9px;
 }
@@ -158,7 +165,7 @@ button {
   border: 0;
   border-radius: 8px;
   padding: 8px 12px;
-  background: var(--accent);
+  background: hsl(var(--color-primary, var(--local-color-primary)));
   color: #fff;
   cursor: pointer;
 }
@@ -178,12 +185,12 @@ button {
 }
 
 button.secondary {
-  background: #6f756f;
+  background: color-mix(in srgb, hsl(var(--color-text-muted, var(--local-color-text-muted))) 92%, black);
 }
 
 .result {
   margin: 10px 0 0;
-  color: var(--muted);
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
 }
 
 .summary-grid {
@@ -193,13 +200,13 @@ button.secondary {
 }
 
 .summary-grid div {
-  border: 1px solid var(--line);
+  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: 8px;
   padding: 8px;
 }
 
 .summary-grid span {
-  color: var(--muted);
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
   display: block;
   font-size: 0.82rem;
 }
@@ -216,7 +223,7 @@ button.secondary {
 }
 
 .optional-group-card {
-  border: 1px solid var(--line);
+  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: 8px;
   padding: 10px;
   display: grid;
@@ -226,19 +233,19 @@ button.secondary {
 }
 
 .optional-group-card[data-status="failed"] {
-  border-color: #c55a5a;
+  border-color: hsl(var(--color-danger, var(--local-color-danger)));
 }
 
 .optional-group-card[data-status="starting"] {
-  border-color: #b1882f;
+  border-color: hsl(var(--color-warning, var(--local-color-warning)));
 }
 
 .optional-group-card[data-status="active"] {
-  border-color: #2f6b48;
+  border-color: hsl(var(--color-primary, var(--local-color-primary)));
 }
 
 .optional-group-card[data-status="waiting-for-reconcile"] {
-  border-color: #6f756f;
+  border-color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
 }
 
 .optional-group-details {
@@ -247,7 +254,7 @@ button.secondary {
 }
 
 .optional-group-details span {
-  color: var(--muted);
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
   font-size: 0.82rem;
 }
 
