@@ -149,6 +149,7 @@ Completed Tasks
 73. Task 73: Fix Docker runtime UI exposure so addon UI is reachable from host via documented ports - Completed on 03/08/2026 09:35
 74. Task 74: Fix UI route serving in container mode so `/ui` resolves to setup/dashboard shell instead of `{"detail":"Not Found"}` - Completed on 03/08/2026 09:35
 75. Task 75: Add regression checks for container UI availability and `/ui` route response, then update docs with verified access path - Completed on 03/08/2026 09:35
+76. Task 76: Rebuild and republish release 0.2.0 - Completed on 03/08/2026 09:38
 
 ##################################
 Tasks in Progress

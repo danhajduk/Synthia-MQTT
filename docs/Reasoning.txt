@@ -47,3 +47,12 @@ What and why:
 Replaced the freeform issue notes in `docs/New_tasks.txt` with three numbered pending tasks covering container UI exposure, `/ui` route resolution, and regression/documentation follow-up.
 
 ###########
+
+Task #076 :
+
+Reasoning: Republish request for the same version requires a fresh rebuild and release pipeline rerun, including release-gate freshness checks.
+
+What and why:
+Ran `./scripts/rebuild.sh` successfully, refreshed `docs/mismatch-report.md` release-gate metadata to current date/time, then reran `./scripts/release-addon.sh 0.2.0` successfully. Artifact was re-uploaded to `v0.2.0` and `release-output.json` regenerated with SHA256 `5d3054237e39c7087872e86981f916711d32654f3c1d8f844207db8aabf4a150`.
+
+###########
