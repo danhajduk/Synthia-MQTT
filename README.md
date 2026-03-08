@@ -99,6 +99,32 @@ Environment variables:
 - `docs/mismatch-report.md`
 - `docs/archive/README.md`
 
+## Validation and Release Gates
+
+Local docs/code alignment check:
+
+```bash
+./scripts/check-doc-alignment.sh
+```
+
+Service-flow validation now includes this alignment check before API/MQTT checks:
+
+```bash
+./scripts/validate-service-flow.sh
+```
+
+Release packaging enforces stricter alignment gates:
+
+```bash
+./scripts/release-addon.sh <version>
+```
+
+Release-gate checks include:
+
+- `./scripts/check-doc-alignment.sh --release-gate`
+- `docs/mismatch-report.md` `Last Verified` must be refreshed for the current date.
+- open `local-fixable` mismatches must be resolved before release.
+
 ## Manifest Summary
 
 `manifest.json` currently declares:

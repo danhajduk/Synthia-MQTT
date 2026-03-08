@@ -26,6 +26,9 @@ capabilities_file="$tmpdir/capabilities.json"
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 manifest_file="$repo_root/manifest.json"
 
+echo "[validate] local documentation/code alignment"
+"$repo_root/scripts/check-doc-alignment.sh"
+
 sub_args=(-h "$MQTT_HOST" -p "$MQTT_PORT" -W 20 -C 1)
 if [[ -n "$MQTT_USERNAME" ]]; then
   sub_args+=(-u "$MQTT_USERNAME")

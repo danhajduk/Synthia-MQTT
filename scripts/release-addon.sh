@@ -35,6 +35,9 @@ for p in ${PACKAGE_PATHS}; do
   [[ -e "$p" ]] || { echo "Missing path to package: $p"; exit 1; }
 done
 
+echo "==> Release gate: documentation alignment + mismatch freshness"
+"$(cd "$(dirname "$0")" && pwd)/check-doc-alignment.sh" --release-gate
+
 if echo " ${PACKAGE_PATHS} " | grep -q " frontend "; then
   if [[ ! -d "frontend/dist" ]]; then
     if command -v npm >/dev/null 2>&1 && [[ -f "frontend/package.json" ]]; then

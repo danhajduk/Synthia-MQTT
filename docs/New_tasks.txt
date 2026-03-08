@@ -101,6 +101,12 @@ Completed Tasks
 40.3 Task 40.3: Add local documentation note clarifying addon entrypoint path mapping vs Core repo path examples - Completed on 03/07/2026 17:26
 40.4 Task 40.4: Extend local validation tooling to assert extracted layout and version-source invariants - Completed on 03/07/2026 17:27
 40. Task 40: Mitigate remaining mismatch-report findings in code and local documentation - Completed on 03/07/2026 17:28
+41.1 Task 41.1: Re-run documented code-to-golden audit against `/home/dan/Projects/Synthia/docs` and split findings into `local-fixable` vs `golden-upstream` ownership classes - Completed on 03/07/2026 19:59
+41.2 Task 41.2: Add repeatable alignment check script to assert local docs/contracts remain aligned with implemented API endpoints, capability names, and manifest-sourced version usage - Completed on 03/07/2026 19:59
+41.3 Task 41.3: Update `docs/mismatch-report.md` format to track per-finding status (`open`, `mitigated-local`, `upstream-golden`) with explicit verification date and code/doc evidence references - Completed on 03/07/2026 19:59
+41.4 Task 41.4: Extend validation workflow (`scripts/validate-service-flow.sh` or companion checker) to fail when local documentation drifts from implemented behavior - Completed on 03/07/2026 19:59
+41.5 Task 41.5: Add release-gate checklist step requiring golden-doc alignment recheck and mismatch report refresh before publishing a new addon version - Completed on 03/07/2026 19:59
+41. Task 41: Establish continuous golden-document alignment controls for this repository - Completed on 03/07/2026 19:59
 
 ##################################
 Tasks in Progress
@@ -109,9 +115,3 @@ Tasks in Progress
 ##################################
 Pending Tasks
 ##################################
-41.1 Task 41.1: Re-run documented code-to-golden audit against `/home/dan/Projects/Synthia/docs` and split findings into `local-fixable` vs `golden-upstream` ownership classes.
-41.2 Task 41.2: Add repeatable alignment check script to assert local docs/contracts remain aligned with implemented API endpoints, capability names, and manifest-sourced version usage.
-41.3 Task 41.3: Update `docs/mismatch-report.md` format to track per-finding status (`open`, `mitigated-local`, `upstream-golden`) with explicit verification date and code/doc evidence references.
-41.4 Task 41.4: Extend validation workflow (`scripts/validate-service-flow.sh` or companion checker) to fail when local documentation drifts from implemented behavior.
-41.5 Task 41.5: Add release-gate checklist step requiring golden-doc alignment recheck and mismatch report refresh before publishing a new addon version.
-41. Task 41: Establish continuous golden-document alignment controls for this repository.

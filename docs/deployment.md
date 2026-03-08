@@ -39,6 +39,18 @@ Validation helper:
   - `current` symlink + version artifact files (`addon.tgz`, `docker-compose.yml`, `extracted/Dockerfile`)
   - `desired.json`/`runtime.json` version fields match the `current` symlink target version
   - legacy compatibility symlink target
+- `scripts/check-doc-alignment.sh` verifies local docs and implementation alignment:
+  - implemented `/api/*` routes match endpoint lists in `README.md` and `docs/api.md`
+  - `docs/api.md` capability list matches `app/api/addon_contract.py` capabilities
+  - active docs/scripts avoid stale hardcoded version literals and keep manifest-sourced version usage
+  - ownership-boundary mapping note (`backend/app/main.py` -> `app/main.py`) is present
+
+Release gate:
+
+- `scripts/release-addon.sh` runs `scripts/check-doc-alignment.sh --release-gate` before packaging/upload.
+- Release-gate mode requires:
+  - `docs/mismatch-report.md` `Last Verified` date matches current date
+  - no finding with `Status: open` and `Ownership: local-fixable`
 
 ## Manifest and artifact
 
