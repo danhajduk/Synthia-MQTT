@@ -110,6 +110,26 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("readiness_required_groups", text)
         self.assertIn("readiness_missing_groups", text)
 
+    def test_theme_structure_matches_golden_layout(self) -> None:
+        root = Path(__file__).resolve().parents[1] / "frontend" / "src" / "theme"
+        self.assertTrue((root / "index.css").exists())
+        self.assertTrue((root / "tokens.css").exists())
+        self.assertTrue((root / "base.css").exists())
+        self.assertTrue((root / "components.css").exists())
+        self.assertTrue((root / "themes" / "light.css").exists())
+        self.assertTrue((root / "themes" / "dark.css").exists())
+
+    def test_index_html_imports_theme_index_css(self) -> None:
+        index_html = Path(__file__).resolve().parents[1] / "frontend" / "src" / "index.html"
+        text = index_html.read_text(encoding="utf-8")
+        self.assertIn('href="/ui/theme/index.css"', text)
+
+    def test_theme_wiring_uses_data_theme_root_attribute(self) -> None:
+        app_js = Path(__file__).resolve().parents[1] / "frontend" / "src" / "app.js"
+        text = app_js.read_text(encoding="utf-8")
+        self.assertIn("THEME_STORAGE_KEY", text)
+        self.assertIn("data-theme", text)
+
 
 if __name__ == "__main__":
     unittest.main()

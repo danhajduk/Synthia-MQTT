@@ -1,0 +1,13 @@
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --local-color-bg: 220 30% 12%;
+  --local-color-panel: 222 25% 16%;
+  --local-color-text: 212 30% 93%;
+  --local-color-text-muted: 214 18% 72%;
+  --local-color-border: 217 16% 30%;
+  --local-color-primary: 151 55% 47%;
+  --local-color-success: 151 55% 47%;
+  --local-color-warning: 41 94% 62%;
+  --local-color-danger: 0 72% 62%;
+}

@@ -1,0 +1,19 @@
+:root {
+  --local-color-bg: 35 41% 93%;
+  --local-color-panel: 40 100% 99%;
+  --local-color-text: 128 15% 14%;
+  --local-color-text-muted: 108 4% 43%;
+  --local-color-border: 38 24% 77%;
+  --local-color-primary: 146 39% 30%;
+  --local-color-success: 146 39% 30%;
+  --local-color-warning: 39 59% 44%;
+  --local-color-danger: 0 47% 56%;
+
+  --local-radius-sm: 6px;
+  --local-radius-md: 10px;
+  --local-radius-lg: 14px;
+  --local-shadow-sm: 0 1px 2px rgb(0 0 0 / 8%);
+  --local-shadow-md: 0 8px 20px rgb(0 0 0 / 12%);
+
+  --font-fallback: "Segoe UI", Tahoma, sans-serif;
+}

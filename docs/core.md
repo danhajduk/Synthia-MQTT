@@ -40,6 +40,7 @@ This document set describes the behavior currently implemented in this repositor
   - `<mqtt_base_topic>/addons/mqtt/health` (retained)
 - UI hosting:
   - `/ui` is served only when `frontend/dist` exists.
+  - UI theme layout mirrors golden structure under `frontend/src/theme/` (`index.css`, `tokens.css`, `base.css`, `components.css`, `themes/light.css`, `themes/dark.css`).
   - UI styles use addon-owned fallback tokens and auto-adopt Core theme tokens/classes when injected into iframe document.
 
 ## Config Persistence

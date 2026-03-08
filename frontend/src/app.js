@@ -1,5 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = "mqtt_setup_state_v1";
+const THEME_STORAGE_KEY = "mqtt_ui_theme";
 const MAX_STEP = 5;
 
 const state = {
@@ -111,6 +112,37 @@ function hasCoreThemeTokens() {
   ].every((token) => rootStyle.getPropertyValue(token).trim().length > 0);
 }
 
+function resolveInitialTheme() {
+  const existing = document.documentElement.getAttribute("data-theme");
+  if (existing === "dark" || existing === "light") {
+    return existing;
+  }
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  if (saved === "dark" || saved === "light") {
+    return saved;
+  }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyThemeAttribute(theme) {
+  const normalized = theme === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", normalized);
+  localStorage.setItem(THEME_STORAGE_KEY, normalized);
+}
+
+function mirrorParentThemeIfAvailable() {
+  try {
+    const parentTheme = window.top?.document?.documentElement?.getAttribute("data-theme");
+    if (parentTheme === "dark" || parentTheme === "light") {
+      applyThemeAttribute(parentTheme);
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 function applyThemeMode(hasCoreTheme) {
   document.documentElement.classList.toggle("core-theme-detected", hasCoreTheme);
   document.documentElement.classList.toggle("core-theme-fallback", !hasCoreTheme);
@@ -118,11 +150,11 @@ function applyThemeMode(hasCoreTheme) {
   $("iframe-css-note")?.classList.toggle("hidden", !hasCoreTheme);
 
   document.querySelectorAll(".panel").forEach((element) => {
-    element.classList.toggle("card", hasCoreTheme);
+    element.classList.add("card");
   });
   document.querySelectorAll("button").forEach((element) => {
-    element.classList.toggle("btn", hasCoreTheme);
-    element.classList.toggle("btn-primary", hasCoreTheme && !element.classList.contains("secondary"));
+    element.classList.add("btn");
+    element.classList.toggle("btn-primary", !element.classList.contains("secondary"));
   });
 }
 
@@ -135,8 +167,15 @@ function startThemeDetection() {
     }
   })();
   document.documentElement.classList.toggle("in-iframe", inIframe);
+  applyThemeAttribute(resolveInitialTheme());
+  if (inIframe) {
+    mirrorParentThemeIfAvailable();
+  }
   applyThemeMode(hasCoreThemeTokens());
   const observer = new MutationObserver(() => {
+    if (inIframe) {
+      mirrorParentThemeIfAvailable();
+    }
     applyThemeMode(hasCoreThemeTokens());
   });
   observer.observe(document.head, { childList: true, subtree: true });
