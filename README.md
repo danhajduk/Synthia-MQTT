@@ -32,16 +32,22 @@ Manual compose startup:
 MQTT_HOST=10.0.0.100 MQTT_PORT=1883 docker compose -f docker/docker-compose.yml up -d
 ```
 
+Optional host-port override startup:
+
+```bash
+MQTT_HOST=10.0.0.100 MQTT_PORT=1883 docker compose -f docker/docker-compose.yml -f docker/docker-compose.port-override.yml up -d
+```
+
 Health check:
 
 ```bash
 curl http://localhost:18080/healthz
 ```
 
-UI (when `frontend/dist` exists):
+UI:
 
 ```bash
-open http://localhost:18080/ui
+open http://localhost:18080/ui/
 ```
 
 ## Implemented API Endpoints

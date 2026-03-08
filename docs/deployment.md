@@ -10,11 +10,19 @@ Main compose file: `docker/docker-compose.yml`
 Defined service:
 
 - `mqtt-addon` (builds from `docker/Dockerfile`)
+- host port mapping `18080:8080` in `docker/docker-compose.yml`
+- optional override mapping `10.0.0.100:18081:8080` in `docker/docker-compose.port-override.yml`
 
 Image packaging note:
 
 - `docker/Dockerfile` includes `manifest.json` in `/workspace/manifest.json` so addon contract metadata loads at startup.
+- `docker/Dockerfile` copies `frontend/dist` into the image so `/ui/` is served in container runtime.
 - Runtime health sampling uses an internal `HealthSnapshot` service model; API routes map it to external `AddonHealth` contract fields.
+
+Verified UI access path:
+
+- default compose: `http://localhost:18080/ui/`
+- with port override file: `http://10.0.0.100:18081/ui/`
 
 Notes:
 

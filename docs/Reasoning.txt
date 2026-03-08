@@ -10,6 +10,37 @@ Executed `./scripts/release-addon.sh 0.2.0`, which passed release-gate checks, p
 
 Task #073 :
 
+Error context: Docker runtime was reachable but UI endpoint returned not found because image packaging omitted UI assets.
+
+Reasoning: The `/ui` route is mounted only when `frontend/dist` exists. Container builds must always include `frontend/dist` so UI serving is deterministic.
+
+What and why:
+Updated `docker/Dockerfile` to copy `frontend/dist` into `/workspace/frontend/dist` so container runtime serves `/ui/` consistently.
+
+###########
+
+Task #074 :
+
+Error context: When UI assets are absent, FastAPI returned default `404 {"detail":"Not Found"}` for `/ui`, which is ambiguous during diagnostics.
+
+Reasoning: A deterministic fallback route gives operators a clear error and avoids misleading generic 404 behavior.
+
+What and why:
+Added `/ui` and `/ui/{path}` fallback handlers in `app/main.py` that return HTTP 503 with explicit UI-assets-missing guidance when `frontend/dist` is unavailable.
+
+###########
+
+Task #075 :
+
+Reasoning: Preventing regression requires both static guardrails and runtime verification for container UI exposure and `/ui` response behavior.
+
+What and why:
+Extended `tests/test_regression_guards.py` to assert Dockerfile frontend asset copy, compose port exposure, and UI route wiring markers. Extended `scripts/validate-service-flow.sh` with a redirect-aware `/ui` HTML-shell check. Updated deployment docs and README with verified UI access URLs.
+
+###########
+
+Task #073 :
+
 Reasoning: The reported issues are implementation-facing but were captured as informal notes. Converting them into concrete, testable tasks keeps execution aligned with the repository workflow and prevents ambiguity.
 
 What and why:

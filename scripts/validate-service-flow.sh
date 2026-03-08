@@ -40,6 +40,27 @@ fi
 echo "[validate] service healthz"
 curl -fsS "${SERVICE_BASE_URL}/healthz" >/dev/null
 
+echo "[validate] ui route"
+ui_headers_file="$tmpdir/ui.headers"
+ui_body_file="$tmpdir/ui.body"
+curl -sS -L -D "$ui_headers_file" "${SERVICE_BASE_URL}/ui" -o "$ui_body_file"
+python3 - "$ui_headers_file" "$ui_body_file" <<'PY'
+import sys
+from pathlib import Path
+
+headers = Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()
+body = Path(sys.argv[2]).read_text(encoding="utf-8")
+status_lines = [line for line in headers if line.startswith("HTTP/")]
+if not status_lines:
+    raise SystemExit("ui route validation failed: missing HTTP status line")
+status_code = int(status_lines[-1].split()[1])
+if status_code >= 400:
+    raise SystemExit(f"ui route validation failed: HTTP {status_code} body={body[:160]!r}")
+if "<!doctype html>" not in body.lower():
+    raise SystemExit("ui route validation failed: expected HTML shell response")
+print("ui route check passed")
+PY
+
 echo "[validate] addon health API"
 curl -fsS "${SERVICE_BASE_URL}/api/addon/health" > "$tmpdir/addon_health.json"
 

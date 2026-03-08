@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r /workspace/requirements.txt
 
 COPY manifest.json /workspace/manifest.json
 COPY app /workspace/app
+COPY frontend/dist /workspace/frontend/dist
 COPY runtime /workspace/runtime
 
 EXPOSE 8080

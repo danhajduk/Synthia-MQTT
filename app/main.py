@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi import status
+from fastapi.responses import JSONResponse
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -125,6 +127,14 @@ app.include_router(
 ui_dist = Path(__file__).resolve().parents[1] / "frontend" / "dist"
 if ui_dist.exists():
     app.mount("/ui", StaticFiles(directory=ui_dist, html=True), name="ui")
+else:
+    @app.get("/ui", include_in_schema=False)
+    @app.get("/ui/{_path:path}", include_in_schema=False)
+    def ui_unavailable(_path: str = "") -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "UI assets are not available. Build frontend/dist before serving /ui."},
+        )
 
 
 @app.get("/healthz")
