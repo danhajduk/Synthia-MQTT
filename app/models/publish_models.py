@@ -16,6 +16,24 @@ class MqttPublishResponse(BaseModel):
     ok: bool
 
 
+class MqttGatewayPublishRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    addon_id: str = Field(min_length=1)
+    message_type: str = Field(min_length=1)
+    payload: dict[str, Any]
+    topic: str | None = None
+    qos: int | None = Field(default=None, ge=0, le=2)
+    retain: bool | None = None
+
+
+class MqttGatewayPublishResponse(BaseModel):
+    ok: bool
+    topic: str
+    qos: int
+    retain: bool
+
+
 class HaDiscoverySensorRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

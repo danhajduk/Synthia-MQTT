@@ -1,10 +1,8 @@
-Task #50 :
-Reasoning: Registration provisioning needs explicit topic-scope realization so publish/subscribe permissions are enforceable and broker-mode outputs are prepared for embedded or external workflows.
+Task #51 :
+Reasoning: Gateway publishing should be explicit and structured, with envelope defaults and permission checks derived from approved registration scopes.
 What and why:
-- Added topic-permission realization with reserved namespace publish restrictions and addon-owned namespace enforcement.
-- Extended MQTT registration record with explicit `permissions.publish` and `permissions.subscribe`.
-- Added broker-mode-aware ACL output:
-  - embedded: generated ACL snippets in `runtime/broker/acl_generated/`
-  - external: operator note files in `runtime/broker/external_acl_notes/`
-- Wired registration API to current broker mode and return 400 for invalid topic scopes.
+- Added `POST /api/mqtt/gateway/publish` for structured gateway payload publishing.
+- Added standard envelope generation (`type`, `source_addon_id`, `timestamp`, `data`).
+- Added default topic/qos/retain behavior and registration-scope topic authorization checks.
+- Updated endpoint/model docs and telemetry operation list.
 ###########

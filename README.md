@@ -61,6 +61,7 @@ open http://localhost:18080/ui
 - `POST /api/install/reset`
 - `POST /api/broker/restart`
 - `POST /api/mqtt/publish`
+- `POST /api/mqtt/gateway/publish`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
 

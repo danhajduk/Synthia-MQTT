@@ -75,6 +75,7 @@ app.include_router(
         policy_cache,
         telemetry_reporter,
         config_store,
+        registration_store,
     )
 )
 app.include_router(

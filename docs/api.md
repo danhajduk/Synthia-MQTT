@@ -84,12 +84,27 @@ Uses Docker SDK if available and updates install session verification state.
 ## MQTT publish routes
 
 - `POST /api/mqtt/publish`
+- `POST /api/mqtt/gateway/publish`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
 
 HA sensor discovery publishes retained payload to:
 
 - `homeassistant/sensor/{unique_id}/config`
+
+Gateway publish endpoint:
+
+- `POST /api/mqtt/gateway/publish`
+- accepts structured payload (`addon_id`, `message_type`, `payload`, optional `topic`, optional `qos`, optional `retain`)
+- publishes standard JSON envelope:
+  - `type`
+  - `source_addon_id`
+  - `timestamp`
+  - `data`
+- defaults:
+  - `topic`: `synthia/addons/<addon_id>/<message_type>`
+  - `qos`: addon config default (`mqtt_qos`)
+  - `retain`: `true`
 
 MQTT registration endpoint:
 
@@ -153,6 +168,7 @@ Addon runtime sends buffered best-effort usage events to Core endpoint:
 Source operations currently reported:
 
 - successful `POST /api/mqtt/publish`
+- successful `POST /api/mqtt/gateway/publish`
 - successful `POST /api/ha/discovery/sensor`
 
 Reporting behavior:

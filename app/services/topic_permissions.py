@@ -65,3 +65,24 @@ def _normalize_topics(topics: list[str]) -> list[str]:
 
 def _is_reserved_topic(topic: str) -> bool:
     return any(topic.startswith(prefix) for prefix in RESERVED_NAMESPACE_PREFIXES)
+
+
+def topic_allowed_by_scopes(topic: str, scopes: list[str]) -> bool:
+    return any(_mqtt_topic_matches(scope, topic) for scope in scopes)
+
+
+def _mqtt_topic_matches(filter_topic: str, topic: str) -> bool:
+    filter_levels = filter_topic.split("/")
+    topic_levels = topic.split("/")
+
+    for idx, level in enumerate(filter_levels):
+        if level == "#":
+            return idx == len(filter_levels) - 1
+        if idx >= len(topic_levels):
+            return False
+        if level == "+":
+            continue
+        if level != topic_levels[idx]:
+            return False
+
+    return len(topic_levels) == len(filter_levels)
