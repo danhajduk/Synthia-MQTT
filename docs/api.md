@@ -87,6 +87,7 @@ Uses Docker SDK if available and updates install session verification state.
 - `POST /api/mqtt/gateway/publish`
 - `GET /api/mqtt/publish-traces`
 - `GET /api/mqtt/registrations`
+- `GET /api/mqtt/topic-explorer`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
 - `POST /api/ha/discovery/state/publish`
@@ -168,6 +169,15 @@ MQTT registration endpoint:
 - broker mode output behavior:
   - embedded mode writes generated ACL snippets under `runtime/broker/acl_generated/`
   - external mode writes operator notes under `runtime/broker/external_acl_notes/`
+
+Topic explorer endpoint:
+
+- `GET /api/mqtt/topic-explorer` provides safe topic visibility summary:
+  - reserved namespaces (`system`, `core`, `supervisor`, `scheduler`, `policy`, `telemetry`)
+  - addon-owned namespaces from current registrations
+  - known lifecycle topics (`announce`, `health`) per registration
+  - registration-to-topic mapping summary
+  - derived topic family overview (`reserved` vs `addon`)
 
 Operational publish routes are blocked until setup state is complete:
 

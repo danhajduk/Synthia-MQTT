@@ -3,11 +3,14 @@ from typing import Callable
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.registration_models import (
+    MqttTopicExplorerResponse,
     MqttRegistrationInspectionResponse,
     MqttRegistrationRequest,
     MqttRegistrationResponse,
     RegistrationInspectionRecord,
+    RegistrationTopicMapping,
     SetupCapabilitySummary,
+    TopicFamilySummary,
 )
 from app.models.trace_models import PublishTraceLogRequest
 from app.services.config_store import ConfigStore
@@ -93,5 +96,68 @@ def build_mqtt_registration_router(
             for record in store.list_registrations()
         ]
         return MqttRegistrationInspectionResponse(ok=True, setup=setup_summary, registrations=records)
+
+    @router.get("/topic-explorer", response_model=MqttTopicExplorerResponse)
+    def topic_explorer(
+        _claims: ServiceTokenClaims = Depends(require_registration_scope),
+    ) -> MqttTopicExplorerResponse:
+        base_topic = str(config_store.get_effective_config().get("mqtt_base_topic", "synthia")).strip() or "synthia"
+        reserved_namespaces = [
+            f"{base_topic}/system/#",
+            f"{base_topic}/core/#",
+            f"{base_topic}/supervisor/#",
+            f"{base_topic}/scheduler/#",
+            f"{base_topic}/policy/#",
+            f"{base_topic}/telemetry/#",
+        ]
+
+        records = store.list_registrations()
+        mappings: list[RegistrationTopicMapping] = []
+        addon_namespaces: list[str] = []
+        lifecycle_topics: list[str] = []
+        family_to_addons: dict[tuple[str, str], set[str]] = {}
+
+        for record in records:
+            addon_root = f"{base_topic}/addons/{record.addon_id}"
+            addon_namespace = f"{addon_root}/#"
+            addon_namespaces.append(addon_namespace)
+            addon_lifecycle = [f"{addon_root}/announce", f"{addon_root}/health"]
+            lifecycle_topics.extend(addon_lifecycle)
+            mappings.append(
+                RegistrationTopicMapping(
+                    addon_id=record.addon_id,
+                    publish_scopes=record.permissions.publish,
+                    subscribe_scopes=record.permissions.subscribe,
+                    lifecycle_topics=addon_lifecycle,
+                )
+            )
+
+            for topic in [*record.permissions.publish, *record.permissions.subscribe, *addon_lifecycle]:
+                parts = [part for part in topic.split("/") if part]
+                if len(parts) < 2:
+                    continue
+                if len(parts) >= 3 and parts[1] == "addons":
+                    family = "/".join(parts[:3]) + "/..."
+                    key = (family, "addon")
+                else:
+                    family = "/".join(parts[:2]) + "/..."
+                    key = (family, "reserved")
+                if key not in family_to_addons:
+                    family_to_addons[key] = set()
+                family_to_addons[key].add(record.addon_id)
+
+        topic_families = [
+            TopicFamilySummary(family=family, kind=kind, registrations=sorted(addons))
+            for (family, kind), addons in sorted(family_to_addons.items(), key=lambda entry: entry[0][0])
+        ]
+        return MqttTopicExplorerResponse(
+            ok=True,
+            base_topic=base_topic,
+            reserved_namespaces=reserved_namespaces,
+            addon_namespaces=sorted(set(addon_namespaces)),
+            lifecycle_topics=sorted(set(lifecycle_topics)),
+            registration_mappings=mappings,
+            topic_families=topic_families,
+        )
 
     return router

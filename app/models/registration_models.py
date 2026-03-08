@@ -68,3 +68,26 @@ class MqttRegistrationInspectionResponse(BaseModel):
     ok: bool
     setup: SetupCapabilitySummary
     registrations: list[RegistrationInspectionRecord]
+
+
+class RegistrationTopicMapping(BaseModel):
+    addon_id: str
+    publish_scopes: list[str]
+    subscribe_scopes: list[str]
+    lifecycle_topics: list[str]
+
+
+class TopicFamilySummary(BaseModel):
+    family: str
+    kind: Literal["reserved", "addon"]
+    registrations: list[str]
+
+
+class MqttTopicExplorerResponse(BaseModel):
+    ok: bool
+    base_topic: str
+    reserved_namespaces: list[str]
+    addon_namespaces: list[str]
+    lifecycle_topics: list[str]
+    registration_mappings: list[RegistrationTopicMapping]
+    topic_families: list[TopicFamilySummary]

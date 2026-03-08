@@ -1,8 +1,8 @@
-Task #058 :
+Task #059 :
 
-Reasoning: Publish failures and denied contracts were not observable from the dashboard, which made broker and policy troubleshooting blind.
+Reasoning: Operators needed a safe overview of governed MQTT topic usage without enabling raw packet sniffing.
 
 What and why:
-Added persistent runtime trace logging for publish/discovery/provisioning paths with operation outcome, topic, caller, detail, and optional message/correlation IDs; exposed GET /api/mqtt/publish-traces and added dashboard trace-debugger view with denied/error counters.
+Added GET /api/mqtt/topic-explorer to summarize reserved namespaces, addon-owned namespaces, lifecycle topics, registration mappings, and derived topic families; added a dashboard topic explorer panel consuming this endpoint.
 
 ###########

@@ -259,6 +259,21 @@
         </section>
 
         <section class="panel">
+          <h2>Topic Explorer</h2>
+          <div class="actions">
+            <button id="refresh-topic-explorer" type="button">Refresh Topic Explorer</button>
+          </div>
+          <div class="summary-grid">
+            <div><span>Base Topic</span><strong id="topic-base">-</strong></div>
+            <div><span>Reserved Namespaces</span><strong id="topic-reserved-count">-</strong></div>
+            <div><span>Addon Namespaces</span><strong id="topic-addon-count">-</strong></div>
+            <div><span>Lifecycle Topics</span><strong id="topic-lifecycle-count">-</strong></div>
+            <div><span>Topic Families</span><strong id="topic-family-count">-</strong></div>
+          </div>
+          <pre id="topic-explorer-output">[]</pre>
+        </section>
+
+        <section class="panel">
           <h2>Test Publish</h2>
           <div class="form-grid">
             <label>Topic <input id="pub-topic" type="text" value="synthia/test" /></label>

@@ -522,6 +522,26 @@ async function loadPublishTraces() {
   $("trace-output").textContent = JSON.stringify(traces, null, 2);
 }
 
+async function loadTopicExplorer() {
+  const response = await api("/api/mqtt/topic-explorer");
+  setText("topic-base", String(response.base_topic || "-"));
+  setText("topic-reserved-count", String(Array.isArray(response.reserved_namespaces) ? response.reserved_namespaces.length : 0));
+  setText("topic-addon-count", String(Array.isArray(response.addon_namespaces) ? response.addon_namespaces.length : 0));
+  setText("topic-lifecycle-count", String(Array.isArray(response.lifecycle_topics) ? response.lifecycle_topics.length : 0));
+  setText("topic-family-count", String(Array.isArray(response.topic_families) ? response.topic_families.length : 0));
+  $("topic-explorer-output").textContent = JSON.stringify(
+    {
+      reserved_namespaces: response.reserved_namespaces || [],
+      addon_namespaces: response.addon_namespaces || [],
+      lifecycle_topics: response.lifecycle_topics || [],
+      registration_mappings: response.registration_mappings || [],
+      topic_families: response.topic_families || [],
+    },
+    null,
+    2
+  );
+}
+
 async function publishTest() {
   const payload = {
     topic: $("pub-topic").value.trim(),
@@ -593,6 +613,7 @@ function bindEvents() {
   $("load-finish").addEventListener("click", () => run(loadDashboardSummary));
   $("refresh-registrations").addEventListener("click", () => run(loadRegistrationInspector));
   $("refresh-traces").addEventListener("click", () => run(loadPublishTraces));
+  $("refresh-topic-explorer").addEventListener("click", () => run(loadTopicExplorer));
   $("test-publish").addEventListener("click", () => run(publishTest));
 
   bindSetupNavigation();
@@ -623,7 +644,7 @@ async function initialize() {
     await loadDoneSummary();
   } else {
     setViewMode("dashboard");
-    await Promise.all([loadDashboardSummary(), loadRegistrationInspector(), loadPublishTraces()]);
+    await Promise.all([loadDashboardSummary(), loadRegistrationInspector(), loadPublishTraces(), loadTopicExplorer()]);
   }
 }
 
