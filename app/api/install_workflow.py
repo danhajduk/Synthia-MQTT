@@ -86,6 +86,26 @@ def _optional_reconcile_state(
     return "waiting_for_reconcile"
 
 
+def _readiness_state(
+    setup_state: str,
+    requested: list[str],
+    active: list[str],
+    required_groups: list[str],
+) -> tuple[str, bool, list[str]]:
+    if setup_state not in {"ready", "degraded"}:
+        return "not_ready", False, required_groups
+    missing = [group_id for group_id in required_groups if group_id not in active]
+    if not requested:
+        return "full", True, []
+    if missing:
+        if active:
+            return "partial", False, missing
+        return "not_ready", False, missing
+    if sorted(requested) == sorted(active):
+        return "full", True, []
+    return "partial", False, []
+
+
 def _direct_access_summary(mode: str, external_direct_access_mode: str) -> str:
     if mode == "embedded":
         return "Embedded broker supports managed direct MQTT credentials."
@@ -123,6 +143,8 @@ def build_install_workflow_router(
             "name": group.name,
             "compose_file": group.compose_file,
             "setup_required": group.setup_required,
+            "depends_on": group.depends_on,
+            "default_enabled": group.default_enabled,
         }
         for group in supported_optional_groups
     }
@@ -188,6 +210,17 @@ def build_install_workflow_router(
             starting=optional_groups_starting,
             failed=optional_groups_failed,
         )
+        required_groups = [
+            group_id
+            for group_id in optional_groups_requested
+            if bool(supported_optional_group_map.get(group_id, {}).get("setup_required", False))
+        ]
+        readiness_state, readiness_full, readiness_missing_groups = _readiness_state(
+            setup_state=setup_state,
+            requested=optional_groups_requested,
+            active=optional_groups_active,
+            required_groups=required_groups,
+        )
         deployment_mode = "expanded" if optional_groups_active else "base_only"
 
         return InstallStatusResponse(
@@ -213,6 +246,10 @@ def build_install_workflow_router(
             optional_groups_pending_reconcile=optional_groups_pending_reconcile,
             deployment_mode=deployment_mode,
             optional_groups_reconcile_state=optional_groups_reconcile_state,
+            readiness_state=readiness_state,
+            readiness_full=readiness_full,
+            readiness_required_groups=required_groups,
+            readiness_missing_groups=readiness_missing_groups,
         )
 
     @router.post("/optional-groups", response_model=OptionalGroupSelectionResponse)

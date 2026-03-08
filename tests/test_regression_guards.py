@@ -47,12 +47,13 @@ class RegressionGuardsTest(unittest.TestCase):
         manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
         groups = manifest.get("optional_docker_groups") or []
         self.assertTrue(isinstance(groups, list))
-        self.assertGreaterEqual(len(groups), 1)
+        self.assertGreaterEqual(len(groups), 2)
         first = groups[0]
         self.assertIn("id", first)
         self.assertIn("name", first)
         self.assertIn("description", first)
         self.assertIn("compose_file", first)
+        self.assertIn("depends_on", first)
 
     def test_release_script_packages_runtime(self) -> None:
         release_script = Path(__file__).resolve().parents[1] / "scripts" / "release-addon.sh"
@@ -100,6 +101,14 @@ class RegressionGuardsTest(unittest.TestCase):
         install_workflow = Path(__file__).resolve().parents[1] / "app" / "api" / "install_workflow.py"
         text = install_workflow.read_text(encoding="utf-8")
         self.assertIn('"/optional-groups/reset"', text)
+
+    def test_install_status_exposes_readiness_fields(self) -> None:
+        models_file = Path(__file__).resolve().parents[1] / "app" / "models" / "install_models.py"
+        text = models_file.read_text(encoding="utf-8")
+        self.assertIn("readiness_state", text)
+        self.assertIn("readiness_full", text)
+        self.assertIn("readiness_required_groups", text)
+        self.assertIn("readiness_missing_groups", text)
 
 
 if __name__ == "__main__":

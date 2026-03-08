@@ -35,6 +35,10 @@ class InstallStatusResponse(BaseModel):
         "failed",
         "mixed",
     ] = "idle"
+    readiness_state: Literal["not_ready", "partial", "full"] = "not_ready"
+    readiness_full: bool = False
+    readiness_required_groups: list[str] = Field(default_factory=list)
+    readiness_missing_groups: list[str] = Field(default_factory=list)
 
 
 class ExternalConnectionConfig(BaseModel):

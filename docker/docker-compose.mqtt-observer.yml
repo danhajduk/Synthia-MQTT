@@ -1,0 +1,6 @@
+services:
+  mqtt-observer:
+    image: eclipse-mosquitto:2
+    container_name: synthia-mqtt-observer
+    command: ["sleep", "infinity"]
+    restart: unless-stopped

@@ -154,7 +154,11 @@ class ConfigStore:
         supported_groups: dict[str, dict[str, Any]],
     ) -> dict[str, Any]:
         supported_group_ids = set(supported_groups.keys())
-        requested = [group_id for group_id in self._normalize_string_list(requested_group_ids) if group_id in supported_group_ids]
+        requested = self._resolve_requested_optional_groups(
+            requested_group_ids=self._normalize_string_list(requested_group_ids),
+            supported_groups=supported_groups,
+        )
+        requested = [group_id for group_id in requested if group_id in supported_group_ids]
         self._prepare_optional_group_assets(requested, supported_groups=supported_groups)
         state = self.get_install_session_state()
         active = [group_id for group_id in self._normalize_string_list(state.get("optional_groups_active")) if group_id in requested]
@@ -336,6 +340,34 @@ class ConfigStore:
             return payload
 
         self._state_store.update_desired(_mutate)
+
+    def _resolve_requested_optional_groups(
+        self,
+        requested_group_ids: list[str],
+        supported_groups: dict[str, dict[str, Any]],
+    ) -> list[str]:
+        ordered: list[str] = []
+        visiting: set[str] = set()
+        visited: set[str] = set()
+
+        def visit(group_id: str) -> None:
+            if group_id in visited:
+                return
+            if group_id in visiting:
+                return
+            metadata = supported_groups.get(group_id)
+            if not isinstance(metadata, dict):
+                return
+            visiting.add(group_id)
+            for dependency in self._normalize_string_list(metadata.get("depends_on")):
+                visit(dependency)
+            visiting.remove(group_id)
+            visited.add(group_id)
+            ordered.append(group_id)
+
+        for requested in requested_group_ids:
+            visit(requested)
+        return ordered
 
     def _prepare_optional_group_assets(
         self,
