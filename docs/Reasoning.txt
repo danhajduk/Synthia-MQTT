@@ -1,12 +1,7 @@
-Task #41 :
-Reasoning: Build automated local alignment checks and enforce them in validation/release workflows so golden-doc drift is tracked explicitly while local documentation regressions fail fast.
+Task #42 :
+Reasoning: Re-verify local documentation against implemented repository behavior and remediate any local drift only.
 What and why:
-- Added `scripts/check-doc-alignment.sh` to verify endpoint parity (code vs docs), capability parity (code vs docs), manifest-sourced version usage guardrails, and ownership-boundary note presence.
-- Added release-gate mode in the same script to require same-day mismatch-report refresh and to block releases if any `open` + `local-fixable` mismatch remains.
-- Integrated alignment checks into `scripts/validate-service-flow.sh` and `scripts/release-addon.sh` so both operational validation and release packaging enforce documentation alignment.
-- Re-ran code-to-golden audit and rewrote `docs/mismatch-report.md` with explicit status/ownership classes and evidence fields.
-- Updated active docs (`README.md`, `docs/deployment.md`) to document the new alignment and release-gate controls.
+- Ran `scripts/check-doc-alignment.sh` and manual code-to-doc route/capability/auth/policy/telemetry checks across `app/`, `README.md`, and `docs/*`.
+- Confirmed local docs already match implemented behavior; no local code/doc remediation was required.
+- Recorded this verification task and completion in task tracking files to keep local alignment status explicit.
 ###########
-#############
-All Tasks completed 03/07/2026 19:59:30
-#############
