@@ -11,6 +11,10 @@ Defined service:
 
 - `mqtt-addon` (builds from `docker/Dockerfile`)
 
+Image packaging note:
+
+- `docker/Dockerfile` includes `manifest.json` in `/workspace/manifest.json` so addon contract metadata loads at startup.
+
 Notes:
 
 - This compose file does not define `mosquitto`.

@@ -5,6 +5,7 @@ WORKDIR /workspace
 COPY requirements.txt /workspace/requirements.txt
 RUN pip install --no-cache-dir -r /workspace/requirements.txt
 
+COPY manifest.json /workspace/manifest.json
 COPY app /workspace/app
 COPY runtime /workspace/runtime
 

@@ -1,8 +1,8 @@
-Task #062 :
+Task #063 :
 
-Reasoning: The repository needed repeatable end-to-end guardrails for setup, registration, and publish governance behavior to prevent regressions.
+Reasoning: Service container entered restart loop because addon manifest metadata file was not packaged in the runtime image.
 
 What and why:
-Added `tests/test_e2e_flows.py` using `unittest` + FastAPI `TestClient` with isolated temporary runtime stores and stubbed runtime dependencies. Tests cover setup state transitions, external and embedded apply flows, registration/ACL realization, gateway publish success path, and reserved namespace contract rejection.
+Updated `docker/Dockerfile` to copy `manifest.json` into `/workspace/manifest.json` and documented the packaging requirement in deployment docs. Verified image rebuild and container startup status are healthy.
 
 ###########
