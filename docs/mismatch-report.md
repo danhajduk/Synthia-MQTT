@@ -7,10 +7,11 @@ Compared docs:
 - `/home/dan/Projects/Synthia/docs/addons.md`
 - `/home/dan/Projects/Synthia/docs/standalone-addon.md`
 - `/home/dan/Projects/Synthia/docs/api.md`
+- `/home/dan/Projects/Synthia/docs/Policies/Synthia_Addon_API_and_MQTT_Standard.md`
 
 ## Summary
 
-- Total findings: 4
+- Total findings: 3
 - Highest-risk mismatch: bootstrap/deployment layout assumptions differ from standalone spec examples.
 - Golden standard: `/home/dan/Projects/Synthia/docs` is treated as source-of-truth for alignment.
 
@@ -91,27 +92,7 @@ Recommended fix (local alignment):
 
 - Add local docs note mapping addon entrypoint path to Core contract expectations.
 
-## Finding 4: Registry contract minimal endpoints vs addon extended endpoints
+## Notes from this recheck
 
-Type: Missing documentation in golden reference for optional endpoints
-
-Affected files:
-
-- `/home/dan/Projects/Synthia/docs/addons.md`
-- `app/api/addon_contract.py`
-
-What code shows:
-
-- Addon exposes additional contract endpoints (`/api/addon/version`, `/api/addon/permissions`, `/api/addon/capabilities`, `/api/addon/config/effective`).
-
-What docs say:
-
-- Core addons doc lists only minimal required remote endpoints (`meta`, `health`, `config`).
-
-Why this is a mismatch:
-
-- Current addon capability surface is broader than reference doc and may be missed by operators/integrators.
-
-Recommended fix (local alignment):
-
-- Keep optional endpoints implemented and verify they remain backward-compatible with minimal required contract.
+- Previous Finding 4 was removed.
+- `/home/dan/Projects/Synthia/docs/Policies/Synthia_Addon_API_and_MQTT_Standard.md` now documents `GET /api/addon/capabilities`, policy topics, and telemetry usage reporting, which aligns with current addon implementation.
