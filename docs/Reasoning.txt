@@ -1,5 +1,4 @@
-Task #40.4 :
-Error context: Validation coverage did not enforce the new extracted build-context layout or verify manifest-sourced version wiring in runtime/app metadata.
-Reasoning: Add deterministic checks to existing validation scripts so layout/version regressions fail fast in local validation workflows.
-What and why: Extended `scripts/validate-bootstrap.sh` to require `versions/<version>/extracted/Dockerfile` and enforce `desired.json.pinned_version` + `runtime.json.active_version` against the `current` symlink version. Extended `scripts/validate-service-flow.sh` static checks to require `version=ADDON_VERSION.version` in `app/main.py`. Updated deployment docs validation bullet list accordingly.
+Task #40 :
+Reasoning: After implementing subtasks 40.1-40.4, refresh mismatch reporting to reflect local mitigations and keep only active golden-doc drift findings.
+What and why: Updated `docs/mismatch-report.md` summary and findings to remove the resolved extracted-layout mismatch, retain active golden-doc drift items, and explicitly note local mitigations completed in this repository.
 ###########

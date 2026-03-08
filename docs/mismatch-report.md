@@ -11,8 +11,8 @@ Compared docs:
 
 ## Summary
 
-- Total findings: 3
-- Highest-risk mismatch: bootstrap/deployment layout assumptions differ from standalone spec examples.
+- Total findings: 2
+- Highest-risk mismatch: version example drift in golden addons registration documentation.
 - Golden standard: `/home/dan/Projects/Synthia/docs` is treated as source-of-truth for alignment.
 
 ## Finding 1: API metadata version drift
@@ -41,33 +41,7 @@ Recommended fix (local alignment):
 - Keep Core docs unchanged (golden).
 - Ensure local integration scripts/docs do not hardcode stale version examples.
 
-## Finding 2: Standalone artifact layout examples differ from current bootstrap flow
-
-Type: Stale implementation behavior vs golden specification
-
-Affected files:
-
-- `/home/dan/Projects/Synthia/docs/standalone-addon.md`
-- `scripts/bootstrap-install.sh`
-
-What code shows:
-
-- Bootstrap stores `addon.tgz` and extracted compose file under `versions/<version>/` and writes `desired.json` at install root.
-- The script does not unpack the full artifact into an `extracted/` runtime directory.
-
-What docs say:
-
-- Standalone spec examples emphasize an extracted build-context layout under `extracted/`.
-
-Why this is a mismatch:
-
-- Current addon installer behavior is artifact-retaining with targeted compose extraction only.
-
-Recommended fix (local alignment):
-
-- Update local bootstrap/install flow to satisfy the golden SSAP layout expectation.
-
-## Finding 3: Core API doc backend path example does not map to this addon repo
+## Finding 2: Core API doc backend path example does not map to this addon repo
 
 Type: Unclear ownership boundary
 
@@ -94,5 +68,7 @@ Recommended fix (local alignment):
 
 ## Notes from this recheck
 
+- Previous Finding 2 was mitigated locally by extracting full artifact build context to `versions/<version>/extracted/`.
 - Previous Finding 4 was removed.
 - `/home/dan/Projects/Synthia/docs/Policies/Synthia_Addon_API_and_MQTT_Standard.md` now documents `GET /api/addon/capabilities`, policy topics, and telemetry usage reporting, which aligns with current addon implementation.
+- Local ownership-boundary mitigation was added in `docs/api.md` to map Core `backend/app/main.py` references to addon `app/main.py`.
