@@ -109,11 +109,12 @@ Completed Tasks
 41. Task 41: Establish continuous golden-document alignment controls for this repository - Completed on 03/07/2026 19:59
 42. Task 42: Re-verify and align local documentation with current implemented repository state - Completed on 03/07/2026 20:06
 43.1 Task 43.1: Persist setup_state lifecycle and enforce readiness gating on operational publish APIs - Completed on 03/07/2026 21:04
+43.2 Task 43.2: Update setup/dashboard UI shell to display setup_state guidance and gate dashboard until setup completion - Completed on 03/07/2026 21:06
+43. Task 43: Add first-run setup state and setup UI shell - Completed on 03/07/2026 21:06
 
 ##################################
 Tasks in Progress
 ##################################
-43. Task 43: Add first-run setup state and setup UI shell
 
 ##################################
 Pending Tasks

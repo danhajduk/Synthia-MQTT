@@ -229,20 +229,26 @@ function validateDetails() {
 }
 
 function updateSetupStatus(install, health) {
+  setText("status-setup-state", install.setup_state);
+  setText("status-setup-guidance", install.setup_guidance);
   setText("status-mode", install.mode);
   setText("status-configured", String(install.configured));
   setText("status-verified", String(install.verified));
   setText("status-registered", String(install.registered_to_core));
+  setText("status-direct-mqtt", String(install.direct_mqtt_supported));
   setText("status-mqtt", String(install.mqtt_connected));
   setText("status-health", health.status);
   setText("status-error", install.last_error || "none");
 }
 
 function updateDashboardStatus(install, health) {
+  setText("dash-status-setup-state", install.setup_state);
+  setText("dash-status-setup-guidance", install.setup_guidance);
   setText("dash-status-mode", install.mode);
   setText("dash-status-configured", String(install.configured));
   setText("dash-status-verified", String(install.verified));
   setText("dash-status-registered", String(install.registered_to_core));
+  setText("dash-status-direct-mqtt", String(install.direct_mqtt_supported));
   setText("dash-status-mqtt", String(install.mqtt_connected));
   setText("dash-status-health", health.status);
   setText("dash-status-error", install.last_error || "none");
@@ -556,7 +562,8 @@ async function initialize() {
   const forceSetup = new URLSearchParams(window.location.search).get("setup") === "1";
   const { install } = await loadStatusSnapshot();
 
-  if (forceSetup || !install.configured) {
+  const setupComplete = ["ready", "degraded"].includes(String(install.setup_state));
+  if (forceSetup || !setupComplete) {
     setViewMode("setup");
     await loadDoneSummary();
   } else {

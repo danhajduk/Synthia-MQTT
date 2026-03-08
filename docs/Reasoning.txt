@@ -1,8 +1,7 @@
-Task #43.1 :
-Reasoning: Introduce explicit first-run setup state in persisted install session data and enforce setup completion before operational publish APIs are usable.
+Task #43.2 :
+Reasoning: The setup UI must make first-run readiness explicit and prevent users from landing in operational dashboard mode until setup has completed.
 What and why:
-- Extended install status contract with `setup_state`, `setup_guidance`, and `direct_mqtt_supported`.
-- Persisted `setup_state` in install session state and wired state transitions across install apply/reset paths.
-- Added API gating so MQTT publish and HA discovery publish return HTTP 409 until setup reaches `ready`/`degraded`.
-- Updated local docs (`README.md`, `docs/api.md`) to reflect new status fields and gating behavior.
+- Updated setup and dashboard status cards to show `setup_state`, `setup_guidance`, and `direct_mqtt_supported` from `/api/install/status`.
+- Changed initialization gate to route users to setup until state is `ready` or `degraded`.
+- Rebuilt `frontend/dist` assets from updated source files.
 ###########
