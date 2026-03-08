@@ -114,6 +114,9 @@ class ConfigStore:
                 "external_direct_access_mode",
                 state["external_direct_access_mode"],
             )
+            state["optional_groups_requested"] = self._normalize_string_list(raw.get("optional_groups_requested"))
+            state["optional_groups_active"] = self._normalize_string_list(raw.get("optional_groups_active"))
+            state["optional_groups_failed"] = self._normalize_string_list(raw.get("optional_groups_failed"))
 
         install_config = self.get_install_state()
         mode = install_config.get("mode")
@@ -134,11 +137,25 @@ class ConfigStore:
             "external_test_ok",
             "external_test_signature",
             "external_direct_access_mode",
+            "optional_groups_requested",
+            "optional_groups_active",
+            "optional_groups_failed",
         ):
             if key in updates:
                 state[key] = updates[key]
         self._save_install_session_state(state)
         return state
+
+    def set_requested_optional_groups(self, requested_group_ids: list[str], supported_group_ids: set[str]) -> dict[str, Any]:
+        requested = [group_id for group_id in self._normalize_string_list(requested_group_ids) if group_id in supported_group_ids]
+        state = self.get_install_session_state()
+        active = [group_id for group_id in self._normalize_string_list(state.get("optional_groups_active")) if group_id in requested]
+        failed = [group_id for group_id in self._normalize_string_list(state.get("optional_groups_failed")) if group_id in requested]
+        return self.update_install_session_state(
+            optional_groups_requested=requested,
+            optional_groups_active=active,
+            optional_groups_failed=failed,
+        )
 
     def set_selected_mode(self, mode: str, external_direct_access_mode: str = "gateway_only") -> dict[str, Any]:
         if mode not in {"external", "embedded"}:
@@ -269,6 +286,9 @@ class ConfigStore:
             "external_test_ok": False,
             "external_test_signature": None,
             "external_direct_access_mode": "gateway_only",
+            "optional_groups_requested": [],
+            "optional_groups_active": [],
+            "optional_groups_failed": [],
         }
 
     @staticmethod
@@ -286,3 +306,17 @@ class ConfigStore:
         if len(value) <= 2:
             return "*" * len(value)
         return f"{value[0]}{'*' * (len(value) - 2)}{value[-1]}"
+
+    @staticmethod
+    def _normalize_string_list(raw_value: Any) -> list[str]:
+        if not isinstance(raw_value, list):
+            return []
+        seen: set[str] = set()
+        normalized: list[str] = []
+        for item in raw_value:
+            value = str(item).strip()
+            if not value or value in seen:
+                continue
+            seen.add(value)
+            normalized.append(value)
+        return normalized

@@ -9,6 +9,7 @@ from app.models.addon_models import (
     AddonConfigUpdate,
     AddonHealth,
     AddonMeta,
+    OptionalDockerGroup,
     AddonVersion,
 )
 from app.services.broker_manager import BrokerManager
@@ -34,8 +35,24 @@ def _load_manifest_metadata(manifest: dict[str, object]) -> dict[str, str]:
     }
 
 
+def _load_optional_docker_groups(manifest: dict[str, object]) -> list[OptionalDockerGroup]:
+    raw_groups = manifest.get("optional_docker_groups")
+    if not isinstance(raw_groups, list):
+        return []
+    groups: list[OptionalDockerGroup] = []
+    for raw_group in raw_groups:
+        if not isinstance(raw_group, dict):
+            continue
+        try:
+            groups.append(OptionalDockerGroup.model_validate(raw_group))
+        except Exception:
+            continue
+    return groups
+
+
 MANIFEST = _load_manifest()
 MANIFEST_METADATA = _load_manifest_metadata(MANIFEST)
+MANIFEST_OPTIONAL_DOCKER_GROUPS = _load_optional_docker_groups(MANIFEST)
 MANIFEST_PERMISSIONS = [str(permission) for permission in MANIFEST.get("permissions", [])]
 ADDON_VERSION = AddonVersion(
     addon_id=MANIFEST_METADATA["addon_id"],
@@ -49,6 +66,7 @@ META = AddonMeta(
     name=MANIFEST_METADATA["name"],
     version=MANIFEST_METADATA["version"],
     description=MANIFEST_METADATA["description"],
+    optional_docker_groups=MANIFEST_OPTIONAL_DOCKER_GROUPS,
 )
 
 CAPABILITIES = [

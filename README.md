@@ -63,6 +63,7 @@ open http://localhost:18080/ui/
 - `POST /api/install/mode`
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
+- `POST /api/install/optional-groups`
 - `POST /api/install/register-core`
 - `POST /api/install/reset`
 - `POST /api/broker/restart`
@@ -84,6 +85,12 @@ open http://localhost:18080/ui/
 - `setup_guidance`: next-action hint for operators
 - `external_direct_access_mode`: `gateway_only | manual_direct_access`
 - `direct_access_summary`: explicit direct-access capability note for selected mode
+- `deployment_mode`: `base_only | expanded`
+- `optional_groups_supported`: optional docker groups declared by manifest metadata
+- `optional_groups_requested`: selected optional docker group ids
+- `optional_groups_active`: currently active optional docker group ids reported by runtime session
+- `optional_groups_failed`: optional docker group ids currently marked failed
+- `optional_groups_pending_reconcile`: `true` while requested groups are not fully active
 
 Fresh installs remain `unconfigured` until broker mode/config is applied.
 `POST /api/mqtt/publish` and `POST /api/ha/discovery/sensor` return `409` until setup reaches `ready` (or `degraded`).
@@ -105,6 +112,9 @@ Platform topic publishes also enforce envelope schema (`type`, `source_addon_id`
 `GET /api/mqtt/publish-traces` provides recent success/denied/error publish and provisioning trace records, including message/correlation IDs when present.
 `GET /api/mqtt/topic-explorer` provides operator-facing topic summaries (reserved namespaces, addon namespaces, lifecycle topics, and registration mappings).
 `GET /api/mqtt/metrics` provides publish/deny/reconnect counts, active registration count, per-addon publish summaries, and broker mode summary.
+
+Optional docker groups can be requested from setup/dashboard UI and are persisted through `POST /api/install/optional-groups`
+as desired deployment shape, while base startup remains fully functional with zero optional groups enabled.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
@@ -198,3 +208,4 @@ Release-gate checks include:
 - `version`: sourced from `manifest.json` (`python3 -c 'import json;print(json.load(open("manifest.json","r",encoding="utf-8"))["version"])'`)
 - `package_profile`: `standalone_service`
 - permissions: `network.egress`, `mqtt.publish`, `mqtt.subscribe`
+- `optional_docker_groups`: manifest-declared optional compose groups (id/name/description/compose_file and optional dependency/setup/default flags)

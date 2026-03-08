@@ -38,6 +38,9 @@ const state = {
     addonBaseUrl: "http://localhost:18080",
     hasToken: false,
   },
+  optionalGroups: {
+    requested: [],
+  },
 };
 
 function parsePayload(raw) {
@@ -76,7 +79,16 @@ function setResult(id, text) {
 }
 
 function setGlobalError(message) {
-  ["details-error", "mode-save-result", "test-result", "apply-result", "register-result", "publish-result"].forEach((id) => {
+  [
+    "details-error",
+    "mode-save-result",
+    "test-result",
+    "apply-result",
+    "register-result",
+    "publish-result",
+    "optional-groups-result",
+    "dash-optional-groups-result",
+  ].forEach((id) => {
     const element = $(id);
     if (element) {
       element.textContent = message;
@@ -260,6 +272,8 @@ function updateSetupStatus(install, health) {
   setText("status-broker-running", String(install.broker_running));
   setText("status-mqtt", String(install.mqtt_connected));
   setText("status-health", health.status);
+  setText("status-deployment-mode", install.deployment_mode || "base_only");
+  setText("status-optional-pending", String(Boolean(install.optional_groups_pending_reconcile)));
   setText("status-error", install.last_error || "none");
 }
 
@@ -277,13 +291,105 @@ function updateDashboardStatus(install, health) {
   setText("dash-status-broker-running", String(install.broker_running));
   setText("dash-status-mqtt", String(install.mqtt_connected));
   setText("dash-status-health", health.status);
+  setText("dash-status-deployment-mode", install.deployment_mode || "base_only");
+  setText("dash-status-optional-pending", String(Boolean(install.optional_groups_pending_reconcile)));
   setText("dash-status-error", install.last_error || "none");
+}
+
+function normalizeOptionalGroupIds(values) {
+  if (!Array.isArray(values)) return [];
+  const seen = new Set();
+  const normalized = [];
+  values.forEach((value) => {
+    const id = String(value || "").trim();
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    normalized.push(id);
+  });
+  return normalized;
+}
+
+function renderOptionalGroups(install) {
+  const supported = Array.isArray(install.optional_groups_supported) ? install.optional_groups_supported : [];
+  const requested = normalizeOptionalGroupIds(install.optional_groups_requested);
+  const active = new Set(normalizeOptionalGroupIds(install.optional_groups_active));
+  const failed = new Set(normalizeOptionalGroupIds(install.optional_groups_failed));
+  state.optionalGroups.requested = requested;
+
+  const containers = [$("setup-optional-groups"), $("dashboard-optional-groups")];
+  containers.forEach((container) => {
+    if (!container) return;
+    container.innerHTML = "";
+    if (!supported.length) {
+      const empty = document.createElement("p");
+      empty.className = "result";
+      empty.textContent = "No optional docker groups are declared by this addon.";
+      container.appendChild(empty);
+      return;
+    }
+
+    supported.forEach((group) => {
+      const card = document.createElement("label");
+      card.className = "optional-group-card";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.dataset.groupId = group.id;
+      checkbox.checked = requested.includes(group.id);
+      card.appendChild(checkbox);
+
+      const details = document.createElement("div");
+      details.className = "optional-group-details";
+      const status = failed.has(group.id)
+        ? "failed"
+        : active.has(group.id)
+          ? "active"
+          : requested.includes(group.id)
+            ? "waiting for reconcile"
+            : "base-only";
+      details.innerHTML = `
+        <strong>${group.name}</strong>
+        <span>${group.description}</span>
+        <span>ID: ${group.id}</span>
+        <span>Compose: ${group.compose_file}</span>
+        <span>Setup required: ${group.setup_required ? "yes" : "no"}</span>
+        <span>Status: ${status}</span>
+      `;
+      card.appendChild(details);
+      container.appendChild(card);
+    });
+  });
+}
+
+function selectedOptionalGroupIds() {
+  const sourceSelector =
+    state.viewMode === "dashboard"
+      ? "#dashboard-optional-groups input[type='checkbox']:checked"
+      : "#setup-optional-groups input[type='checkbox']:checked";
+  return normalizeOptionalGroupIds(
+    Array.from(document.querySelectorAll(sourceSelector)).map(
+      (element) => element.dataset.groupId || ""
+    )
+  );
+}
+
+async function saveOptionalGroups() {
+  const requested_group_ids = selectedOptionalGroupIds();
+  const response = await api("/api/install/optional-groups", "POST", { requested_group_ids });
+  const pending = response.pending_reconcile ? " pending reconcile." : " reconcile not pending.";
+  setResult("optional-groups-result", `Optional groups saved: ${response.requested_group_ids.join(", ") || "none"};${pending}`);
+  setResult(
+    "dash-optional-groups-result",
+    `Optional groups saved: ${response.requested_group_ids.join(", ") || "none"};${pending}`
+  );
+  await loadStatusSnapshot();
 }
 
 async function loadStatusSnapshot() {
   const [install, health] = await Promise.all([api("/api/install/status"), api("/api/addon/health")]);
   updateSetupStatus(install, health);
   updateDashboardStatus(install, health);
+  renderOptionalGroups(install);
   return { install, health };
 }
 
@@ -491,6 +597,9 @@ function resetStateDefaults() {
       addonBaseUrl: "http://localhost:18080",
       hasToken: false,
     },
+    optionalGroups: {
+      requested: [],
+    },
   });
 }
 
@@ -638,6 +747,8 @@ function bindEvents() {
   });
 
   $("refresh-dashboard").addEventListener("click", () => run(loadStatusSnapshot));
+  $("save-optional-groups").addEventListener("click", () => run(saveOptionalGroups));
+  $("dash-save-optional-groups").addEventListener("click", () => run(saveOptionalGroups));
   $("open-setup").addEventListener("click", () => {
     setViewMode("setup");
     setStep(1);

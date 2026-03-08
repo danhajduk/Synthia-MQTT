@@ -1,6 +1,16 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class OptionalDockerGroup(BaseModel):
+    id: str
+    name: str
+    description: str
+    compose_file: str
+    depends_on: list[str] = Field(default_factory=list)
+    setup_required: bool = False
+    default_enabled: bool = False
 
 
 class AddonMeta(BaseModel):
@@ -8,6 +18,7 @@ class AddonMeta(BaseModel):
     name: str
     version: str
     description: str
+    optional_docker_groups: list[OptionalDockerGroup] = Field(default_factory=list)
 
 
 class AddonVersion(BaseModel):

@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.models.addon_models import OptionalDockerGroup
+
 
 class InstallStatusResponse(BaseModel):
     mode: Literal["external", "embedded"]
@@ -18,6 +20,12 @@ class InstallStatusResponse(BaseModel):
     broker_running: bool
     mqtt_connected: bool
     last_error: str | None
+    optional_groups_supported: list[OptionalDockerGroup] = Field(default_factory=list)
+    optional_groups_requested: list[str] = Field(default_factory=list)
+    optional_groups_active: list[str] = Field(default_factory=list)
+    optional_groups_failed: list[str] = Field(default_factory=list)
+    optional_groups_pending_reconcile: bool = False
+    deployment_mode: Literal["base_only", "expanded"] = "base_only"
 
 
 class ExternalConnectionConfig(BaseModel):
@@ -87,6 +95,18 @@ class InstallModeUpdateResponse(BaseModel):
     mode: Literal["external", "embedded"]
     direct_mqtt_supported: bool
     external_direct_access_mode: Literal["gateway_only", "manual_direct_access"]
+
+
+class OptionalGroupSelectionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    requested_group_ids: list[str] = Field(default_factory=list)
+
+
+class OptionalGroupSelectionResponse(BaseModel):
+    ok: bool
+    requested_group_ids: list[str]
+    pending_reconcile: bool
 
 
 class CoreRegistryRequest(BaseModel):

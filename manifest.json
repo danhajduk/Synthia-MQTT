@@ -38,6 +38,17 @@
       }
     ]
   },
+  "optional_docker_groups": [
+    {
+      "id": "mqtt_tools",
+      "name": "MQTT Tools",
+      "description": "Optional MQTT CLI helper container for diagnostics and manual inspection.",
+      "compose_file": "docker/docker-compose.mqtt-tools.yml",
+      "depends_on": [],
+      "setup_required": false,
+      "default_enabled": false
+    }
+  ],
   "publisher": {
     "id": "publisher.danhajduk"
   }

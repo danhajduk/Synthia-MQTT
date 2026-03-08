@@ -159,10 +159,212 @@ Completed Tasks
 83. Task 83: Reflect golden store/supervisor runtime intent updates in local bootstrap code and docs - Completed on 03/08/2026 11:34
 84. Task 84: Add runtime_defaults port/bind intent to manifest.json - Completed on 03/08/2026 11:36
 
+85. Task 85: Add addon manifest support for optional docker groups - Completed on 03/08/2026 12:36
+86. Task 86: Add base-only initial startup flow - Completed on 03/08/2026 12:36
+87. Task 87: Add setup/admin UI for optional docker groups - Completed on 03/08/2026 12:36
+
 ##################################
 Tasks in Progress
 ##################################
 
+
 ##################################
 Pending Tasks
 ##################################
+# Addon Tasks — Optional Docker Group Support
+Start at **Task 88**.
+
+## Working Rules
+For every task below:
+- document and commit after each step
+- sign off completed_task.txt with date and summary of work done
+- run the project rebuild script when finished
+- ensure completed_task.txt remains gitignored
+
+---
+
+## Task 88 — Add desired-state writer for docker group selection
+Write requested docker groups into mounted desired state.
+
+### Scope
+- update mounted desired state with selected optional docker groups
+- use atomic write with locking
+- preserve unrelated desired-state fields
+- do not attempt to edit compose files directly
+
+### Acceptance
+- addon can safely request deployment shape changes through desired state
+
+---
+
+## Task 89 — Add runtime-state reader for docker group feedback
+Read actual deployment result from runtime state.
+
+### Scope
+- read runtime.json
+- show:
+  - requested groups
+  - active groups
+  - failed groups
+  - pending reconcile state
+- use this in setup/admin UI
+
+### Acceptance
+- addon can distinguish requested optional services from actually running ones
+
+---
+
+## Task 90 — Add pending/reconcile UX for optional docker groups
+Make delayed deployment changes visible and understandable.
+
+### Scope
+- after user enables or disables a group, show:
+  - requested
+  - waiting for reconcile
+  - starting
+  - active
+  - failed
+- support multiple groups cleanly
+
+### Acceptance
+- UI stays honest while supervisor catches up with desired-state changes
+
+---
+
+## Task 91 — Add mounted desired/runtime state path abstraction
+Centralize state file access.
+
+### Scope
+- centralize configured paths for mounted state files
+- add reusable helpers for:
+  - desired state read/write
+  - runtime state read
+- support missing-file bootstrap behavior
+
+### Acceptance
+- state-file access is consistent across addon setup and admin flows
+
+---
+
+## Task 92 — Add atomic desired-state write + lock helper
+Protect desired state from corruption.
+
+### Scope
+- write desired state via temp file + replace
+- implement file locking
+- guard against concurrent updates from multiple UI/API actions
+
+### Acceptance
+- desired-state updates are safe and repeatable
+
+---
+
+## Task 93 — Add optional docker group status view
+Expose deployment shape clearly in addon UI.
+
+### Scope
+- show:
+  - supported groups
+  - requested groups
+  - active groups
+  - failed groups
+  - current base-only vs expanded deployment mode
+- support clear mismatch display
+
+### Acceptance
+- operator can see whether requested optional services are actually running
+
+---
+
+## Task 94 — Add pre-reconcile asset preparation for optional groups
+Prepare required config/assets before supervisor starts optional docker groups.
+
+### Scope
+- for each supported optional group, prepare any needed runtime assets before desired-state request completes
+- examples:
+  - config files
+  - data directories
+  - credentials
+  - templates
+- do not start docker services directly from the addon
+
+### Acceptance
+- supervisor has the files it needs before optional group deployment begins
+
+---
+
+## Task 95 — Add reset/reconfigure flow for optional docker groups
+Allow operator to change their mind safely.
+
+### Scope
+- support:
+  - enable group
+  - disable group
+  - reset to base-only
+- write desired state cleanly
+- surface reconcile warnings and pending transitions
+
+### Acceptance
+- operator can safely reconfigure optional docker groups from the addon UI
+
+---
+
+## Task 96 — Add support for multiple optional docker groups
+Do not stop at one extra service.
+
+### Scope
+- ensure addon logic supports zero, one, or many optional groups
+- handle dependencies and ordering if declared
+- display all states cleanly in UI/API
+
+### Acceptance
+- addon architecture supports multiple optional docker groups without MQTT-specific assumptions
+
+---
+
+## Task 97 — Add readiness logic that includes optional docker groups
+Only report full readiness when required groups are actually active.
+
+### Scope
+- define addon readiness based on:
+  - base service health
+  - required optional groups active when enabled
+- expose readiness in UI/API
+- distinguish partial vs full readiness where helpful
+
+### Acceptance
+- addon readiness reflects real deployment state, not just saved preferences
+
+---
+
+## Task 98 — Add tests for desired/runtime-driven optional docker group flow
+Protect the generic delayed-expansion deployment model.
+
+### Scope
+- test base-only mode
+- test enabling one group
+- test enabling multiple groups
+- test disabling groups
+- test requested vs active state handling
+- test failed group reporting
+
+### Acceptance
+- addon tests cover optional docker group behavior end to end
+
+---
+
+## Task 99 — Add docs for optional docker group pattern
+Document the addon-side architecture for future reuse.
+
+### Scope
+- explain:
+  - base-only startup
+  - optional docker groups
+  - desired-state writes
+  - runtime-state feedback
+  - pre-reconcile asset generation
+  - supervisor responsibility
+- include an example flow
+
+### Acceptance
+- addon repo docs clearly describe how optional docker groups are enabled after initial setup

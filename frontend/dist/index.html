@@ -30,6 +30,8 @@
             <div><span>Managed Broker Running</span><strong id="status-broker-running">-</strong></div>
             <div><span>MQTT Connected</span><strong id="status-mqtt">-</strong></div>
             <div><span>Addon Health</span><strong id="status-health">-</strong></div>
+            <div><span>Deployment Mode</span><strong id="status-deployment-mode">-</strong></div>
+            <div><span>Optional Groups Pending</span><strong id="status-optional-pending">-</strong></div>
             <div><span>Last Error</span><strong id="status-error">-</strong></div>
           </div>
           <div class="actions">
@@ -204,6 +206,16 @@
             </div>
           </section>
         </section>
+
+        <section class="panel">
+          <h2>Optional Docker Groups</h2>
+          <p>Select optional compose groups to request. Base service runs without these groups.</p>
+          <div id="setup-optional-groups" class="optional-groups-grid"></div>
+          <div class="actions">
+            <button id="save-optional-groups" type="button">Save Optional Groups</button>
+          </div>
+          <p id="optional-groups-result" class="result">-</p>
+        </section>
       </section>
 
       <section id="dashboard-view" class="hidden">
@@ -228,12 +240,23 @@
             <div><span>Managed Broker Running</span><strong id="dash-status-broker-running">-</strong></div>
             <div><span>MQTT Connected</span><strong id="dash-status-mqtt">-</strong></div>
             <div><span>Addon health</span><strong id="dash-status-health">-</strong></div>
+            <div><span>Deployment Mode</span><strong id="dash-status-deployment-mode">-</strong></div>
+            <div><span>Optional Groups Pending</span><strong id="dash-status-optional-pending">-</strong></div>
             <div><span>Last error</span><strong id="dash-status-error">-</strong></div>
           </div>
           <div class="actions">
             <button id="refresh-dashboard" type="button">Refresh Dashboard</button>
             <button id="open-setup" type="button" class="secondary">Open Setup Wizard</button>
           </div>
+        </section>
+
+        <section class="panel">
+          <h2>Optional Docker Groups</h2>
+          <div id="dashboard-optional-groups" class="optional-groups-grid"></div>
+          <div class="actions">
+            <button id="dash-save-optional-groups" type="button">Save Optional Groups</button>
+          </div>
+          <p id="dash-optional-groups-result" class="result">-</p>
         </section>
 
         <section class="panel">

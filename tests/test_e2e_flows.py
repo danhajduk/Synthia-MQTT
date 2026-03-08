@@ -107,6 +107,16 @@ class MqttAddonE2ETest(unittest.TestCase):
         status = self.client.get("/api/install/status")
         self.assertEqual(status.status_code, 200)
         self.assertEqual(status.json()["setup_state"], "unconfigured")
+        self.assertEqual(status.json()["deployment_mode"], "base_only")
+        self.assertEqual(status.json()["optional_groups_requested"], [])
+
+        optional_groups = self.client.post(
+            "/api/install/optional-groups",
+            json={"requested_group_ids": ["mqtt_tools", "unknown"]},
+        )
+        self.assertEqual(optional_groups.status_code, 200)
+        self.assertEqual(optional_groups.json()["requested_group_ids"], ["mqtt_tools"])
+        self.assertTrue(optional_groups.json()["pending_reconcile"])
 
         mode = self.client.post(
             "/api/install/mode",
@@ -133,6 +143,7 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(status_after["mode"], "external")
         self.assertEqual(status_after["external_direct_access_mode"], "gateway_only")
         self.assertEqual(status_after["setup_state"], "ready")
+        self.assertEqual(status_after["optional_groups_requested"], ["mqtt_tools"])
 
     def test_embedded_flow_registration_and_acl_realization(self) -> None:
         apply_embedded = self.client.post(

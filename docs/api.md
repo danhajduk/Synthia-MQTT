@@ -1,7 +1,7 @@
 # API Reference (Current Implementation)
 
 Status: Active
-Last Verified: 2026-03-07 (US/Pacific)
+Last Verified: 2026-03-08 (US/Pacific)
 
 ## Base routes
 
@@ -49,6 +49,7 @@ Current capability values:
 - `POST /api/install/mode`
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
+- `POST /api/install/optional-groups`
 - `POST /api/install/register-core`
 - `POST /api/install/reset`
 
@@ -77,8 +78,17 @@ External apply validation behavior:
 - `broker_running`: current embedded broker container running status (embedded mode)
 - `external_direct_access_mode`: `gateway_only | manual_direct_access`
 - `direct_access_summary`: explicit capability limits for selected mode
+- `deployment_mode`: `base_only | expanded`
+- `optional_groups_supported`: manifest-declared optional docker groups (`id`, `name`, `description`, `compose_file`)
+- `optional_groups_requested`: requested optional group IDs
+- `optional_groups_active`: active optional group IDs
+- `optional_groups_failed`: failed optional group IDs
+- `optional_groups_pending_reconcile`: `true` while requested and active sets differ
 
 Fresh installs report `setup_state=unconfigured` until mode/config is applied.
+
+`POST /api/install/optional-groups` persists requested optional group IDs for delayed supervisor reconciliation.
+Unknown IDs are filtered out; compose files are not edited by addon runtime.
 
 ## Broker admin route
 
@@ -212,6 +222,7 @@ When `SYNTHIA_AUTH_REQUIRED=true`, privileged write operations require `Authoriz
 - `POST /api/ha/discovery/sensor` -> scope `mqtt.publish`
 - `POST /api/broker/restart` -> scope `broker.admin`
 - `POST /api/install/apply` -> scope `install.apply`
+- `POST /api/install/optional-groups` -> scope `install.apply`
 - `POST /api/install/register-core` -> scope `core.register`
 - `POST /api/install/reset` -> scope `install.reset`
 

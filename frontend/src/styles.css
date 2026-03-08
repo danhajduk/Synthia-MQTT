@@ -210,6 +210,31 @@ button.secondary {
   word-break: break-all;
 }
 
+.optional-groups-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.optional-group-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.optional-group-details {
+  display: grid;
+  gap: 3px;
+}
+
+.optional-group-details span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
 .copy-btn {
   margin-top: 8px;
   padding: 5px 8px;

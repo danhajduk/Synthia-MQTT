@@ -139,3 +139,30 @@ What and why:
 Added `runtime_defaults` to `manifest.json` with `bind_localhost=false` and default port mapping (`18080 -> 8080/tcp`) exactly as requested.
 
 ###########
+
+Task #085 :
+
+Reasoning: Optional docker-group support should be data-driven from manifest metadata so addon/supervisor integration does not rely on hardcoded group logic.
+
+What and why:
+Added `optional_docker_groups` to `manifest.json`, introduced typed `OptionalDockerGroup` model, and wired `/api/addon/meta` to parse/return optional groups dynamically. Added optional compose metadata file for declared group path parity.
+
+###########
+
+Task #086 :
+
+Reasoning: Fresh installs must stay functional in base-only mode while exposing whether optional deployment expansion is still pending.
+
+What and why:
+Extended install session/status models with optional-group requested/active/failed fields, computed pending reconcile state, and added `deployment_mode` plus guidance updates in `/api/install/status`.
+
+###########
+
+Task #087 :
+
+Reasoning: Operators need first-party UI controls for optional docker-group requests instead of manual compose edits.
+
+What and why:
+Added `POST /api/install/optional-groups` endpoint with supported-group filtering, and implemented setup/dashboard UI sections that render supported groups, current state, and save requested selection.
+
+###########

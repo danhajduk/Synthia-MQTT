@@ -1,7 +1,7 @@
 # Deployment and Packaging (Current)
 
 Status: Active
-Last Verified: 2026-03-07 (US/Pacific)
+Last Verified: 2026-03-08 (US/Pacific)
 
 ## Compose runtime
 
@@ -12,6 +12,7 @@ Defined service:
 - `mqtt-addon` (builds from `docker/Dockerfile`)
 - host port mapping `18080:8080` in `docker/docker-compose.yml`
 - optional override mapping `10.0.0.100:18081:8080` in `docker/docker-compose.port-override.yml`
+- optional-group compose metadata includes `docker/docker-compose.mqtt-tools.yml` (manifest-declared; supervisor-driven enablement pattern)
 
 Image packaging note:
 
@@ -86,3 +87,5 @@ Verified values:
 - `version`: sourced from `manifest.json` (`python3 -c 'import json;print(json.load(open("manifest.json","r",encoding="utf-8"))["version"])'`)
 - `package_profile`: `standalone_service`
 - `permissions`: `network.egress`, `mqtt.publish`, `mqtt.subscribe`
+- `runtime_defaults`: `bind_localhost=false`, `ports=[{host:18080,container:8080,proto:tcp}]`
+- `optional_docker_groups`: supports addon-declared optional compose groups without hardcoded supervisor behavior

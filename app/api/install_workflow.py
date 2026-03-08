@@ -5,7 +5,7 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.addon_contract import MANIFEST_METADATA
+from app.api.addon_contract import MANIFEST_METADATA, MANIFEST_OPTIONAL_DOCKER_GROUPS
 from app.models.install_models import (
     CoreRegistryRequest,
     CoreRegistryResponse,
@@ -16,6 +16,8 @@ from app.models.install_models import (
     InstallModeUpdateResponse,
     InstallStatusResponse,
     InstallTestExternalResponse,
+    OptionalGroupSelectionRequest,
+    OptionalGroupSelectionResponse,
 )
 from app.services.config_store import ConfigStore
 from app.services.broker_manager import BrokerManager
@@ -51,7 +53,9 @@ def _normalize_http_url(url_value: str) -> str:
     return normalized
 
 
-def _setup_guidance(setup_state: str) -> str:
+def _setup_guidance(setup_state: str, optional_groups_pending: bool = False) -> str:
+    if optional_groups_pending:
+        return "Base setup is complete. Waiting for supervisor reconcile of optional docker groups."
     if setup_state == "unconfigured":
         return "Select and save broker mode, then apply configuration in setup wizard."
     if setup_state == "configuring":
@@ -93,6 +97,8 @@ def build_install_workflow_router(
 ) -> APIRouter:
     router = APIRouter(prefix="/api/install", tags=["install"])
     repo_root = Path(__file__).resolve().parents[2]
+    supported_optional_groups = MANIFEST_OPTIONAL_DOCKER_GROUPS
+    supported_optional_group_ids = {group.id for group in supported_optional_groups}
 
     @router.get("/status", response_model=InstallStatusResponse)
     def get_status() -> InstallStatusResponse:
@@ -117,13 +123,30 @@ def build_install_workflow_router(
         direct_mqtt_supported = install_state["mode"] == "embedded" or (
             install_state["mode"] == "external" and external_direct_access_mode == "manual_direct_access"
         )
+        optional_groups_requested = [
+            str(group_id)
+            for group_id in install_state.get("optional_groups_requested", [])
+            if str(group_id) in supported_optional_group_ids
+        ]
+        optional_groups_active = [
+            str(group_id)
+            for group_id in install_state.get("optional_groups_active", [])
+            if str(group_id) in supported_optional_group_ids
+        ]
+        optional_groups_failed = [
+            str(group_id)
+            for group_id in install_state.get("optional_groups_failed", [])
+            if str(group_id) in supported_optional_group_ids
+        ]
+        optional_groups_pending_reconcile = sorted(optional_groups_requested) != sorted(optional_groups_active)
+        deployment_mode = "expanded" if optional_groups_active else "base_only"
 
         return InstallStatusResponse(
             mode=install_state["mode"],
             external_direct_access_mode=external_direct_access_mode,
             direct_access_summary=_direct_access_summary(install_state["mode"], external_direct_access_mode),
             setup_state=setup_state,
-            setup_guidance=_setup_guidance(setup_state),
+            setup_guidance=_setup_guidance(setup_state, optional_groups_pending=optional_groups_pending_reconcile),
             configured=bool(install_state["configured"]),
             verified=bool(install_state["verified"]),
             registered_to_core=bool(install_state["registered_to_core"]),
@@ -133,6 +156,29 @@ def build_install_workflow_router(
             broker_running=broker_running,
             mqtt_connected=health.mqtt_connected,
             last_error=last_error,
+            optional_groups_supported=supported_optional_groups,
+            optional_groups_requested=optional_groups_requested,
+            optional_groups_active=optional_groups_active,
+            optional_groups_failed=optional_groups_failed,
+            optional_groups_pending_reconcile=optional_groups_pending_reconcile,
+            deployment_mode=deployment_mode,
+        )
+
+    @router.post("/optional-groups", response_model=OptionalGroupSelectionResponse)
+    def set_optional_groups(
+        payload: OptionalGroupSelectionRequest,
+        _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
+    ) -> OptionalGroupSelectionResponse:
+        updated = config_store.set_requested_optional_groups(
+            requested_group_ids=payload.requested_group_ids,
+            supported_group_ids=supported_optional_group_ids,
+        )
+        requested = [str(group_id) for group_id in updated.get("optional_groups_requested", []) if str(group_id)]
+        active = [str(group_id) for group_id in updated.get("optional_groups_active", []) if str(group_id)]
+        return OptionalGroupSelectionResponse(
+            ok=True,
+            requested_group_ids=requested,
+            pending_reconcile=sorted(requested) != sorted(active),
         )
 
     @router.post("/mode", response_model=InstallModeUpdateResponse)

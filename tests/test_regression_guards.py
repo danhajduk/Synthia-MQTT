@@ -42,6 +42,18 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("docker", paths)
         self.assertIn("runtime", paths)
 
+    def test_manifest_declares_optional_docker_groups(self) -> None:
+        manifest_file = Path(__file__).resolve().parents[1] / "manifest.json"
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+        groups = manifest.get("optional_docker_groups") or []
+        self.assertTrue(isinstance(groups, list))
+        self.assertGreaterEqual(len(groups), 1)
+        first = groups[0]
+        self.assertIn("id", first)
+        self.assertIn("name", first)
+        self.assertIn("description", first)
+        self.assertIn("compose_file", first)
+
     def test_release_script_packages_runtime(self) -> None:
         release_script = Path(__file__).resolve().parents[1] / "scripts" / "release-addon.sh"
         text = release_script.read_text(encoding="utf-8")
