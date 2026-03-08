@@ -1,5 +1,6 @@
 # Workflow and local tooling
 .codex/
+AGENTS.md
 New_tasks.txt
 completed_task.txt
 
