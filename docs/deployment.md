@@ -36,7 +36,8 @@ Validation helper:
 - `scripts/validate-bootstrap.sh` now checks SSAP layout invariants:
   - canonical service root path
   - presence of `desired.json` + `runtime.json`
-  - `current` symlink + version artifact files
+  - `current` symlink + version artifact files (`addon.tgz`, `docker-compose.yml`, `extracted/Dockerfile`)
+  - `desired.json`/`runtime.json` version fields match the `current` symlink target version
   - legacy compatibility symlink target
 
 ## Manifest and artifact

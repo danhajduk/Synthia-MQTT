@@ -206,6 +206,7 @@ telemetry_text = (repo_root / "app" / "services" / "telemetry_reporter.py").read
 required_markers = [
     ("token_validator", main_text),
     ("policy_cache", main_text),
+    ("version=ADDON_VERSION.version", main_text),
     ("telemetry_reporter.start()", main_text),
     ("telemetry_reporter.stop()", main_text),
     ('"/api/telemetry/usage"', telemetry_text),

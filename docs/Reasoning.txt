@@ -1,5 +1,5 @@
-Task #40.3 :
-Error context: Golden Core API docs reference `backend/app/main.py`, which is accurate for Core but ambiguous for addon-repo readers validating this service.
-Reasoning: Add a local ownership-boundary note in addon docs to map Core-path references to this repository's actual entrypoint and remove implementation ambiguity.
-What and why: Updated `docs/api.md` with an ownership boundary section clarifying that Core references to `backend/app/main.py` map to `app/main.py` in this addon repository.
+Task #40.4 :
+Error context: Validation coverage did not enforce the new extracted build-context layout or verify manifest-sourced version wiring in runtime/app metadata.
+Reasoning: Add deterministic checks to existing validation scripts so layout/version regressions fail fast in local validation workflows.
+What and why: Extended `scripts/validate-bootstrap.sh` to require `versions/<version>/extracted/Dockerfile` and enforce `desired.json.pinned_version` + `runtime.json.active_version` against the `current` symlink version. Extended `scripts/validate-service-flow.sh` static checks to require `version=ADDON_VERSION.version` in `app/main.py`. Updated deployment docs validation bullet list accordingly.
 ###########

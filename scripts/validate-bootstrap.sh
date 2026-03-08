@@ -44,6 +44,8 @@ current_target = (service_root / os.readlink(current_link)).resolve()
 required_version_files = [
     current_target / "addon.tgz",
     current_target / "docker-compose.yml",
+    current_target / "extracted",
+    current_target / "extracted" / "Dockerfile",
 ]
 for path in required_version_files:
     if not path.exists():
@@ -65,6 +67,16 @@ if runtime.get("addon_id") != "mqtt":
     raise SystemExit("runtime.json addon_id mismatch")
 if runtime.get("ssap_version") != "1.0":
     raise SystemExit("runtime.json ssap_version mismatch")
+
+current_version = current_target.name
+if desired.get("pinned_version") != current_version:
+    raise SystemExit(
+        f"desired.json pinned_version mismatch: {desired.get('pinned_version')} != {current_version}"
+    )
+if runtime.get("active_version") != current_version:
+    raise SystemExit(
+        f"runtime.json active_version mismatch: {runtime.get('active_version')} != {current_version}"
+    )
 
 print("ssap layout checks passed")
 PY
