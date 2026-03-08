@@ -11,6 +11,7 @@ from app.models.addon_models import (
     AddonMeta,
     AddonVersion,
 )
+from app.services.broker_manager import BrokerManager
 from app.services.config_store import ConfigStore
 from app.services.health import HealthService
 from app.services.token_auth import ServiceTokenClaims
@@ -71,7 +72,43 @@ def build_addon_contract_router(
 
     @router.get("/health", response_model=AddonHealth)
     def get_health() -> AddonHealth:
-        return health_service.snapshot()
+        base_health = health_service.snapshot()
+        install_state = config_store.get_install_session_state()
+        setup_state = str(install_state.get("setup_state") or "unconfigured")
+        if setup_state not in {"unconfigured", "configuring", "ready", "error", "degraded"}:
+            setup_state = "error"
+        broker_mode = "embedded" if install_state.get("mode") == "embedded" else "external"
+        direct_mqtt_supported = broker_mode == "embedded"
+
+        broker_reachable = base_health.mqtt_connected
+        broker_health = "healthy" if broker_reachable else "unreachable"
+        if broker_mode == "embedded":
+            broker_manager = BrokerManager()
+            broker_reachable = broker_manager.broker_running() and base_health.mqtt_connected
+            broker_health = "healthy" if broker_reachable else "degraded"
+
+        status = base_health.status
+        if setup_state == "unconfigured":
+            status = "unconfigured"
+            broker_health = "unknown"
+        elif setup_state == "error":
+            status = "error"
+        elif setup_state in {"configuring", "degraded"}:
+            status = "degraded"
+        elif not broker_reachable and status != "offline":
+            status = "degraded"
+
+        return AddonHealth(
+            status=status,
+            mqtt_connected=base_health.mqtt_connected,
+            setup_state=setup_state,
+            broker_mode=broker_mode,
+            broker_reachable=broker_reachable,
+            broker_health=broker_health,
+            direct_mqtt_supported=direct_mqtt_supported,
+            last_error=base_health.last_error or install_state.get("last_error"),
+            uptime_seconds=base_health.uptime_seconds,
+        )
 
     @router.get("/version", response_model=AddonVersion)
     def get_version() -> AddonVersion:

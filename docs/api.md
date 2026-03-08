@@ -29,6 +29,14 @@ In this addon repository, the equivalent entrypoint is `app/main.py`.
 
 `/api/addon/config/effective` masks `mqtt_password`.
 
+`/api/addon/health` now reports setup and broker readiness details:
+
+- `setup_state`
+- `broker_mode`
+- `broker_reachable`
+- `broker_health`
+- `direct_mqtt_supported`
+
 Current capability values:
 
 - `mqtt.publish`

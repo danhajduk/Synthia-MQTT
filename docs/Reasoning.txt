@@ -1,8 +1,8 @@
-Task #46.2 :
-Reasoning: Operators need an explicit UI control for the backend `allow_unvalidated` override path so default behavior remains safe while still allowing deliberate bypass.
+Task #47 :
+Reasoning: Health reporting must separate addon runtime status from broker-specific readiness so Core/Supervisor can determine setup completeness and broker availability precisely.
 What and why:
-- Added setup apply-step checkbox to allow unvalidated external apply (with warning text).
-- Persisted checkbox state in local setup state and sent `allow_unvalidated` in external apply payload.
-- Hid override control for embedded mode to avoid irrelevant UI noise.
-- Rebuilt frontend distribution assets.
+- Extended `/api/addon/health` response model with setup and broker fields (`setup_state`, `broker_mode`, `broker_reachable`, `broker_health`, `direct_mqtt_supported`).
+- Composed addon health from install session state + MQTT runtime state + embedded broker runtime inspection.
+- Added explicit `error`/`unconfigured` status handling for clean readiness signaling.
+- Updated API docs with new health fields.
 ###########

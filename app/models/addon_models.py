@@ -18,8 +18,13 @@ class AddonVersion(BaseModel):
 
 
 class AddonHealth(BaseModel):
-    status: Literal["healthy", "degraded", "offline"]
+    status: Literal["healthy", "degraded", "offline", "error", "unconfigured"]
     mqtt_connected: bool
+    setup_state: Literal["unconfigured", "configuring", "ready", "error", "degraded"]
+    broker_mode: Literal["external", "embedded"]
+    broker_reachable: bool
+    broker_health: Literal["healthy", "degraded", "unreachable", "unknown"]
+    direct_mqtt_supported: bool
     last_error: str | None
     uptime_seconds: int
 
