@@ -4,5 +4,6 @@ Reasoning: Publishing 0.2.0 requires manifest version bump and consistent local 
 
 What and why:
 Bumped `manifest.json` version to `0.2.0`, updated local mismatch evidence docs that explicitly referenced old version literals, and validated alignment/tests before release publish.
+Executed `./scripts/release-addon.sh 0.2.0`, which passed release-gate checks, produced deterministic artifacts, uploaded `addon.tgz` to GitHub release `v0.2.0`, and refreshed `release-output.json` with SHA256/catalog metadata.
 
 ###########

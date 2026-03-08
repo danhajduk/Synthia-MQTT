@@ -145,11 +145,11 @@ Completed Tasks
 69. Task 69: Add recurring golden-doc revalidation checkpoint for upstream-golden findings in local release workflow - Completed on 03/07/2026 22:21
 70. Task 70: Maintain local ownership-boundary mapping note parity with golden api.md route-assembly references - Completed on 03/07/2026 22:21
 71. Task 71: Implement code-side compatibility adjustments required by approved golden-doc mismatch remediations - Completed on 03/07/2026 22:21
+72. Task 72: Build and publish release 0.2.0 - Completed on 03/07/2026 22:24
 
 ##################################
 Tasks in Progress
 ##################################
-72. Task 72: Build and publish release 0.2.0
 
 ##################################
 Pending Tasks
