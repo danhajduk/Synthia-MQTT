@@ -1,8 +1,8 @@
-Task #061 :
+Task #062 :
 
-Reasoning: External broker mode needed explicit direct-access governance rules so operators are not misled into assuming managed broker-side provisioning exists.
+Reasoning: The repository needed repeatable end-to-end guardrails for setup, registration, and publish governance behavior to prevent regressions.
 
 What and why:
-Added explicit external direct-access model (`gateway_only` vs `manual_direct_access`) to install mode/apply/status APIs and setup UI. Registration now enforces mode-specific behavior: gateway-only rejects direct registrations; manual-direct mode allows recording manual credential mapping (`manual_direct_mqtt`) without fake broker credential provisioning.
+Added `tests/test_e2e_flows.py` using `unittest` + FastAPI `TestClient` with isolated temporary runtime stores and stubbed runtime dependencies. Tests cover setup state transitions, external and embedded apply flows, registration/ACL realization, gateway publish success path, and reserved namespace contract rejection.
 
 ###########

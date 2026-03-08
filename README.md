@@ -157,6 +157,15 @@ Service-flow validation now includes this alignment check before API/MQTT checks
 ./scripts/validate-service-flow.sh
 ```
 
+End-to-end API flow tests:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+python -m unittest tests/test_e2e_flows.py
+```
+
 Release packaging enforces stricter alignment gates:
 
 ```bash

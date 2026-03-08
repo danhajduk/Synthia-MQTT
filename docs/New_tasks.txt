@@ -135,11 +135,11 @@ Completed Tasks
 59. Task 59: Add topic explorer UI - Completed on 03/07/2026 21:54
 60. Task 60: Add MQTT usage metrics - Completed on 03/07/2026 21:58
 61. Task 61: Add external broker advanced/manual direct-access model - Completed on 03/07/2026 22:01
+62. Task 62: Add end-to-end tests for setup, registration, and publish flows - Completed on 03/07/2026 22:05
 
 ##################################
 Tasks in Progress
 ##################################
-62. Task 62: Add end-to-end tests for setup, registration, and publish flows
 
 ##################################
 Pending Tasks
