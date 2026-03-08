@@ -25,6 +25,7 @@ Current behavior:
 - Resolves latest or specific tag from GitHub releases.
 - Downloads `addon.tgz` into `SynthiaAddons/services/mqtt/versions/<version>/addon.tgz`.
 - Extracts `docker/docker-compose.yml` from artifact to `versions/<version>/docker-compose.yml`.
+- Extracts full artifact build context into `versions/<version>/extracted/`.
 - Writes `desired.json` and `runtime.json` in canonical service root.
 - Updates symlinks:
   - `SynthiaAddons/services/mqtt/current -> versions/<version>`

@@ -1,5 +1,5 @@
-Task #40.1 :
-Error context: Local scripts/docs included pinned addon version examples that drift from `manifest.json` and require manual edits each release.
-Reasoning: Derive displayed/used versions from `manifest.json` and replace fixed version examples with dynamic placeholders to keep operator guidance aligned automatically.
-What and why: Updated FastAPI app metadata version to `ADDON_VERSION.version`, replaced hardcoded bootstrap version examples in `README.md` and `scripts/bootstrap-install.sh`, and updated deployment/manifest docs to instruct version sourcing from `manifest.json`.
+Task #40.2 :
+Error context: Bootstrap flow stored artifact and compose file but did not materialize an `extracted/` build-context directory expected by SSAP layout guidance.
+Reasoning: Extend bootstrap to unpack `addon.tgz` into a deterministic per-version `extracted/` path while preserving existing artifact retention and compose extraction behavior.
+What and why: Added artifact extraction step in `scripts/bootstrap-install.sh` to populate `SynthiaAddons/services/mqtt/versions/<version>/extracted`, updated script output summary/comments, and synchronized `docs/deployment.md` with the new extracted-layout behavior.
 ###########

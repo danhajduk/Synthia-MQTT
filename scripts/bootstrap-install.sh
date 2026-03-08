@@ -7,6 +7,7 @@ set -euo pipefail
 # Creates:
 #   ./SynthiaAddons/services/mqtt/
 #   ./SynthiaAddons/services/mqtt/versions/<version>/addon.tgz
+#   ./SynthiaAddons/services/mqtt/versions/<version>/extracted/*
 #   ./SynthiaAddons/services/mqtt/desired.json
 #   ./SynthiaAddons/services/mqtt/runtime.json
 #   ./SynthiaAddons/Synthia-MQTT -> ./SynthiaAddons/services/mqtt (compatibility)
@@ -78,6 +79,15 @@ extract_compose_file() {
   fi
 
   die "artifact missing docker/docker-compose.yml"
+}
+
+extract_artifact_tree() {
+  local artifact_file="$1"
+  local extracted_dir="$2"
+
+  rm -rf "$extracted_dir"
+  mkdir -p "$extracted_dir"
+  tar -xzf "$artifact_file" -C "$extracted_dir"
 }
 
 parse_args() {
@@ -357,6 +367,7 @@ main() {
   local version_dir="${INSTALL_ROOT}/versions/${version}"
   local artifact_file="${version_dir}/addon.tgz"
   local compose_file="${version_dir}/docker-compose.yml"
+  local extracted_dir="${version_dir}/extracted"
   local desired_file="${INSTALL_ROOT}/desired.json"
   local runtime_file="${INSTALL_ROOT}/runtime.json"
   local current_link="${INSTALL_ROOT}/current"
@@ -379,6 +390,9 @@ main() {
 
   echo "[bootstrap] extracting compose file -> ${compose_file}"
   extract_compose_file "${artifact_file}" "${compose_file}"
+
+  echo "[bootstrap] extracting artifact build context -> ${extracted_dir}"
+  extract_artifact_tree "${artifact_file}" "${extracted_dir}"
 
   local signature_url=""
   if signature_url="$(discover_signature_url "${asset_url}")"; then
@@ -411,6 +425,7 @@ main() {
   echo "[bootstrap] desired.json: $(realpath "${desired_file}")"
   echo "[bootstrap] runtime.json: $(realpath "${runtime_file}")"
   echo "[bootstrap] docker-compose.yml: $(realpath "${compose_file}")"
+  echo "[bootstrap] extracted build context: $(realpath "${extracted_dir}")"
   echo "[bootstrap] current -> $(readlink "${current_link}")"
   echo "[bootstrap] compatibility link: ${compatibility_link} -> $(readlink "${compatibility_link}")"
 }
