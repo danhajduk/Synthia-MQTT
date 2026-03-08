@@ -63,6 +63,18 @@ def _setup_guidance(setup_state: str) -> str:
     return "Setup is in error state. Review last_error and re-run setup."
 
 
+def _external_signature(payload: ExternalConnectionConfig) -> str:
+    return "|".join(
+        [
+            payload.host.strip(),
+            str(payload.port),
+            "1" if payload.tls else "0",
+            payload.username or "",
+            payload.password or "",
+        ]
+    )
+
+
 def build_install_workflow_router(
     config_store: ConfigStore,
     health_service: HealthService,
@@ -130,10 +142,14 @@ def build_install_workflow_router(
             password=payload.password,
         )
         diagnostic_code = _diagnostic_code_from_reason(ok=ok, reason=reason)
+        signature = _external_signature(payload)
         config_store.update_install_session_state(
             mode="external",
+            setup_state="configuring",
             verified=ok,
             last_error=None if ok else reason,
+            external_test_ok=ok,
+            external_test_signature=signature if ok else None,
         )
         return InstallTestExternalResponse(ok=ok, diagnostic_code=diagnostic_code, reason=reason)
 
@@ -149,6 +165,19 @@ def build_install_workflow_router(
             verified=False,
             last_error=None,
         )
+        if payload.mode == "external" and not payload.allow_unvalidated:
+            install_state = config_store.get_install_session_state()
+            expected_signature = install_state.get("external_test_signature")
+            tested_ok = bool(install_state.get("external_test_ok"))
+            request_external = payload.external
+            if request_external is None:
+                raise HTTPException(status_code=400, detail="external config is required when mode is external")
+            if not tested_ok or expected_signature != _external_signature(request_external):
+                raise HTTPException(
+                    status_code=400,
+                    detail="External config must pass /api/install/test-external before apply.",
+                )
+
         try:
             config_store.apply_install_config(payload)
         except ValueError as exc:

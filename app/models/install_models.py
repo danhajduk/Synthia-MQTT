@@ -54,6 +54,7 @@ class InstallApplyRequest(BaseModel):
     base_topic: str | None = None
     ha_discovery_prefix: str | None = None
     qos_default: int | None = Field(default=None, ge=0, le=2)
+    allow_unvalidated: bool = False
 
     @model_validator(mode="after")
     def validate_mode_payload(self) -> "InstallApplyRequest":

@@ -1,7 +1,9 @@
-Task #45.2 :
-Reasoning: Task 45 requires managed broker health/status visibility to operators directly in the setup/dashboard shell.
+Task #46.1 :
+Reasoning: Task 46 requires external broker config persistence to be gated by a successful connectivity validation unless operators explicitly override.
 What and why:
-- Added setup and dashboard status fields for Docker socket availability and managed broker running state.
-- Wired UI status rendering to new `install.status` fields (`docker_sock_available`, `broker_running`).
-- Rebuilt frontend distribution assets.
+- Added `allow_unvalidated` to install apply payload.
+- Added external connection signature tracking in install session state (`external_test_ok`, `external_test_signature`).
+- `POST /api/install/test-external` now records successful test signature.
+- `POST /api/install/apply` (external mode) now rejects unvalidated/mismatched configs unless `allow_unvalidated=true`.
+- Updated API/README docs for this validation rule.
 ###########

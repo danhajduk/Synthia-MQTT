@@ -51,6 +51,12 @@ Implemented install modes:
 - `external`: stores broker host/port/tls/credentials and reloads MQTT client
 - `embedded`: writes broker files under `runtime/broker/` and attempts `docker compose up` for `mosquitto` + `mqtt-addon`
 
+External apply validation behavior:
+
+- `POST /api/install/test-external` records the last successful external connection test signature.
+- `POST /api/install/apply` for `mode=external` requires a matching successful test first.
+- override is supported with request flag `allow_unvalidated=true`.
+
 `GET /api/install/status` now reports first-run setup readiness fields:
 
 - `setup_state`: `unconfigured | configuring | ready | error | degraded`

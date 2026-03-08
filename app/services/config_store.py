@@ -101,6 +101,11 @@ class ConfigStore:
             state["verified"] = bool(raw.get("verified", state["verified"]))
             state["registered_to_core"] = bool(raw.get("registered_to_core", state["registered_to_core"]))
             state["last_error"] = raw.get("last_error", state["last_error"])
+            state["external_test_ok"] = bool(raw.get("external_test_ok", state["external_test_ok"]))
+            state["external_test_signature"] = raw.get(
+                "external_test_signature",
+                state["external_test_signature"],
+            )
 
         install_config = self.get_install_state()
         mode = install_config.get("mode")
@@ -111,7 +116,16 @@ class ConfigStore:
 
     def update_install_session_state(self, **updates: Any) -> dict[str, Any]:
         state = self.get_install_session_state()
-        for key in ("mode", "setup_state", "configured", "verified", "registered_to_core", "last_error"):
+        for key in (
+            "mode",
+            "setup_state",
+            "configured",
+            "verified",
+            "registered_to_core",
+            "last_error",
+            "external_test_ok",
+            "external_test_signature",
+        ):
             if key in updates:
                 state[key] = updates[key]
         self._save_install_session_state(state)
@@ -237,6 +251,8 @@ class ConfigStore:
             "verified": False,
             "registered_to_core": False,
             "last_error": None,
+            "external_test_ok": False,
+            "external_test_signature": None,
         }
 
     @staticmethod

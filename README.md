@@ -73,6 +73,9 @@ open http://localhost:18080/ui
 Fresh installs remain `unconfigured` until broker mode/config is applied.
 `POST /api/mqtt/publish` and `POST /api/ha/discovery/sensor` return `409` until setup reaches `ready` (or `degraded`).
 
+For external broker mode, `POST /api/install/apply` requires a prior successful
+`POST /api/install/test-external` for the same config unless `allow_unvalidated=true`.
+
 ## Optional Service-Token Auth
 
 Privileged write endpoints can enforce service-token JWT validation.
