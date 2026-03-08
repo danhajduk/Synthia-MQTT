@@ -44,6 +44,7 @@ Current behavior:
 - `desired.json` runtime intent now includes:
   - `bind_localhost` (default `false`)
   - `ports[0]` default mapping: `host=18080`, `container=8080`, `proto=tcp`
+  - optional resource intent fields: `cpu`, `memory` (set via bootstrap flags/env when provided)
 - Updates symlinks:
   - `SynthiaAddons/services/mqtt/current -> versions/<version>`
   - `SynthiaAddons/Synthia-MQTT -> SynthiaAddons/services/mqtt` (compatibility link)
@@ -56,6 +57,7 @@ Validation helper:
   - `current` symlink + version artifact files (`addon.tgz`, `docker-compose.yml`, `extracted/Dockerfile`)
   - `desired.json`/`runtime.json` version fields match the `current` symlink target version
   - `desired.json` runtime port intent is present and consistent (`bind_localhost` boolean + `ports[0]` host/container/proto defaults)
+  - optional runtime resource intent parity can be asserted via `EXPECTED_RUNTIME_CPU` and `EXPECTED_RUNTIME_MEMORY`
   - legacy compatibility symlink target
 - `scripts/check-doc-alignment.sh` verifies local docs and implementation alignment:
   - implemented `/api/*` routes match endpoint lists in `README.md` and `docs/api.md`

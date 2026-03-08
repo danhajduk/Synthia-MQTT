@@ -38,6 +38,8 @@ RUNTIME_BIND_LOCALHOST="${RUNTIME_BIND_LOCALHOST:-false}"
 ADDON_HTTP_HOST_PORT="${ADDON_HTTP_HOST_PORT:-18080}"
 ADDON_HTTP_CONTAINER_PORT="${ADDON_HTTP_CONTAINER_PORT:-8080}"
 ADDON_HTTP_PROTO="${ADDON_HTTP_PROTO:-tcp}"
+RUNTIME_CPU="${RUNTIME_CPU:-}"
+RUNTIME_MEMORY="${RUNTIME_MEMORY:-}"
 
 usage() {
   cat <<EOF
@@ -52,6 +54,8 @@ Options:
   --addon-host-port <num>  Host port to encode in desired runtime ports (default: 18080)
   --addon-container-port <num>  Container port to encode in desired runtime ports (default: 8080)
   --bind-localhost <true|false> Desired runtime localhost bind intent (default: false)
+  --runtime-cpu <value>     Optional desired runtime cpu override (for example: 0.50)
+  --runtime-memory <value>  Optional desired runtime memory override (for example: 256m)
   -h, --help               Show this help
 
 Examples:
@@ -139,6 +143,16 @@ parse_args() {
         shift
         [[ $# -gt 0 ]] || die "--bind-localhost requires a value"
         RUNTIME_BIND_LOCALHOST="$1"
+        ;;
+      --runtime-cpu)
+        shift
+        [[ $# -gt 0 ]] || die "--runtime-cpu requires a value"
+        RUNTIME_CPU="$1"
+        ;;
+      --runtime-memory)
+        shift
+        [[ $# -gt 0 ]] || die "--runtime-memory requires a value"
+        RUNTIME_MEMORY="$1"
         ;;
       -h|--help)
         usage
@@ -307,54 +321,79 @@ write_desired_json() {
   local artifact_url="$3"
   local artifact_sha="$4"
   local signature_value="$5"
-  local bind_localhost_json="false"
-  if [[ "${RUNTIME_BIND_LOCALHOST,,}" == "true" ]]; then
-    bind_localhost_json="true"
-  fi
+  RUNTIME_BIND_LOCALHOST="$RUNTIME_BIND_LOCALHOST" \
+  ADDON_HTTP_HOST_PORT="$ADDON_HTTP_HOST_PORT" \
+  ADDON_HTTP_CONTAINER_PORT="$ADDON_HTTP_CONTAINER_PORT" \
+  ADDON_HTTP_PROTO="$ADDON_HTTP_PROTO" \
+  RUNTIME_CPU="$RUNTIME_CPU" \
+  RUNTIME_MEMORY="$RUNTIME_MEMORY" \
+  PROJECT_NAME="$PROJECT_NAME" \
+  ADDON_ID="$ADDON_ID" \
+  MODE="$MODE" \
+  DESIRED_STATE="$DESIRED_STATE" \
+  CHANNEL="$CHANNEL" \
+  CATALOG_ID="$CATALOG_ID" \
+  CORE_URL="$CORE_URL" \
+  python3 - "$file_path" "$version" "$artifact_url" "$artifact_sha" "$signature_value" <<'PY'
+import json
+import os
+import sys
 
-  cat > "$file_path" <<EOF
-{
-  "ssap_version": "1.0",
-  "addon_id": "${ADDON_ID}",
-  "mode": "${MODE}",
-  "desired_state": "${DESIRED_STATE}",
-  "channel": "${CHANNEL}",
-  "pinned_version": "${version}",
-  "install_source": {
-    "type": "catalog",
-    "catalog_id": "${CATALOG_ID}",
-    "release": {
-      "artifact_url": "${artifact_url}",
-      "sha256": "${artifact_sha}",
-      "publisher_key_id": "publisher.danhajduk#ed25519",
-      "signature": {
-        "type": "ed25519",
-        "value": "${signature_value}"
-      }
-    }
-  },
-  "runtime": {
+file_path, version, artifact_url, artifact_sha, signature_value = sys.argv[1:6]
+
+bind_localhost = os.getenv("RUNTIME_BIND_LOCALHOST", "false").strip().lower() == "true"
+runtime = {
     "orchestrator": "docker_compose",
-    "project_name": "${PROJECT_NAME}",
+    "project_name": os.getenv("PROJECT_NAME", "synthia-addon-mqtt"),
     "network": "synthia_net",
-    "bind_localhost": ${bind_localhost_json},
+    "bind_localhost": bind_localhost,
     "ports": [
-      {
-        "host": ${ADDON_HTTP_HOST_PORT},
-        "container": ${ADDON_HTTP_CONTAINER_PORT},
-        "proto": "${ADDON_HTTP_PROTO,,}"
-      }
-    ]
-  },
-  "config": {
-    "env": {
-      "CORE_URL": "${CORE_URL}",
-      "SYNTHIA_ADDON_ID": "${ADDON_ID}",
-      "SYNTHIA_SERVICE_TOKEN": "\${SYNTHIA_SERVICE_TOKEN}"
-    }
-  }
+        {
+            "host": int(os.getenv("ADDON_HTTP_HOST_PORT", "18080")),
+            "container": int(os.getenv("ADDON_HTTP_CONTAINER_PORT", "8080")),
+            "proto": os.getenv("ADDON_HTTP_PROTO", "tcp").strip().lower(),
+        }
+    ],
 }
-EOF
+
+runtime_cpu = os.getenv("RUNTIME_CPU", "").strip()
+runtime_memory = os.getenv("RUNTIME_MEMORY", "").strip()
+if runtime_cpu:
+    runtime["cpu"] = runtime_cpu
+if runtime_memory:
+    runtime["memory"] = runtime_memory
+
+payload = {
+    "ssap_version": "1.0",
+    "addon_id": os.getenv("ADDON_ID", "mqtt"),
+    "mode": os.getenv("MODE", "standalone_service"),
+    "desired_state": os.getenv("DESIRED_STATE", "running"),
+    "channel": os.getenv("CHANNEL", "stable"),
+    "pinned_version": version,
+    "install_source": {
+        "type": "catalog",
+        "catalog_id": os.getenv("CATALOG_ID", "official"),
+        "release": {
+            "artifact_url": artifact_url,
+            "sha256": artifact_sha,
+            "publisher_key_id": "publisher.danhajduk#ed25519",
+            "signature": {"type": "ed25519", "value": signature_value},
+        },
+    },
+    "runtime": runtime,
+    "config": {
+        "env": {
+            "CORE_URL": os.getenv("CORE_URL", "http://127.0.0.1:9001"),
+            "SYNTHIA_ADDON_ID": os.getenv("ADDON_ID", "mqtt"),
+            "SYNTHIA_SERVICE_TOKEN": "${SYNTHIA_SERVICE_TOKEN}",
+        }
+    },
+}
+
+with open(file_path, "w", encoding="utf-8") as f:
+    json.dump(payload, f, indent=2)
+    f.write("\n")
+PY
 }
 
 write_runtime_json() {
@@ -389,6 +428,8 @@ main() {
   (( ADDON_HTTP_CONTAINER_PORT >= 1 && ADDON_HTTP_CONTAINER_PORT <= 65535 )) || die "addon container port out of range"
   [[ "${ADDON_HTTP_PROTO,,}" == "tcp" || "${ADDON_HTTP_PROTO,,}" == "udp" ]] || die "addon proto must be tcp or udp"
   [[ "${RUNTIME_BIND_LOCALHOST,,}" == "true" || "${RUNTIME_BIND_LOCALHOST,,}" == "false" ]] || die "bind-localhost must be true or false"
+  [[ "$RUNTIME_CPU" != *\"* ]] || die "runtime cpu must not contain quotes"
+  [[ "$RUNTIME_MEMORY" != *\"* ]] || die "runtime memory must not contain quotes"
 
   require_cmd curl
   require_cmd python3

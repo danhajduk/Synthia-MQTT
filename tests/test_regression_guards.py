@@ -53,7 +53,7 @@ class RegressionGuardsTest(unittest.TestCase):
         text = bootstrap_script.read_text(encoding="utf-8")
         self.assertIn('"bind_localhost"', text)
         self.assertIn('"ports"', text)
-        self.assertIn('"container": ${ADDON_HTTP_CONTAINER_PORT}', text)
+        self.assertIn('int(os.getenv("ADDON_HTTP_CONTAINER_PORT", "8080"))', text)
 
     def test_validate_bootstrap_checks_runtime_port_intent(self) -> None:
         validate_script = Path(__file__).resolve().parents[1] / "scripts" / "validate-bootstrap.sh"
@@ -61,6 +61,14 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("runtime.bind_localhost", text)
         self.assertIn("runtime.ports", text)
         self.assertIn("ADDON_PORT", text)
+
+    def test_bootstrap_supports_runtime_resource_overrides(self) -> None:
+        bootstrap_script = Path(__file__).resolve().parents[1] / "scripts" / "bootstrap-install.sh"
+        text = bootstrap_script.read_text(encoding="utf-8")
+        self.assertIn("--runtime-cpu", text)
+        self.assertIn("--runtime-memory", text)
+        self.assertIn('runtime["cpu"]', text)
+        self.assertIn('runtime["memory"]', text)
 
 
 if __name__ == "__main__":

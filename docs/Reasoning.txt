@@ -121,3 +121,12 @@ What and why:
 Reviewed latest golden `store.md` and `supervisor.md` updates and confirmed local runtime-port intent alignment remains compatible with current supervisor/store contract statements. Added `SynthiaAddons/` to `.gitignore` to prevent local bootstrap output from polluting repository status.
 
 ###########
+
+Task #083 :
+
+Reasoning: Golden store/supervisor docs now emphasize runtime intent support for optional resource overrides (`cpu`, `memory`) in desired state; local bootstrap flow should expose and validate these intent fields.
+
+What and why:
+Updated `scripts/bootstrap-install.sh` to support `--runtime-cpu` and `--runtime-memory` and emit optional `runtime.cpu`/`runtime.memory` in `desired.json` (via robust Python JSON writer). Extended `scripts/validate-bootstrap.sh` with `EXPECTED_RUNTIME_CPU`/`EXPECTED_RUNTIME_MEMORY` assertions. Added regression guards and updated `docs/deployment.md` to document optional resource intent and validation parity checks.
+
+###########

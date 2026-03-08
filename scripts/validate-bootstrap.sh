@@ -100,6 +100,19 @@ if int(first_port.get("container", -1)) != 8080:
 if str(first_port.get("proto", "")).lower() != "tcp":
     raise SystemExit("desired.json runtime.ports[0].proto must be tcp")
 
+expected_cpu = os.getenv("EXPECTED_RUNTIME_CPU", "")
+expected_memory = os.getenv("EXPECTED_RUNTIME_MEMORY", "")
+if expected_cpu:
+    if runtime_intent.get("cpu") != expected_cpu:
+        raise SystemExit(
+            f"desired.json runtime.cpu mismatch: {runtime_intent.get('cpu')} != {expected_cpu}"
+        )
+if expected_memory:
+    if runtime_intent.get("memory") != expected_memory:
+        raise SystemExit(
+            f"desired.json runtime.memory mismatch: {runtime_intent.get('memory')} != {expected_memory}"
+        )
+
 print("ssap layout checks passed")
 PY
 
