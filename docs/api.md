@@ -87,6 +87,10 @@ External apply validation behavior:
 - `optional_groups_failed`: failed optional group IDs
 - `optional_groups_pending_reconcile`: `true` while requested and active sets differ
 - `optional_groups_reconcile_state`: `idle | waiting_for_reconcile | starting | active | failed | mixed`
+- `readiness_state`: `not_ready | partial | full`
+- `readiness_full`: `true` only when full readiness conditions are met
+- `readiness_required_groups`: requested optional groups marked `setup_required=true`
+- `readiness_missing_groups`: required groups not currently active
 
 Fresh installs report `setup_state=unconfigured` until mode/config is applied.
 
@@ -106,6 +110,11 @@ Runtime feedback is read from `runtime.json` fields:
 - `runtime.optional_docker_groups.pending_reconcile`
 
 `POST /api/install/optional-groups/reset` clears requested optional group IDs (base-only reset) and returns current pending-reconcile flag.
+
+Dependency and ordering behavior:
+
+- request payload supports zero, one, or many group IDs.
+- declared dependencies (`depends_on`) are auto-included and written in dependency-first order.
 
 ## Broker admin route
 

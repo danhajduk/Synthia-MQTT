@@ -275,6 +275,10 @@ function updateSetupStatus(install, health) {
   setText("status-deployment-mode", install.deployment_mode || "base_only");
   setText("status-optional-pending", String(Boolean(install.optional_groups_pending_reconcile)));
   setText("status-optional-reconcile-state", install.optional_groups_reconcile_state || "idle");
+  setText("status-readiness-state", install.readiness_state || "not_ready");
+  setText("status-readiness-full", String(Boolean(install.readiness_full)));
+  setText("status-required-groups", normalizeOptionalGroupIds(install.readiness_required_groups).join(", ") || "none");
+  setText("status-missing-groups", normalizeOptionalGroupIds(install.readiness_missing_groups).join(", ") || "none");
   setText("status-error", install.last_error || "none");
 }
 
@@ -295,6 +299,10 @@ function updateDashboardStatus(install, health) {
   setText("dash-status-deployment-mode", install.deployment_mode || "base_only");
   setText("dash-status-optional-pending", String(Boolean(install.optional_groups_pending_reconcile)));
   setText("dash-status-optional-reconcile-state", install.optional_groups_reconcile_state || "idle");
+  setText("dash-status-readiness-state", install.readiness_state || "not_ready");
+  setText("dash-status-readiness-full", String(Boolean(install.readiness_full)));
+  setText("dash-status-required-groups", normalizeOptionalGroupIds(install.readiness_required_groups).join(", ") || "none");
+  setText("dash-status-missing-groups", normalizeOptionalGroupIds(install.readiness_missing_groups).join(", ") || "none");
   setText("dash-status-error", install.last_error || "none");
 }
 
@@ -370,6 +378,7 @@ function renderOptionalGroups(install) {
         <span>${group.description}</span>
         <span>ID: ${group.id}</span>
         <span>Compose: ${group.compose_file}</span>
+        <span>Depends on: ${normalizeOptionalGroupIds(group.depends_on).join(", ") || "none"}</span>
         <span>Setup required: ${group.setup_required ? "yes" : "no"}</span>
         <span>Status: ${status}</span>
       `;

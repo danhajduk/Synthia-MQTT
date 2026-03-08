@@ -121,6 +121,12 @@ as desired deployment shape, while base startup remains fully functional with ze
 Optional group requests are written atomically to desired state (`runtime.optional_docker_groups.requested`) and runtime feedback is read from `runtime.json` to distinguish requested vs active/starting/failed groups.
 `POST /api/install/optional-groups/reset` resets requested optional groups to base-only deployment intent.
 
+Dependency handling and readiness behavior:
+
+- requesting a group auto-includes declared dependencies in dependency order.
+- `setup_required=true` groups are treated as required-for-full-readiness when requested.
+- install status exposes readiness as `not_ready | partial | full` plus required/missing group lists.
+
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
 with retained + QoS 1 defaults and reconnect republish behavior.

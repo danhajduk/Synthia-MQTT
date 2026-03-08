@@ -118,3 +118,24 @@ Pre-reconcile asset preparation:
 
 - selected optional groups get runtime assets prepared under `runtime/optional_groups/<group_id>/`
 - deselected groups are cleaned up during reset/reconfigure
+
+Optional docker-group pattern (addon-side):
+
+- base-only startup:
+  - addon setup/apply can complete with zero optional groups requested.
+- desired-state writes:
+  - addon writes intent only (`runtime.optional_docker_groups.requested`), never edits compose files.
+- runtime-state feedback:
+  - addon reads runtime reconcile feedback (`requested/active/starting/failed/pending_reconcile`) from runtime state.
+- readiness:
+  - full readiness requires base setup readiness and all requested `setup_required` groups active.
+- supervisor responsibility:
+  - supervisor reads desired intent, performs compose orchestration, and writes runtime state outcomes.
+
+Example flow:
+
+1. operator selects `mqtt_observer` in UI.
+2. addon resolves dependencies and writes `["mqtt_tools","mqtt_observer"]` to desired state.
+3. addon prepares pre-reconcile assets under `runtime/optional_groups/...`.
+4. supervisor reconciles and writes runtime feedback (starting/active/failed).
+5. UI shows pending/mismatch until active state converges; readiness becomes `full` only when required groups are active.
