@@ -12,11 +12,11 @@ Target file:
 Issue summary:
 
 - The registration curl example in golden `addons.md` currently shows `"version":"0.1.0"`.
-- Current addon version is manifest-sourced and currently `0.1.9` in this repository.
+- Current addon version is manifest-sourced and currently `0.2.0` in this repository.
 
 Code evidence (local addon repo):
 
-- `manifest.json` -> `"version": "0.1.9"`
+- `manifest.json` -> `"version": "0.2.0"`
 - `app/api/install_workflow.py` sends `MANIFEST_METADATA["version"]` via `register_addon_endpoint(...)`
 
 Proposed golden-doc correction:

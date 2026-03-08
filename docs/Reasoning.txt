@@ -1,8 +1,8 @@
-Task #071 :
+Task #072 :
 
-Reasoning: Completing mismatch-derived tasks required converting audit findings into enforceable recurrence checks and concrete code/doc compatibility guards.
+Reasoning: Publishing 0.2.0 requires manifest version bump and consistent local evidence docs before running signed release tooling.
 
 What and why:
-Completed Tasks 68-71 by adding an upstream golden-doc correction request artifact, enforcing daily mismatch `Audit Run` freshness in release-gate alignment checks, adding golden/local ownership-boundary parity validation against golden `docs/api.md`, and adding a regression guard that verifies register-core uses manifest-sourced version metadata.
+Bumped `manifest.json` version to `0.2.0`, updated local mismatch evidence docs that explicitly referenced old version literals, and validated alignment/tests before release publish.
 
 ###########

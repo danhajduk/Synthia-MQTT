@@ -149,6 +149,7 @@ Completed Tasks
 ##################################
 Tasks in Progress
 ##################################
+72. Task 72: Build and publish release 0.2.0
 
 ##################################
 Pending Tasks
