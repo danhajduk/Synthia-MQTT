@@ -130,3 +130,12 @@ What and why:
 Updated `scripts/bootstrap-install.sh` to support `--runtime-cpu` and `--runtime-memory` and emit optional `runtime.cpu`/`runtime.memory` in `desired.json` (via robust Python JSON writer). Extended `scripts/validate-bootstrap.sh` with `EXPECTED_RUNTIME_CPU`/`EXPECTED_RUNTIME_MEMORY` assertions. Added regression guards and updated `docs/deployment.md` to document optional resource intent and validation parity checks.
 
 ###########
+
+Task #084 :
+
+Reasoning: Manifest-level runtime defaults were explicitly requested so runtime intent exists both in bootstrap output and addon metadata.
+
+What and why:
+Added `runtime_defaults` to `manifest.json` with `bind_localhost=false` and default port mapping (`18080 -> 8080/tcp`) exactly as requested.
+
+###########

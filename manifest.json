@@ -28,6 +28,16 @@
     "service": "app/main.py",
     "ui": "frontend"
   },
+  "runtime_defaults": {
+    "bind_localhost": false,
+    "ports": [
+      {
+        "host": 18080,
+        "container": 8080,
+        "proto": "tcp"
+      }
+    ]
+  },
   "publisher": {
     "id": "publisher.danhajduk"
   }

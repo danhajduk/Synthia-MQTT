@@ -157,6 +157,7 @@ Completed Tasks
 81. Task 81: Update local deployment/docs to describe desired runtime port intent contract and golden compatibility rationale - Completed on 03/08/2026 10:07
 82. Task 82: Verify golden store/supervisor doc changes and ignore local bootstrap output directory - Completed on 03/08/2026 11:29
 83. Task 83: Reflect golden store/supervisor runtime intent updates in local bootstrap code and docs - Completed on 03/08/2026 11:34
+84. Task 84: Add runtime_defaults port/bind intent to manifest.json - Completed on 03/08/2026 11:36
 
 ##################################
 Tasks in Progress
