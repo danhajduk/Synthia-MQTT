@@ -7,3 +7,12 @@ Bumped `manifest.json` version to `0.2.0`, updated local mismatch evidence docs 
 Executed `./scripts/release-addon.sh 0.2.0`, which passed release-gate checks, produced deterministic artifacts, uploaded `addon.tgz` to GitHub release `v0.2.0`, and refreshed `release-output.json` with SHA256/catalog metadata.
 
 ###########
+
+Task #073 :
+
+Reasoning: The reported issues are implementation-facing but were captured as informal notes. Converting them into concrete, testable tasks keeps execution aligned with the repository workflow and prevents ambiguity.
+
+What and why:
+Replaced the freeform issue notes in `docs/New_tasks.txt` with three numbered pending tasks covering container UI exposure, `/ui` route resolution, and regression/documentation follow-up.
+
+###########
