@@ -74,7 +74,7 @@ function setResult(id, text) {
 }
 
 function setGlobalError(message) {
-  ["details-error", "test-result", "apply-result", "register-result", "publish-result"].forEach((id) => {
+  ["details-error", "mode-save-result", "test-result", "apply-result", "register-result", "publish-result"].forEach((id) => {
     const element = $(id);
     if (element) {
       element.textContent = message;
@@ -182,6 +182,7 @@ function syncModeUI() {
   } else {
     registerToggle.disabled = false;
   }
+  setResult("mode-support", mode === "embedded" ? "Direct MQTT expected: yes" : "Direct MQTT expected: no (gateway mode)");
   snapshotFieldsToState();
   saveState();
 }
@@ -287,6 +288,16 @@ async function runTestStep() {
     setResult("test-result", "Embedded config syntax check passed.");
   }
   saveState();
+  await loadStatusSnapshot();
+}
+
+async function saveModeSelection() {
+  snapshotFieldsToState();
+  const result = await api("/api/install/mode", "POST", { mode: state.mode });
+  setResult(
+    "mode-save-result",
+    `Mode saved: ${result.mode}. Direct MQTT expected: ${result.direct_mqtt_supported ? "yes" : "no"}.`
+  );
   await loadStatusSnapshot();
 }
 
@@ -487,7 +498,12 @@ async function publishTest() {
 }
 
 function bindSetupNavigation() {
-  $("next-1").addEventListener("click", () => setStep(2));
+  $("next-1").addEventListener("click", () =>
+    run(async () => {
+      await saveModeSelection();
+      setStep(2);
+    })
+  );
   $("back-2").addEventListener("click", () => setStep(1));
   $("next-2").addEventListener("click", () => {
     if (validateDetails()) setStep(3);
@@ -512,6 +528,7 @@ function bindEvents() {
     });
   });
 
+  $("save-mode").addEventListener("click", () => run(saveModeSelection));
   $("refresh-status").addEventListener("click", () => run(loadStatusSnapshot));
   $("run-test").addEventListener("click", () => run(runTestStep));
   $("run-apply").addEventListener("click", () => run(runApplyStep));

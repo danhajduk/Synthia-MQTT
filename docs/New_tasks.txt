@@ -112,11 +112,12 @@ Completed Tasks
 43.2 Task 43.2: Update setup/dashboard UI shell to display setup_state guidance and gate dashboard until setup completion - Completed on 03/07/2026 21:06
 43. Task 43: Add first-run setup state and setup UI shell - Completed on 03/07/2026 21:06
 44.1 Task 44.1: Add install mode selection persistence API and setup-state transition for saved mode selection - Completed on 03/07/2026 21:08
+44.2 Task 44.2: Add setup UI save-mode action and direct MQTT expectation visibility - Completed on 03/07/2026 21:09
+44. Task 44: Add broker mode selection UI and persistence - Completed on 03/07/2026 21:09
 
 ##################################
 Tasks in Progress
 ##################################
-44. Task 44: Add broker mode selection UI and persistence
 
 ##################################
 Pending Tasks
