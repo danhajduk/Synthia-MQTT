@@ -6,3 +6,8 @@ What and why: Updated release and signing packaging stages to copy docker/docker
 #############
 All Tasks completed 03/05/2026 21:19:40
 #############
+Task #36 :
+Error context: Repository documentation was split between legacy `Ducuments/` files and README statements that no longer matched current code/scripts.
+Reasoning: Build a new source-of-truth doc set directly from verified code paths, then archive legacy docs and publish a code-to-doc mismatch report against `/home/dan/Projects/Synthia/docs`.
+What and why: Added active docs under `docs/` (`core.md`, `api.md`, `deployment.md`, `mismatch-report.md`), archived all legacy `Ducuments/*.md` into `docs/archive/` with archive headers, and aligned `README.md` plus task tracker to the new documentation baseline.
+###########

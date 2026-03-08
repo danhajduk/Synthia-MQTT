@@ -1,3 +1,12 @@
+# Archived Document
+
+Status: Outdated
+Replaced by: docs/core.md
+
+Preserved for historical reference only.
+
+---
+
 # Overview
 
 This service provides a distributed MQTT addon for Synthia.

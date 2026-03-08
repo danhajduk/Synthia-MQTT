@@ -1,3 +1,12 @@
+# Archived Document
+
+Status: Outdated
+Replaced by: docs/core.md
+
+Preserved for historical reference only.
+
+---
+
 # Bootstrap Install: Current Flow vs v2 Target
 
 ## Current Flow (`scripts/bootstrap-install.sh`)

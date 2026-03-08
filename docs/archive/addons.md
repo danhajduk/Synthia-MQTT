@@ -1,3 +1,12 @@
+# Archived Document
+
+Status: Outdated
+Replaced by: docs/core.md
+
+Preserved for historical reference only.
+
+---
+
 # Addons Reference (Core + Addon Workspace)
 
 This document is the single handoff reference for building, registering, and operating addons with Synthia Core.

@@ -1,3 +1,12 @@
+# Archived Document
+
+Status: Outdated
+Replaced by: docs/core.md
+
+Preserved for historical reference only.
+
+---
+
 # Synthia Addon Standard (SAS) — Catalog / Manifest / Core Contract (v1.1)
 
 **Status:** Draft (intended to become the *single source of truth* for Synthia addon packaging + store distribution)  

@@ -1,3 +1,12 @@
+# Archived Document
+
+Status: Outdated
+Replaced by: docs/core.md
+
+Preserved for historical reference only.
+
+---
+
 # Services Module Documentation
 
 ## `app/services/config_store.py`

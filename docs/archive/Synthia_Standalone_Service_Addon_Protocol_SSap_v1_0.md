@@ -1,3 +1,12 @@
+# Archived Document
+
+Status: Outdated
+Replaced by: docs/core.md
+
+Preserved for historical reference only.
+
+---
+
 # Synthia Standalone Service Addon Protocol (SSAP) v1.0
 
 **Status:** Draft – Canonical Specification  
