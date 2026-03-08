@@ -1,8 +1,7 @@
-Task #45.1 :
-Reasoning: Embedded broker management requires a stable container identity and observable runtime status in install health snapshots.
+Task #45.2 :
+Reasoning: Task 45 requires managed broker health/status visibility to operators directly in the setup/dashboard shell.
 What and why:
-- Standardized embedded broker container name to `synthia-addon-mqtt-mosquitto` for compose override generation and broker management operations.
-- Added runtime broker inspection (`docker socket available` and `broker running`) to `GET /api/install/status`.
-- Reloaded MQTT client after successful embedded apply so the addon reconnects using embedded-mode runtime configuration.
-- Updated deployment/API docs for the stable container name and new status fields.
+- Added setup and dashboard status fields for Docker socket availability and managed broker running state.
+- Wired UI status rendering to new `install.status` fields (`docker_sock_available`, `broker_running`).
+- Rebuilt frontend distribution assets.
 ###########

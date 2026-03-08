@@ -237,6 +237,8 @@ function updateSetupStatus(install, health) {
   setText("status-verified", String(install.verified));
   setText("status-registered", String(install.registered_to_core));
   setText("status-direct-mqtt", String(install.direct_mqtt_supported));
+  setText("status-docker-sock", String(install.docker_sock_available));
+  setText("status-broker-running", String(install.broker_running));
   setText("status-mqtt", String(install.mqtt_connected));
   setText("status-health", health.status);
   setText("status-error", install.last_error || "none");
@@ -250,6 +252,8 @@ function updateDashboardStatus(install, health) {
   setText("dash-status-verified", String(install.verified));
   setText("dash-status-registered", String(install.registered_to_core));
   setText("dash-status-direct-mqtt", String(install.direct_mqtt_supported));
+  setText("dash-status-docker-sock", String(install.docker_sock_available));
+  setText("dash-status-broker-running", String(install.broker_running));
   setText("dash-status-mqtt", String(install.mqtt_connected));
   setText("dash-status-health", health.status);
   setText("dash-status-error", install.last_error || "none");

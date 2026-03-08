@@ -115,11 +115,12 @@ Completed Tasks
 44.2 Task 44.2: Add setup UI save-mode action and direct MQTT expectation visibility - Completed on 03/07/2026 21:09
 44. Task 44: Add broker mode selection UI and persistence - Completed on 03/07/2026 21:09
 45.1 Task 45.1: Implement stable managed Mosquitto container naming and embedded broker status reporting in install status - Completed on 03/07/2026 21:10
+45.2 Task 45.2: Surface managed broker runtime status in setup/dashboard UI shell - Completed on 03/07/2026 21:11
+45. Task 45: Implement built-in Mosquitto container management - Completed on 03/07/2026 21:11
 
 ##################################
 Tasks in Progress
 ##################################
-45. Task 45: Implement built-in Mosquitto container management
 
 ##################################
 Pending Tasks
