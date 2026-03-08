@@ -38,10 +38,13 @@ Current capability values:
 ## Install workflow routes
 
 - `GET /api/install/status`
+- `POST /api/install/mode`
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
 - `POST /api/install/register-core`
 - `POST /api/install/reset`
+
+`POST /api/install/mode` persists selected broker mode before apply and marks setup as `configuring`.
 
 Implemented install modes:
 

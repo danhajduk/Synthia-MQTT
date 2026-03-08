@@ -12,6 +12,8 @@ from app.models.install_models import (
     ExternalConnectionConfig,
     InstallApplyRequest,
     InstallApplyResponse,
+    InstallModeUpdateRequest,
+    InstallModeUpdateResponse,
     InstallStatusResponse,
     InstallTestExternalResponse,
 )
@@ -50,7 +52,7 @@ def _normalize_http_url(url_value: str) -> str:
 
 def _setup_guidance(setup_state: str) -> str:
     if setup_state == "unconfigured":
-        return "Select broker mode and apply configuration in setup wizard."
+        return "Select and save broker mode, then apply configuration in setup wizard."
     if setup_state == "configuring":
         return "Setup is in progress. Complete apply and verification steps."
     if setup_state == "ready":
@@ -78,7 +80,7 @@ def build_install_workflow_router(
         last_error = health.last_error or install_state.get("last_error")
         setup_state = str(install_state.get("setup_state") or "unconfigured")
 
-        if not bool(install_state["configured"]):
+        if not bool(install_state["configured"]) and setup_state != "configuring":
             setup_state = "unconfigured"
         elif setup_state == "ready" and (not health.mqtt_connected or bool(last_error)):
             setup_state = "degraded"
@@ -100,6 +102,18 @@ def build_install_workflow_router(
             broker_running=False,
             mqtt_connected=health.mqtt_connected,
             last_error=last_error,
+        )
+
+    @router.post("/mode", response_model=InstallModeUpdateResponse)
+    def set_mode(
+        payload: InstallModeUpdateRequest,
+        _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
+    ) -> InstallModeUpdateResponse:
+        config_store.set_selected_mode(payload.mode)
+        return InstallModeUpdateResponse(
+            ok=True,
+            mode=payload.mode,
+            direct_mqtt_supported=payload.mode == "embedded",
         )
 
     @router.post("/test-external", response_model=InstallTestExternalResponse)

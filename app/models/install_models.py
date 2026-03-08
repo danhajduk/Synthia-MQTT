@@ -71,6 +71,18 @@ class InstallApplyResponse(BaseModel):
     warnings: list[str] | None = None
 
 
+class InstallModeUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mode: Literal["external", "embedded"]
+
+
+class InstallModeUpdateResponse(BaseModel):
+    ok: bool
+    mode: Literal["external", "embedded"]
+    direct_mqtt_supported: bool
+
+
 class CoreRegistryRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

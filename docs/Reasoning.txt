@@ -1,7 +1,8 @@
-Task #43.2 :
-Reasoning: The setup UI must make first-run readiness explicit and prevent users from landing in operational dashboard mode until setup has completed.
+Task #44.1 :
+Reasoning: Persist broker mode selection independently from full apply so setup state can move from `unconfigured` to `configuring` as soon as the operator chooses a mode.
 What and why:
-- Updated setup and dashboard status cards to show `setup_state`, `setup_guidance`, and `direct_mqtt_supported` from `/api/install/status`.
-- Changed initialization gate to route users to setup until state is `ready` or `degraded`.
-- Rebuilt `frontend/dist` assets from updated source files.
+- Added `POST /api/install/mode` to persist selected mode (`external|embedded`) before apply.
+- Added mode-update request/response models and ConfigStore mode persistence helper.
+- Updated setup-state handling so an unconfigured install reports `configuring` after mode selection save.
+- Updated endpoint docs in `README.md` and `docs/api.md`.
 ###########

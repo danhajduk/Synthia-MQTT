@@ -54,6 +54,7 @@ open http://localhost:18080/ui
 - `POST /api/addon/config`
 - `GET /api/addon/capabilities`
 - `GET /api/install/status`
+- `POST /api/install/mode`
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
 - `POST /api/install/register-core`

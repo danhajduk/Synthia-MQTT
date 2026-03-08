@@ -117,6 +117,20 @@ class ConfigStore:
         self._save_install_session_state(state)
         return state
 
+    def set_selected_mode(self, mode: str) -> dict[str, Any]:
+        if mode not in {"external", "embedded"}:
+            raise ValueError("Unsupported install mode")
+        overrides = self._load_overrides()
+        overrides["mode"] = mode
+        self._save_overrides(overrides)
+        return self.update_install_session_state(
+            mode=mode,
+            setup_state="configuring",
+            configured=False,
+            verified=False,
+            last_error=None,
+        )
+
     def reset_install_session_state(self, mode: str = "external") -> dict[str, Any]:
         state = self._default_install_session_state()
         if mode in {"external", "embedded"}:
