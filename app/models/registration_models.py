@@ -12,6 +12,12 @@ class MqttRegistrationRequest(BaseModel):
     publish_topics: list[str] = Field(default_factory=list)
     subscribe_topics: list[str] = Field(default_factory=list)
     capabilities: dict[str, object] = Field(default_factory=dict)
+    reprovision: bool = False
+
+
+class DirectMqttCredentials(BaseModel):
+    username: str
+    password: str
 
 
 class MqttRegistrationRecord(BaseModel):
@@ -21,6 +27,7 @@ class MqttRegistrationRecord(BaseModel):
     publish_topics: list[str]
     subscribe_topics: list[str]
     capabilities: dict[str, object]
+    direct_mqtt: DirectMqttCredentials | None = None
     updated_at: datetime
 
 

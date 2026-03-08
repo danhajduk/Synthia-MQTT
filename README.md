@@ -77,6 +77,9 @@ Fresh installs remain `unconfigured` until broker mode/config is applied.
 For external broker mode, `POST /api/install/apply` requires a prior successful
 `POST /api/install/test-external` for the same config unless `allow_unvalidated=true`.
 
+`POST /api/mqtt/registrations` supports `gateway_only`, `direct_mqtt`, and `both` access modes.
+Direct modes provision stable long-term broker credentials and support rotation with `reprovision=true`.
+
 ## Optional Service-Token Auth
 
 Privileged write endpoints can enforce service-token JWT validation.

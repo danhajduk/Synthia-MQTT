@@ -1,8 +1,9 @@
-Task #48 :
-Reasoning: Core-approved MQTT access must be persisted in addon-side registration records with explicit access-mode semantics to support governed gateway/direct usage.
+Task #49 :
+Reasoning: Direct MQTT registrations need stable long-term credentials without storing plaintext secrets in persisted records; reprovision must rotate credentials deterministically.
 What and why:
-- Added `POST /api/mqtt/registrations` endpoint with contract validation.
-- Added runtime-backed registration store (`runtime/mqtt_registrations.json`) with upsert behavior.
-- Added registration request/record/response models with access modes (`gateway_only`, `direct_mqtt`, `both`).
-- Updated README and API docs endpoint inventories.
+- Extended MQTT registration request with `reprovision` flag.
+- Added direct credential response model (`username`, `password`) for direct access modes.
+- Implemented deterministic credential derivation from persisted local seed + version counter and stored only credential metadata (`username`, `version`, `password_hash`).
+- Implemented reprovision rotation by incrementing credential version.
+- Updated docs to describe direct credential provisioning and reprovision behavior.
 ###########

@@ -97,6 +97,8 @@ MQTT registration endpoint:
   - `gateway_only`
   - `direct_mqtt`
   - `both`
+- request flag `reprovision=true` rotates direct MQTT credential version for `direct_mqtt`/`both` registrations.
+- direct modes return stable broker credentials (`username`, `password`) derived from persisted local credential metadata.
 
 Operational publish routes are blocked until setup state is complete:
 
