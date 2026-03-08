@@ -99,6 +99,11 @@ Lifecycle topic helpers:
   - `synthia/addons/<addon_id>/health`
 - default behavior: retained + QoS 1
 - health heartbeat is periodic and announce/health are republished on reconnect
+- health payload includes freshness fields:
+  - `last_seen`
+  - `fresh_until`
+  - `stale_after_s`
+- LWT/offline payload is retained and includes `offline_reason=lwt`
 
 Gateway publish endpoint:
 

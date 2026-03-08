@@ -85,6 +85,8 @@ Registration applies ACL/topic realization with publish/subscribe separation and
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
 with retained + QoS 1 defaults and reconnect republish behavior.
+Retained health payloads include freshness metadata (`last_seen`, `fresh_until`, `stale_after_s`) and
+LWT offline publishes include `offline_reason=lwt`.
 
 ## Optional Service-Token Auth
 

@@ -56,10 +56,11 @@ class MqttClientService:
         self._health_topic = self._lifecycle.health_topic
         self._announce_topic = self._lifecycle.announce_topic
         self._qos = int(self._config.get("mqtt_qos", 1))
+        self._health_interval_s = 15
 
         self._client.will_set(
             topic=self._health_topic,
-            payload=json.dumps(self._lifecycle.offline_payload()),
+            payload=json.dumps(self._lifecycle.offline_payload(reason="lwt")),
             qos=self._qos,
             retain=True,
         )
@@ -154,13 +155,16 @@ class MqttClientService:
         self.publish(self._announce_topic, payload, retain=True, qos=self._qos)
 
     def _publish_health(self) -> None:
-        payload = self._lifecycle.health_payload(self._health_service.snapshot().mqtt_connected)
+        payload = self._lifecycle.health_payload(
+            self._health_service.snapshot().mqtt_connected,
+            heartbeat_interval_s=self._health_interval_s,
+        )
         self.publish(self._health_topic, payload, retain=True, qos=self._qos)
 
     def _publish_health_forever(self) -> None:
         while not self._stop_event.is_set():
             self._publish_health()
-            self._stop_event.wait(15)
+            self._stop_event.wait(self._health_interval_s)
 
     def _subscribe_policy_topics(self, client: mqtt.Client) -> None:
         if self._policy_cache is None or not self._policy_cache.enforcement_enabled():

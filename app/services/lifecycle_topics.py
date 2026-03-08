@@ -41,14 +41,21 @@ class LifecycleTopicHelper:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-    def health_payload(self, mqtt_connected: bool) -> dict[str, str]:
+    def health_payload(self, mqtt_connected: bool, heartbeat_interval_s: int) -> dict[str, str | int]:
+        now = datetime.now(timezone.utc)
+        fresh_until = now.timestamp() + max(heartbeat_interval_s * 2, 1)
         return {
             "status": "healthy" if mqtt_connected else "degraded",
-            "last_seen": datetime.now(timezone.utc).isoformat(),
+            "last_seen": now.isoformat(),
+            "fresh_until": datetime.fromtimestamp(fresh_until, tz=timezone.utc).isoformat(),
+            "stale_after_s": max(heartbeat_interval_s * 2, 1),
         }
 
-    def offline_payload(self) -> dict[str, str]:
+    def offline_payload(self, reason: str = "lwt") -> dict[str, str | int]:
         return {
             "status": "offline",
             "last_seen": datetime.now(timezone.utc).isoformat(),
+            "fresh_until": datetime.now(timezone.utc).isoformat(),
+            "stale_after_s": 0,
+            "offline_reason": reason,
         }

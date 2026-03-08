@@ -126,6 +126,7 @@ Completed Tasks
 50. Task 50: Implement ACL/topic permission realization - Completed on 03/07/2026 21:33
 51. Task 51: Implement gateway publish API - Completed on 03/07/2026 21:35
 52. Task 52: Implement lifecycle topic helpers - Completed on 03/07/2026 21:36
+53. Task 53: Implement LWT/offline behavior for managed clients - Completed on 03/07/2026 21:39
 
 ##################################
 Tasks in Progress
