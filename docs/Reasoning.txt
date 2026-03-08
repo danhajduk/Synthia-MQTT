@@ -1,8 +1,8 @@
-Task #068 :
+Task #071 :
 
-Reasoning: The only open mismatch is upstream-owned; it needed a concrete handoff artifact so correction can be actioned outside this repository.
+Reasoning: Completing mismatch-derived tasks required converting audit findings into enforceable recurrence checks and concrete code/doc compatibility guards.
 
 What and why:
-Added `docs/upstream-golden-change-request.md` with explicit issue summary, code evidence, and proposed correction for golden `addons.md` version drift; linked this request from `docs/mismatch-report.md` Finding 1.
+Completed Tasks 68-71 by adding an upstream golden-doc correction request artifact, enforcing daily mismatch `Audit Run` freshness in release-gate alignment checks, adding golden/local ownership-boundary parity validation against golden `docs/api.md`, and adding a regression guard that verifies register-core uses manifest-sourced version metadata.
 
 ###########

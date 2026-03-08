@@ -29,6 +29,7 @@ docs_api_path = repo_root / "docs" / "api.md"
 docs_mismatch_path = repo_root / "docs" / "mismatch-report.md"
 manifest_path = repo_root / "manifest.json"
 addon_contract_path = repo_root / "app" / "api" / "addon_contract.py"
+golden_api_path = Path("/home/dan/Projects/Synthia/docs/api.md")
 
 missing = [
     path
@@ -129,7 +130,16 @@ if doc_capabilities != implemented_capabilities:
         f"(docs={doc_capabilities}, code={implemented_capabilities})"
     )
 
-if "backend/app/main.py" not in api_text or "app/main.py" not in api_text:
+local_has_mapping_note = "backend/app/main.py" in api_text and "app/main.py" in api_text
+if golden_api_path.exists():
+    golden_api_text = golden_api_path.read_text(encoding="utf-8")
+    golden_has_backend_ref = "backend/app/main.py" in golden_api_text
+    if golden_has_backend_ref != local_has_mapping_note:
+        raise SystemExit(
+            "[align] docs/api.md ownership-boundary mapping parity mismatch "
+            f"(golden_has_backend_ref={golden_has_backend_ref}, local_has_mapping_note={local_has_mapping_note})"
+        )
+elif not local_has_mapping_note:
     raise SystemExit("[align] docs/api.md missing ownership-boundary entrypoint mapping note")
 
 readme_text = readme_path.read_text(encoding="utf-8")
@@ -164,6 +174,10 @@ if release_gate:
     if expected_last_verified not in mismatch_text:
         raise SystemExit(
             "[align] release gate failed: docs/mismatch-report.md Last Verified is not refreshed for today"
+        )
+    if not re.search(rf"Audit Run:\s*{re.escape(today)}\b", mismatch_text):
+        raise SystemExit(
+            "[align] release gate failed: docs/mismatch-report.md Audit Run is not refreshed for today"
         )
 
     if "Status: upstream-golden" not in mismatch_text:

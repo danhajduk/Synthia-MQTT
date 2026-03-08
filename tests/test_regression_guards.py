@@ -17,6 +17,11 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertTrue(hasattr(snapshot, "last_error"))
         self.assertTrue(hasattr(snapshot, "uptime_seconds"))
 
+    def test_register_core_uses_manifest_version(self) -> None:
+        install_workflow = Path(__file__).resolve().parents[1] / "app" / "api" / "install_workflow.py"
+        text = install_workflow.read_text(encoding="utf-8")
+        self.assertIn('addon_version=MANIFEST_METADATA["version"]', text)
+
 
 if __name__ == "__main__":
     unittest.main()

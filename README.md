@@ -180,6 +180,7 @@ Release-gate checks include:
 
 - `./scripts/check-doc-alignment.sh --release-gate`
 - `docs/mismatch-report.md` `Last Verified` must be refreshed for the current date.
+- `docs/mismatch-report.md` `Audit Run` must be refreshed for the current date.
 - open `local-fixable` mismatches must be resolved before release.
 
 ## Manifest Summary
