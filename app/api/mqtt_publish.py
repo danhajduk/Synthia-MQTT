@@ -1,5 +1,6 @@
 from typing import Callable
 from datetime import datetime, timezone
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -9,10 +10,12 @@ from app.models.publish_models import (
     MqttPublishRequest,
     MqttPublishResponse,
 )
+from app.models.trace_models import PublishTraceLogRequest, PublishTraceResponse
 from app.services.config_store import ConfigStore
 from app.services.envelope_validation import EnvelopeValidationError, validate_platform_envelope
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
+from app.services.publish_trace_store import PublishTraceStore
 from app.services.registration_store import RegistrationStore
 from app.services.telemetry_reporter import TelemetryReporter
 from app.services.topic_permissions import TopicPermissionError, topic_allowed_by_scopes, validate_publish_topic
@@ -26,8 +29,33 @@ def build_mqtt_publish_router(
     telemetry_reporter: TelemetryReporter,
     config_store: ConfigStore,
     registration_store: RegistrationStore,
+    trace_store: PublishTraceStore,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/mqtt", tags=["mqtt"])
+
+    def record_trace(
+        *,
+        operation: str,
+        outcome: str,
+        claims: ServiceTokenClaims | None,
+        addon_id: str | None,
+        topic: str | None,
+        detail: str | None,
+        payload: Any,
+    ) -> None:
+        message_id, correlation_id = extract_trace_ids(payload)
+        trace_store.append(
+            PublishTraceLogRequest(
+                operation=operation,
+                outcome=outcome,
+                addon_id=addon_id,
+                caller_sub=claims.sub if claims is not None else None,
+                topic=topic,
+                detail=detail,
+                message_id=message_id,
+                correlation_id=correlation_id,
+            )
+        )
 
     @router.post("/publish", response_model=MqttPublishResponse)
     def publish_message(
@@ -36,6 +64,15 @@ def build_mqtt_publish_router(
     ) -> MqttPublishResponse:
         install_state = config_store.get_install_session_state()
         if install_state.get("setup_state") not in {"ready", "degraded"}:
+            record_trace(
+                operation="mqtt.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=claims.sub,
+                topic=request.topic.strip(),
+                detail="Setup is not complete",
+                payload=request.payload,
+            )
             raise HTTPException(
                 status_code=409,
                 detail="Setup is not complete. Finish setup before using MQTT publish APIs.",
@@ -43,6 +80,15 @@ def build_mqtt_publish_router(
 
         allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
         if not allowed:
+            record_trace(
+                operation="mqtt.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=claims.sub,
+                topic=request.topic.strip(),
+                detail=reason or "Policy denied MQTT publish",
+                payload=request.payload,
+            )
             raise HTTPException(status_code=403, detail=reason or "Policy denied MQTT publish")
 
         topic = request.topic.strip()
@@ -52,14 +98,41 @@ def build_mqtt_publish_router(
                 addon_id=claims.sub if claims.sub != "anonymous" else None,
             )
         except TopicPermissionError as exc:
+            record_trace(
+                operation="mqtt.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=claims.sub,
+                topic=topic,
+                detail=str(exc),
+                payload=request.payload,
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:
+            record_trace(
+                operation="mqtt.publish",
+                outcome="error",
+                claims=claims,
+                addon_id=claims.sub,
+                topic=topic,
+                detail="MQTT service unavailable",
+                payload=request.payload,
+            )
             raise HTTPException(status_code=500, detail="MQTT service unavailable")
         try:
             validate_platform_envelope(topic, request.payload)
         except EnvelopeValidationError as exc:
+            record_trace(
+                operation="mqtt.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=claims.sub,
+                topic=topic,
+                detail=str(exc),
+                payload=request.payload,
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         ok = mqtt_service.publish(
@@ -69,8 +142,26 @@ def build_mqtt_publish_router(
             qos=request.qos,
         )
         if not ok:
+            record_trace(
+                operation="mqtt.publish",
+                outcome="error",
+                claims=claims,
+                addon_id=claims.sub,
+                topic=topic,
+                detail="Failed to publish MQTT message",
+                payload=request.payload,
+            )
             raise HTTPException(status_code=500, detail="Failed to publish MQTT message")
 
+        record_trace(
+            operation="mqtt.publish",
+            outcome="success",
+            claims=claims,
+            addon_id=claims.sub,
+            topic=topic,
+            detail=None,
+            payload=request.payload,
+        )
         telemetry_reporter.enqueue_usage(
             consumer_addon_id=claims.sub,
             operation="mqtt.publish",
@@ -85,6 +176,15 @@ def build_mqtt_publish_router(
     ) -> MqttGatewayPublishResponse:
         install_state = config_store.get_install_session_state()
         if install_state.get("setup_state") not in {"ready", "degraded"}:
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=request.topic.strip() if request.topic else None,
+                detail="Setup is not complete",
+                payload=request.payload,
+            )
             raise HTTPException(
                 status_code=409,
                 detail="Setup is not complete. Finish setup before using MQTT publish APIs.",
@@ -92,10 +192,28 @@ def build_mqtt_publish_router(
 
         allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
         if not allowed:
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=request.topic.strip() if request.topic else None,
+                detail=reason or "Policy denied MQTT publish",
+                payload=request.payload,
+            )
             raise HTTPException(status_code=403, detail=reason or "Policy denied MQTT publish")
 
         registration = registration_store.get_registration(request.addon_id)
         if registration is None:
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=request.topic.strip() if request.topic else None,
+                detail=f"No registration found for addon_id={request.addon_id}",
+                payload=request.payload,
+            )
             raise HTTPException(status_code=404, detail=f"No registration found for addon_id={request.addon_id}")
 
         message_type = request.message_type.strip().lower()
@@ -110,8 +228,26 @@ def build_mqtt_publish_router(
         try:
             topic = validate_publish_topic(topic, addon_id=request.addon_id.strip())
         except TopicPermissionError as exc:
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=topic,
+                detail=str(exc),
+                payload=request.payload,
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         if not topic_allowed_by_scopes(topic, registration.permissions.publish):
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=topic,
+                detail=f"Topic not allowed by registration publish scopes: {topic}",
+                payload=request.payload,
+            )
             raise HTTPException(status_code=403, detail=f"Topic not allowed by registration publish scopes: {topic}")
 
         effective = config_store.get_effective_config()
@@ -126,10 +262,28 @@ def build_mqtt_publish_router(
         try:
             validate_platform_envelope(topic, envelope)
         except EnvelopeValidationError as exc:
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="denied",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=topic,
+                detail=str(exc),
+                payload=envelope,
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="error",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=topic,
+                detail="MQTT service unavailable",
+                payload=envelope,
+            )
             raise HTTPException(status_code=500, detail="MQTT service unavailable")
 
         ok = mqtt_service.publish(
@@ -139,8 +293,26 @@ def build_mqtt_publish_router(
             qos=qos,
         )
         if not ok:
+            record_trace(
+                operation="mqtt.gateway.publish",
+                outcome="error",
+                claims=claims,
+                addon_id=request.addon_id.strip(),
+                topic=topic,
+                detail="Failed to publish MQTT gateway envelope",
+                payload=envelope,
+            )
             raise HTTPException(status_code=500, detail="Failed to publish MQTT gateway envelope")
 
+        record_trace(
+            operation="mqtt.gateway.publish",
+            outcome="success",
+            claims=claims,
+            addon_id=request.addon_id.strip(),
+            topic=topic,
+            detail=None,
+            payload=envelope,
+        )
         telemetry_reporter.enqueue_usage(
             consumer_addon_id=claims.sub,
             operation="mqtt.gateway.publish",
@@ -148,4 +320,21 @@ def build_mqtt_publish_router(
         )
         return MqttGatewayPublishResponse(ok=True, topic=topic, qos=qos, retain=retain)
 
+    @router.get("/publish-traces", response_model=PublishTraceResponse)
+    def publish_traces(
+        limit: int = 100,
+        _claims: ServiceTokenClaims = Depends(require_publish_scope),
+    ) -> PublishTraceResponse:
+        return PublishTraceResponse(ok=True, traces=trace_store.list_recent(limit=limit))
+
     return router
+
+
+def extract_trace_ids(payload: Any) -> tuple[str | None, str | None]:
+    if not isinstance(payload, dict):
+        return None, None
+    raw_message_id = payload.get("message_id")
+    raw_correlation_id = payload.get("correlation_id")
+    message_id = str(raw_message_id).strip() if raw_message_id is not None else None
+    correlation_id = str(raw_correlation_id).strip() if raw_correlation_id is not None else None
+    return message_id or None, correlation_id or None

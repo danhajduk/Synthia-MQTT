@@ -245,6 +245,20 @@
         </section>
 
         <section class="panel">
+          <h2>Publish Trace Debugger</h2>
+          <div class="actions">
+            <button id="refresh-traces" type="button">Refresh Publish Traces</button>
+          </div>
+          <div class="summary-grid">
+            <div><span>Total Traces Loaded</span><strong id="trace-count">-</strong></div>
+            <div><span>Denied</span><strong id="trace-denied-count">-</strong></div>
+            <div><span>Errors</span><strong id="trace-error-count">-</strong></div>
+            <div><span>Last Operation</span><strong id="trace-last-op">-</strong></div>
+          </div>
+          <pre id="trace-output">[]</pre>
+        </section>
+
+        <section class="panel">
           <h2>Test Publish</h2>
           <div class="form-grid">
             <label>Topic <input id="pub-topic" type="text" value="synthia/test" /></label>

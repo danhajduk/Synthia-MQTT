@@ -17,6 +17,7 @@ from app.services.config_store import ConfigStore
 from app.services.health import HealthService
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
+from app.services.publish_trace_store import PublishTraceStore
 from app.services.telemetry_reporter import TelemetryReporter
 from app.services.token_auth import ServiceTokenValidator
 from app.services.registration_store import RegistrationStore
@@ -34,6 +35,7 @@ mqtt_service: MqttClientService | None = None
 token_validator = ServiceTokenValidator(addon_id=ADDON_VERSION.addon_id)
 policy_cache = PolicyCache(service_name=ADDON_VERSION.addon_id)
 registration_store = RegistrationStore()
+publish_trace_store = PublishTraceStore()
 runtime_dir = Path(__file__).resolve().parents[1] / "runtime"
 telemetry_reporter = TelemetryReporter(
     addon_id=ADDON_VERSION.addon_id,
@@ -76,6 +78,7 @@ app.include_router(
         telemetry_reporter,
         config_store,
         registration_store,
+        publish_trace_store,
     )
 )
 app.include_router(
@@ -86,6 +89,7 @@ app.include_router(
         telemetry_reporter,
         config_store,
         registration_store,
+        publish_trace_store,
     )
 )
 app.include_router(
@@ -109,6 +113,7 @@ app.include_router(
         registration_store,
         config_store,
         health_service,
+        publish_trace_store,
         require_scope(token_validator, "core.register"),
     )
 )

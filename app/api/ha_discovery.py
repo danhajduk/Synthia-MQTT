@@ -3,9 +3,11 @@ from typing import Callable
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.publish_models import HaDiscoverySensorRequest, HaStatePublishRequest, MqttPublishResponse
+from app.models.trace_models import PublishTraceLogRequest
 from app.services.config_store import ConfigStore
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
+from app.services.publish_trace_store import PublishTraceStore
 from app.services.registration_store import RegistrationStore
 from app.services.telemetry_reporter import TelemetryReporter
 from app.services.topic_permissions import TopicPermissionError, validate_publish_topic
@@ -19,6 +21,7 @@ def build_ha_discovery_router(
     telemetry_reporter: TelemetryReporter,
     config_store: ConfigStore,
     registration_store: RegistrationStore,
+    trace_store: PublishTraceStore,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/ha/discovery", tags=["home-assistant"])
 
@@ -29,6 +32,16 @@ def build_ha_discovery_router(
     ) -> MqttPublishResponse:
         install_state = config_store.get_install_session_state()
         if install_state.get("setup_state") not in {"ready", "degraded"}:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.discovery.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=f"homeassistant/sensor/{request.unique_id}/config",
+                    detail="Setup is not complete",
+                )
+            )
             raise HTTPException(
                 status_code=409,
                 detail="Setup is not complete. Finish setup before using HA discovery publish APIs.",
@@ -36,16 +49,56 @@ def build_ha_discovery_router(
 
         allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
         if not allowed:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.discovery.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=f"homeassistant/sensor/{request.unique_id}/config",
+                    detail=reason or "Policy denied HA discovery publish",
+                )
+            )
             raise HTTPException(status_code=403, detail=reason or "Policy denied HA discovery publish")
 
         registration = registration_store.get_registration(request.addon_id)
         if registration is None:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.discovery.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=f"homeassistant/sensor/{request.unique_id}/config",
+                    detail=f"No registration found for addon_id={request.addon_id}",
+                )
+            )
             raise HTTPException(status_code=404, detail=f"No registration found for addon_id={request.addon_id}")
         if registration.ha_mode == "none":
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.discovery.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=f"homeassistant/sensor/{request.unique_id}/config",
+                    detail="HA discovery mode is not enabled for this registration",
+                )
+            )
             raise HTTPException(status_code=403, detail="HA discovery mode is not enabled for this registration")
 
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.discovery.publish",
+                    outcome="error",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=f"homeassistant/sensor/{request.unique_id}/config",
+                    detail="MQTT service unavailable",
+                )
+            )
             raise HTTPException(status_code=500, detail="MQTT service unavailable")
 
         topic = f"homeassistant/sensor/{request.unique_id}/config"
@@ -64,8 +117,27 @@ def build_ha_discovery_router(
 
         ok = mqtt_service.publish(topic=topic, payload=payload, retain=True, qos=1)
         if not ok:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.discovery.publish",
+                    outcome="error",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=topic,
+                    detail="Failed to publish HA discovery payload",
+                )
+            )
             raise HTTPException(status_code=500, detail="Failed to publish HA discovery payload")
 
+        trace_store.append(
+            PublishTraceLogRequest(
+                operation="mqtt.ha.discovery.publish",
+                outcome="success",
+                addon_id=request.addon_id,
+                caller_sub=claims.sub,
+                topic=topic,
+            )
+        )
         telemetry_reporter.enqueue_usage(
             consumer_addon_id=claims.sub,
             operation="mqtt.ha.discovery.publish",
@@ -80,6 +152,16 @@ def build_ha_discovery_router(
     ) -> MqttPublishResponse:
         install_state = config_store.get_install_session_state()
         if install_state.get("setup_state") not in {"ready", "degraded"}:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.state.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=request.topic.strip(),
+                    detail="Setup is not complete",
+                )
+            )
             raise HTTPException(
                 status_code=409,
                 detail="Setup is not complete. Finish setup before using HA state publish APIs.",
@@ -87,21 +169,73 @@ def build_ha_discovery_router(
 
         allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
         if not allowed:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.state.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=request.topic.strip(),
+                    detail=reason or "Policy denied HA state publish",
+                    message_id=str(request.payload.get("message_id")) if isinstance(request.payload, dict) and request.payload.get("message_id") is not None else None,
+                    correlation_id=str(request.payload.get("correlation_id")) if isinstance(request.payload, dict) and request.payload.get("correlation_id") is not None else None,
+                )
+            )
             raise HTTPException(status_code=403, detail=reason or "Policy denied HA state publish")
 
         registration = registration_store.get_registration(request.addon_id)
         if registration is None:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.state.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=request.topic.strip(),
+                    detail=f"No registration found for addon_id={request.addon_id}",
+                )
+            )
             raise HTTPException(status_code=404, detail=f"No registration found for addon_id={request.addon_id}")
         if registration.ha_mode == "none":
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.state.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=request.topic.strip(),
+                    detail="HA state mode is not enabled for this registration",
+                )
+            )
             raise HTTPException(status_code=403, detail="HA state mode is not enabled for this registration")
 
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.state.publish",
+                    outcome="error",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=request.topic.strip(),
+                    detail="MQTT service unavailable",
+                )
+            )
             raise HTTPException(status_code=500, detail="MQTT service unavailable")
 
         try:
             topic = validate_publish_topic(request.topic.strip(), addon_id=request.addon_id)
         except TopicPermissionError as exc:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.state.publish",
+                    outcome="denied",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=request.topic.strip(),
+                    detail=str(exc),
+                )
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         ok = mqtt_service.publish(
@@ -111,8 +245,31 @@ def build_ha_discovery_router(
             qos=request.qos,
         )
         if not ok:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.ha.state.publish",
+                    outcome="error",
+                    addon_id=request.addon_id,
+                    caller_sub=claims.sub,
+                    topic=topic,
+                    detail="Failed to publish HA state payload",
+                    message_id=str(request.payload.get("message_id")) if isinstance(request.payload, dict) and request.payload.get("message_id") is not None else None,
+                    correlation_id=str(request.payload.get("correlation_id")) if isinstance(request.payload, dict) and request.payload.get("correlation_id") is not None else None,
+                )
+            )
             raise HTTPException(status_code=500, detail="Failed to publish HA state payload")
 
+        trace_store.append(
+            PublishTraceLogRequest(
+                operation="mqtt.ha.state.publish",
+                outcome="success",
+                addon_id=request.addon_id,
+                caller_sub=claims.sub,
+                topic=topic,
+                message_id=str(request.payload.get("message_id")) if isinstance(request.payload, dict) and request.payload.get("message_id") is not None else None,
+                correlation_id=str(request.payload.get("correlation_id")) if isinstance(request.payload, dict) and request.payload.get("correlation_id") is not None else None,
+            )
+        )
         telemetry_reporter.enqueue_usage(
             consumer_addon_id=claims.sub,
             operation="mqtt.ha.state.publish",

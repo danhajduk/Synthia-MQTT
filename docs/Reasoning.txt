@@ -1,8 +1,8 @@
-Task #057 :
+Task #058 :
 
-Reasoning: Operators needed a single place to inspect active MQTT registrations and setup capabilities without reading runtime files.
+Reasoning: Publish failures and denied contracts were not observable from the dashboard, which made broker and policy troubleshooting blind.
 
 What and why:
-Added GET /api/mqtt/registrations to return setup capability summary plus registration records (access mode, scopes, HA mode, broker profile, direct username, health signal) and added a dashboard registration inspector panel wired to this endpoint.
+Added persistent runtime trace logging for publish/discovery/provisioning paths with operation outcome, topic, caller, detail, and optional message/correlation IDs; exposed GET /api/mqtt/publish-traces and added dashboard trace-debugger view with denied/error counters.
 
 ###########

@@ -509,6 +509,19 @@ async function loadRegistrationInspector() {
   $("registration-output").textContent = JSON.stringify(registrations, null, 2);
 }
 
+async function loadPublishTraces() {
+  const response = await api("/api/mqtt/publish-traces?limit=100");
+  const traces = Array.isArray(response.traces) ? response.traces : [];
+  const denied = traces.filter((trace) => trace.outcome === "denied").length;
+  const errors = traces.filter((trace) => trace.outcome === "error").length;
+  const last = traces.length > 0 ? `${traces[0].operation} (${traces[0].outcome})` : "-";
+  setText("trace-count", String(traces.length));
+  setText("trace-denied-count", String(denied));
+  setText("trace-error-count", String(errors));
+  setText("trace-last-op", last);
+  $("trace-output").textContent = JSON.stringify(traces, null, 2);
+}
+
 async function publishTest() {
   const payload = {
     topic: $("pub-topic").value.trim(),
@@ -579,6 +592,7 @@ function bindEvents() {
   });
   $("load-finish").addEventListener("click", () => run(loadDashboardSummary));
   $("refresh-registrations").addEventListener("click", () => run(loadRegistrationInspector));
+  $("refresh-traces").addEventListener("click", () => run(loadPublishTraces));
   $("test-publish").addEventListener("click", () => run(publishTest));
 
   bindSetupNavigation();
@@ -609,7 +623,7 @@ async function initialize() {
     await loadDoneSummary();
   } else {
     setViewMode("dashboard");
-    await Promise.all([loadDashboardSummary(), loadRegistrationInspector()]);
+    await Promise.all([loadDashboardSummary(), loadRegistrationInspector(), loadPublishTraces()]);
   }
 }
 

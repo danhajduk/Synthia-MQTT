@@ -9,8 +9,10 @@ from app.models.registration_models import (
     RegistrationInspectionRecord,
     SetupCapabilitySummary,
 )
+from app.models.trace_models import PublishTraceLogRequest
 from app.services.config_store import ConfigStore
 from app.services.health import HealthService
+from app.services.publish_trace_store import PublishTraceStore
 from app.services.registration_store import RegistrationStore
 from app.services.topic_permissions import TopicPermissionError
 from app.services.token_auth import ServiceTokenClaims
@@ -20,6 +22,7 @@ def build_mqtt_registration_router(
     store: RegistrationStore,
     config_store: ConfigStore,
     health_service: HealthService,
+    trace_store: PublishTraceStore,
     require_registration_scope: Callable[[], ServiceTokenClaims],
 ) -> APIRouter:
     router = APIRouter(prefix="/api/mqtt", tags=["mqtt-registration"])
@@ -34,7 +37,25 @@ def build_mqtt_registration_router(
         try:
             record = store.upsert(payload, broker_mode=broker_mode)
         except TopicPermissionError as exc:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.registration.upsert",
+                    outcome="denied",
+                    addon_id=payload.addon_id.strip(),
+                    caller_sub=_claims.sub,
+                    detail=str(exc),
+                )
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
+        trace_store.append(
+            PublishTraceLogRequest(
+                operation="mqtt.registration.upsert",
+                outcome="success",
+                addon_id=record.addon_id,
+                caller_sub=_claims.sub,
+                detail="Registration upserted",
+            )
+        )
         return MqttRegistrationResponse(ok=True, registration=record)
 
     @router.get("/registrations", response_model=MqttRegistrationInspectionResponse)

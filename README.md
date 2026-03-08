@@ -62,6 +62,7 @@ open http://localhost:18080/ui
 - `POST /api/broker/restart`
 - `POST /api/mqtt/publish`
 - `POST /api/mqtt/gateway/publish`
+- `GET /api/mqtt/publish-traces`
 - `GET /api/mqtt/registrations`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
@@ -88,6 +89,7 @@ Registrations also include HA mode grants (`none`, `gateway_managed`, `direct_al
 Publish APIs now enforce topic validation (ownership, reserved namespace restrictions, lifecycle topic pattern checks)
 and return explicit HTTP 400 errors for invalid topic contracts.
 Platform topic publishes also enforce envelope schema (`type`, `source_addon_id`, `timestamp`, `data`) and message-type vocabulary.
+`GET /api/mqtt/publish-traces` provides recent success/denied/error publish and provisioning trace records, including message/correlation IDs when present.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`

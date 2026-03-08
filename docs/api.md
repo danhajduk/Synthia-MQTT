@@ -85,6 +85,7 @@ Uses Docker SDK if available and updates install session verification state.
 
 - `POST /api/mqtt/publish`
 - `POST /api/mqtt/gateway/publish`
+- `GET /api/mqtt/publish-traces`
 - `GET /api/mqtt/registrations`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
@@ -133,6 +134,16 @@ Gateway publish endpoint:
   - `source_addon_id`
   - `timestamp`
   - `data`
+
+Publish tracing/debug endpoint:
+
+- `GET /api/mqtt/publish-traces` returns recent publish/provision traces.
+- traces include:
+  - `operation`
+  - `outcome` (`success | denied | error`)
+  - `addon_id`, `caller_sub`, `topic`, and `detail`
+  - `message_id` and `correlation_id` when present in payloads
+- denied publishes and provisioning validation failures are persisted for operator debugging.
 
 MQTT registration endpoint:
 
