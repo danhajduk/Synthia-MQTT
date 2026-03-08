@@ -109,3 +109,9 @@ Tasks in Progress
 ##################################
 Pending Tasks
 ##################################
+41.1 Task 41.1: Re-run documented code-to-golden audit against `/home/dan/Projects/Synthia/docs` and split findings into `local-fixable` vs `golden-upstream` ownership classes.
+41.2 Task 41.2: Add repeatable alignment check script to assert local docs/contracts remain aligned with implemented API endpoints, capability names, and manifest-sourced version usage.
+41.3 Task 41.3: Update `docs/mismatch-report.md` format to track per-finding status (`open`, `mitigated-local`, `upstream-golden`) with explicit verification date and code/doc evidence references.
+41.4 Task 41.4: Extend validation workflow (`scripts/validate-service-flow.sh` or companion checker) to fail when local documentation drifts from implemented behavior.
+41.5 Task 41.5: Add release-gate checklist step requiring golden-doc alignment recheck and mismatch report refresh before publishing a new addon version.
+41. Task 41: Establish continuous golden-document alignment controls for this repository.
