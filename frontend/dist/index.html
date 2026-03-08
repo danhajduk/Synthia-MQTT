@@ -52,8 +52,7 @@
             <li id="marker-2">2. Broker Details</li>
             <li id="marker-3">3. Test</li>
             <li id="marker-4">4. Apply</li>
-            <li id="marker-5">5. Core Registration</li>
-            <li id="marker-6">6. Done</li>
+            <li id="marker-5">5. Done</li>
           </ol>
 
           <section class="step-panel" id="step-1">
@@ -147,32 +146,12 @@
           </div>
             <div class="nav-row">
               <button id="back-4" type="button" class="secondary">Back</button>
-              <button id="next-4" type="button">Next</button>
+              <button id="next-4" type="button">Save</button>
             </div>
           </section>
 
           <section class="step-panel hidden" id="step-5">
-            <h3>Step 5: Core Registration</h3>
-            <label class="check"
-              ><input id="register-enabled" type="checkbox" /> Register addon with Core now</label
-            >
-            <div class="form-grid">
-              <label>Core base URL <input id="core-base-url" type="text" value="http://localhost:3000" /></label>
-              <label>Addon base URL <input id="addon-base-url" type="text" value="http://localhost:18080" /></label>
-              <label>Admin token <input id="core-token" type="password" /></label>
-            </div>
-            <div class="actions">
-              <button id="run-register" type="button">Register With Core</button>
-            </div>
-            <p id="register-result" class="result">-</p>
-            <div class="nav-row">
-              <button id="back-5" type="button" class="secondary">Back</button>
-              <button id="next-5" type="button">Next</button>
-            </div>
-          </section>
-
-          <section class="step-panel hidden" id="step-6">
-            <h3>Step 6: Done</h3>
+            <h3>Step 5: Done</h3>
             <p>Setup summary (secrets are masked):</p>
             <div class="summary-grid">
               <div>
@@ -206,7 +185,7 @@
             </div>
             <pre id="done-output">{}</pre>
             <div class="nav-row">
-              <button id="back-6" type="button" class="secondary">Back</button>
+              <button id="back-5" type="button" class="secondary">Back</button>
               <button id="reload-done" type="button">Reload Summary</button>
             </div>
           </section>

@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = "mqtt_setup_state_v1";
-const MAX_STEP = 6;
+const MAX_STEP = 5;
 
 const state = {
   currentStep: 1,
@@ -71,11 +71,15 @@ function selectedMode() {
 }
 
 function setText(id, value) {
-  $(id).textContent = value;
+  const element = $(id);
+  if (!element) return;
+  element.textContent = value;
 }
 
 function setResult(id, text) {
-  $(id).textContent = text;
+  const element = $(id);
+  if (!element) return;
+  element.textContent = text;
 }
 
 function setGlobalError(message) {
@@ -147,11 +151,6 @@ function fillFieldsFromState() {
   $("embedded-base-topic").value = state.embedded.baseTopic;
   $("embedded-ha-prefix").value = state.embedded.haPrefix;
   $("embedded-qos").value = String(state.embedded.qos);
-
-  $("register-enabled").checked = Boolean(state.core.registerEnabled);
-  $("core-base-url").value = state.core.coreBaseUrl;
-  $("addon-base-url").value = state.core.addonBaseUrl;
-  $("core-token").value = "";
 }
 
 function snapshotFieldsToState() {
@@ -177,10 +176,6 @@ function snapshotFieldsToState() {
   state.embedded.haPrefix = $("embedded-ha-prefix").value.trim() || "homeassistant";
   state.embedded.qos = Number($("embedded-qos").value);
 
-  state.core.registerEnabled = $("register-enabled").checked;
-  state.core.coreBaseUrl = $("core-base-url").value.trim();
-  state.core.addonBaseUrl = $("addon-base-url").value.trim();
-  state.core.hasToken = Boolean($("core-token").value);
 }
 
 function setViewMode(viewMode) {
@@ -198,13 +193,6 @@ function syncModeUI() {
   $("restart-broker").classList.toggle("hidden", mode !== "embedded");
   $("allow-unvalidated-wrap").classList.toggle("hidden", mode !== "external");
 
-  const registerToggle = $("register-enabled");
-  if (mode === "embedded") {
-    registerToggle.checked = true;
-    registerToggle.disabled = true;
-  } else {
-    registerToggle.disabled = false;
-  }
   setResult("mode-support", mode === "embedded" ? "Direct MQTT expected: yes" : "Direct MQTT expected: no (gateway mode)");
   if (mode === "external") {
     $("external-direct-mode-note").textContent =
@@ -537,29 +525,6 @@ async function runBrokerRestart() {
   await loadStatusSnapshot();
 }
 
-async function runCoreRegistration() {
-  snapshotFieldsToState();
-  if (!$("register-enabled").checked) {
-    state.registerDone = false;
-    setResult("register-result", "Core registration skipped.");
-    saveState();
-    return;
-  }
-  const payload = {
-    core_base_url: state.core.coreBaseUrl,
-    base_url: state.core.addonBaseUrl,
-    addon_id: "mqtt",
-    auth_token: $("core-token").value || null,
-  };
-  const result = await api("/api/install/register-core", "POST", payload);
-  state.registerDone = Boolean(result.ok);
-  setResult("register-result", result.ok ? "Core registration succeeded." : "Core registration failed.");
-  $("core-token").value = "";
-  state.core.hasToken = false;
-  saveState();
-  await loadStatusSnapshot();
-}
-
 async function loadDoneSummary() {
   snapshotFieldsToState();
   const [install, health, effective] = await Promise.all([
@@ -746,13 +711,13 @@ function bindSetupNavigation() {
   $("back-3").addEventListener("click", () => setStep(2));
   $("next-3").addEventListener("click", () => setStep(4));
   $("back-4").addEventListener("click", () => setStep(3));
-  $("next-4").addEventListener("click", () => setStep(5));
+  $("next-4").addEventListener("click", () => run(async () => {
+    await saveOptionalGroups();
+    state.applyDone = true;
+    setStep(5);
+    await loadDoneSummary();
+  }));
   $("back-5").addEventListener("click", () => setStep(4));
-  $("next-5").addEventListener("click", async () => {
-    setStep(6);
-    await run(loadDoneSummary);
-  });
-  $("back-6").addEventListener("click", () => setStep(5));
 }
 
 function bindEvents() {
@@ -768,7 +733,6 @@ function bindEvents() {
   $("run-test").addEventListener("click", () => run(runTestStep));
   $("run-apply").addEventListener("click", () => run(runApplyStep));
   $("restart-broker").addEventListener("click", () => run(runBrokerRestart));
-  $("run-register").addEventListener("click", () => run(runCoreRegistration));
   $("reload-done").addEventListener("click", () => run(loadDoneSummary));
   $("reset-setup").addEventListener("click", () => run(resetSetup));
 
