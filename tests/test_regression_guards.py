@@ -48,6 +48,20 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("PACKAGE_PATHS", text)
         self.assertIn("runtime", text)
 
+    def test_bootstrap_writes_runtime_port_intent(self) -> None:
+        bootstrap_script = Path(__file__).resolve().parents[1] / "scripts" / "bootstrap-install.sh"
+        text = bootstrap_script.read_text(encoding="utf-8")
+        self.assertIn('"bind_localhost"', text)
+        self.assertIn('"ports"', text)
+        self.assertIn('"container": ${ADDON_HTTP_CONTAINER_PORT}', text)
+
+    def test_validate_bootstrap_checks_runtime_port_intent(self) -> None:
+        validate_script = Path(__file__).resolve().parents[1] / "scripts" / "validate-bootstrap.sh"
+        text = validate_script.read_text(encoding="utf-8")
+        self.assertIn("runtime.bind_localhost", text)
+        self.assertIn("runtime.ports", text)
+        self.assertIn("ADDON_PORT", text)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -34,6 +34,10 @@ DESIRED_STATE="${DESIRED_STATE:-running}"
 REQUESTED_VERSION="latest"
 CORE_URL="${CORE_URL:-http://127.0.0.1:9001}"
 PROJECT_NAME="${PROJECT_NAME:-synthia-addon-mqtt}"
+RUNTIME_BIND_LOCALHOST="${RUNTIME_BIND_LOCALHOST:-false}"
+ADDON_HTTP_HOST_PORT="${ADDON_HTTP_HOST_PORT:-18080}"
+ADDON_HTTP_CONTAINER_PORT="${ADDON_HTTP_CONTAINER_PORT:-8080}"
+ADDON_HTTP_PROTO="${ADDON_HTTP_PROTO:-tcp}"
 
 usage() {
   cat <<EOF
@@ -45,6 +49,9 @@ Options:
   --install-root <path>    Install root (default: ./SynthiaAddons/services/mqtt)
   --services-root <path>   Services root (default: ./SynthiaAddons/services)
   --legacy-root <path>     Legacy compatibility root symlink (default: ./SynthiaAddons/Synthia-MQTT)
+  --addon-host-port <num>  Host port to encode in desired runtime ports (default: 18080)
+  --addon-container-port <num>  Container port to encode in desired runtime ports (default: 8080)
+  --bind-localhost <true|false> Desired runtime localhost bind intent (default: false)
   -h, --help               Show this help
 
 Examples:
@@ -117,6 +124,21 @@ parse_args() {
         shift
         [[ $# -gt 0 ]] || die "--legacy-root requires a value"
         LEGACY_ROOT="$1"
+        ;;
+      --addon-host-port)
+        shift
+        [[ $# -gt 0 ]] || die "--addon-host-port requires a value"
+        ADDON_HTTP_HOST_PORT="$1"
+        ;;
+      --addon-container-port)
+        shift
+        [[ $# -gt 0 ]] || die "--addon-container-port requires a value"
+        ADDON_HTTP_CONTAINER_PORT="$1"
+        ;;
+      --bind-localhost)
+        shift
+        [[ $# -gt 0 ]] || die "--bind-localhost requires a value"
+        RUNTIME_BIND_LOCALHOST="$1"
         ;;
       -h|--help)
         usage
@@ -285,6 +307,10 @@ write_desired_json() {
   local artifact_url="$3"
   local artifact_sha="$4"
   local signature_value="$5"
+  local bind_localhost_json="false"
+  if [[ "${RUNTIME_BIND_LOCALHOST,,}" == "true" ]]; then
+    bind_localhost_json="true"
+  fi
 
   cat > "$file_path" <<EOF
 {
@@ -310,7 +336,15 @@ write_desired_json() {
   "runtime": {
     "orchestrator": "docker_compose",
     "project_name": "${PROJECT_NAME}",
-    "network": "synthia_net"
+    "network": "synthia_net",
+    "bind_localhost": ${bind_localhost_json},
+    "ports": [
+      {
+        "host": ${ADDON_HTTP_HOST_PORT},
+        "container": ${ADDON_HTTP_CONTAINER_PORT},
+        "proto": "${ADDON_HTTP_PROTO,,}"
+      }
+    ]
   },
   "config": {
     "env": {
@@ -348,6 +382,13 @@ EOF
 
 main() {
   parse_args "$@"
+
+  [[ "$ADDON_HTTP_HOST_PORT" =~ ^[0-9]+$ ]] || die "addon host port must be numeric"
+  [[ "$ADDON_HTTP_CONTAINER_PORT" =~ ^[0-9]+$ ]] || die "addon container port must be numeric"
+  (( ADDON_HTTP_HOST_PORT >= 1 && ADDON_HTTP_HOST_PORT <= 65535 )) || die "addon host port out of range"
+  (( ADDON_HTTP_CONTAINER_PORT >= 1 && ADDON_HTTP_CONTAINER_PORT <= 65535 )) || die "addon container port out of range"
+  [[ "${ADDON_HTTP_PROTO,,}" == "tcp" || "${ADDON_HTTP_PROTO,,}" == "udp" ]] || die "addon proto must be tcp or udp"
+  [[ "${RUNTIME_BIND_LOCALHOST,,}" == "true" || "${RUNTIME_BIND_LOCALHOST,,}" == "false" ]] || die "bind-localhost must be true or false"
 
   require_cmd curl
   require_cmd python3

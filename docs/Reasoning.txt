@@ -85,3 +85,30 @@ What and why:
 Re-ran local-vs-golden audit evidence and identified one new local-fixable mismatch: bootstrap-generated `desired.json` omits runtime port intent fields while runtime compose currently publishes host ports. Updated `docs/mismatch-report.md` (audit timestamp, counts, and new Finding 3) and added pending tasks 79-81 in `docs/New_tasks.txt` to fix code, validation, and docs.
 
 ###########
+
+Task #079 :
+
+Reasoning: Golden standalone contract expects runtime port exposure intent in `desired.json`, so bootstrap must emit these fields consistently with current compose defaults.
+
+What and why:
+Updated `scripts/bootstrap-install.sh` to generate `runtime.bind_localhost` and `runtime.ports` in `desired.json` with defaults (`false`, `18080->8080/tcp`), plus optional override flags and input validation for host/container/proto values.
+
+###########
+
+Task #080 :
+
+Reasoning: Port intent compatibility needs automated validation to prevent drift from returning in future releases.
+
+What and why:
+Extended `scripts/validate-bootstrap.sh` to assert `desired.runtime.bind_localhost` is boolean and `desired.runtime.ports[0]` matches expected host/container/proto values; aligned default validation port to `18080` and UI URL to `/ui/`. Added regression tests in `tests/test_regression_guards.py` for bootstrap runtime port intent and bootstrap-validator checks.
+
+###########
+
+Task #081 :
+
+Reasoning: Documentation must explicitly describe desired/runtime port intent behavior now that compatibility gap is remediated.
+
+What and why:
+Updated `docs/deployment.md` with desired runtime port intent defaults and validation invariants. Updated `docs/mismatch-report.md` Finding 3 status to `mitigated-local` with refreshed code evidence and summary counts.
+
+###########

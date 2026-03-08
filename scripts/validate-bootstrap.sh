@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ADDON_PORT="${ADDON_PORT:-18081}"
+ADDON_PORT="${ADDON_PORT:-18080}"
 DEFAULT_HOST_IP="${DEFAULT_HOST_IP:-$(hostname -I 2>/dev/null | awk '{print $1}')}"
 if [[ -z "$DEFAULT_HOST_IP" ]]; then
   DEFAULT_HOST_IP="127.0.0.1"
@@ -17,13 +17,14 @@ echo "[validate-bootstrap] running bootstrap: $BOOTSTRAP_SCRIPT $BOOTSTRAP_ARGS"
 "$BOOTSTRAP_SCRIPT" $BOOTSTRAP_ARGS
 
 echo "[validate-bootstrap] checking SSAP layout invariants"
-python3 - "$REPO_ROOT" <<'PY'
+python3 - "$REPO_ROOT" "$ADDON_PORT" <<'PY'
 import json
 import os
 import sys
 from pathlib import Path
 
 repo_root = Path(sys.argv[1])
+expected_host_port = int(sys.argv[2])
 addons_root = repo_root / "SynthiaAddons"
 service_root = addons_root / "services" / "mqtt"
 legacy_root = addons_root / "Synthia-MQTT"
@@ -78,12 +79,33 @@ if runtime.get("active_version") != current_version:
         f"runtime.json active_version mismatch: {runtime.get('active_version')} != {current_version}"
     )
 
+runtime_intent = desired.get("runtime") or {}
+bind_localhost = runtime_intent.get("bind_localhost")
+if not isinstance(bind_localhost, bool):
+    raise SystemExit("desired.json runtime.bind_localhost must be boolean")
+
+ports = runtime_intent.get("ports")
+if not isinstance(ports, list) or not ports:
+    raise SystemExit("desired.json runtime.ports must be a non-empty list")
+
+first_port = ports[0]
+if not isinstance(first_port, dict):
+    raise SystemExit("desired.json runtime.ports[0] must be an object")
+if int(first_port.get("host", -1)) != expected_host_port:
+    raise SystemExit(
+        f"desired.json runtime.ports[0].host mismatch: {first_port.get('host')} != {expected_host_port}"
+    )
+if int(first_port.get("container", -1)) != 8080:
+    raise SystemExit("desired.json runtime.ports[0].container must be 8080")
+if str(first_port.get("proto", "")).lower() != "tcp":
+    raise SystemExit("desired.json runtime.ports[0].proto must be tcp")
+
 print("ssap layout checks passed")
 PY
 
 echo "[validate-bootstrap] checking health endpoint"
 curl -fsS "${SERVICE_BASE_URL}/healthz" >/dev/null
 
-UI_URL="${SERVICE_BASE_URL}/ui"
+UI_URL="${SERVICE_BASE_URL}/ui/"
 echo "[validate-bootstrap] UI URL: ${UI_URL}"
 echo "[validate-bootstrap] success"

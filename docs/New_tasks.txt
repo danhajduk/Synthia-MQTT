@@ -152,6 +152,9 @@ Completed Tasks
 76. Task 76: Rebuild and republish release 0.2.0 - Completed on 03/08/2026 09:38
 77. Task 77: Include runtime directory in release/sign staging inputs for Docker build context parity - Completed on 03/08/2026 09:47
 78. Task 78: Rebuild and republish release 0.2.0 - Completed on 03/08/2026 09:48
+79. Task 79: Add runtime port intent fields (`runtime.ports`, `runtime.bind_localhost`) to bootstrap-generated desired.json aligned with current compose defaults - Completed on 03/08/2026 10:07
+80. Task 80: Extend bootstrap validation to assert desired runtime port intent presence and parity with documented UI/API host access path - Completed on 03/08/2026 10:07
+81. Task 81: Update local deployment/docs to describe desired runtime port intent contract and golden compatibility rationale - Completed on 03/08/2026 10:07
 
 ##################################
 Tasks in Progress
@@ -160,6 +163,3 @@ Tasks in Progress
 ##################################
 Pending Tasks
 ##################################
-79. Task 79: Add runtime port intent fields (`runtime.ports`, `runtime.bind_localhost`) to bootstrap-generated desired.json aligned with current compose defaults
-80. Task 80: Extend bootstrap validation to assert desired runtime port intent presence and parity with documented UI/API host access path
-81. Task 81: Update local deployment/docs to describe desired runtime port intent contract and golden compatibility rationale

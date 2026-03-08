@@ -2,7 +2,7 @@
 
 Status: Active
 Last Verified: 2026-03-08 (US/Pacific)
-Audit Run: 2026-03-08 10:02 US/Pacific
+Audit Run: 2026-03-08 10:07 US/Pacific
 Compared docs:
 
 - `/home/dan/Projects/Synthia/docs/addons.md`
@@ -19,8 +19,8 @@ Local docs reviewed:
 ## Summary
 
 - Total findings tracked: 3
-- Open findings: 2
-- Open local-fixable findings: 1
+- Open findings: 1
+- Open local-fixable findings: 0
 - Highest-risk open finding: stale version example in golden addons registration documentation.
 - Golden standard: `/home/dan/Projects/Synthia/docs` is treated as source-of-truth for alignment.
 
@@ -90,7 +90,7 @@ Recommended correction:
 
 ### Finding 3: Desired runtime port intent missing while compose publishes host port
 
-Status: open
+Status: mitigated-local
 Ownership: local-fixable
 Type: Contradictory documentation
 Verification date: 2026-03-08
@@ -105,9 +105,9 @@ Affected files:
 
 Code evidence:
 
-- `scripts/bootstrap-install.sh` writes `desired.json` runtime with `orchestrator`, `project_name`, and `network`, but no `runtime.ports` or `runtime.bind_localhost`.
+- `scripts/bootstrap-install.sh` now writes `desired.json` runtime with `bind_localhost` and `ports` defaults (`18080 -> 8080/tcp`) plus override flags.
 - `docker/docker-compose.yml` publishes host mapping `18080:8080`.
-- `scripts/validate-bootstrap.sh` verifies `desired.json` existence/version fields but does not assert runtime port intent.
+- `scripts/validate-bootstrap.sh` now asserts `desired.runtime.bind_localhost` and `desired.runtime.ports[0]` parity.
 
 Documentation evidence:
 
@@ -116,13 +116,14 @@ Documentation evidence:
 
 Why this is a mismatch:
 
-- Current bootstrap desired state does not encode runtime port intent while runtime compose publishes a host port, creating drift against golden standalone runtime contract expectations.
+- Previously, bootstrap desired state omitted runtime port intent while compose published host ports, creating drift against golden standalone runtime contract expectations.
 
 Recommended correction:
 
-- Add bootstrap support for `runtime.ports` and `runtime.bind_localhost` in generated `desired.json` with defaults aligned to current compose behavior.
-- Add bootstrap validation checks that assert desired runtime port intent is present and consistent with documented access path.
-- Update local deployment docs to explicitly document desired/runtime port intent fields and defaults.
+- Completed locally:
+  - bootstrap now emits `runtime.ports` and `runtime.bind_localhost` intent fields
+  - bootstrap validation now checks runtime port intent presence/parity
+  - deployment docs now document desired/runtime port intent defaults
 
 ## Ownership classification rules used in this report
 
