@@ -14,6 +14,7 @@ Defined service:
 Image packaging note:
 
 - `docker/Dockerfile` includes `manifest.json` in `/workspace/manifest.json` so addon contract metadata loads at startup.
+- Runtime health sampling uses an internal `HealthSnapshot` service model; API routes map it to external `AddonHealth` contract fields.
 
 Notes:
 

@@ -1,8 +1,8 @@
-Task #063 :
+Task #064 :
 
-Reasoning: Service container entered restart loop because addon manifest metadata file was not packaged in the runtime image.
+Reasoning: Health service incorrectly instantiated the external `AddonHealth` contract model internally, creating schema-coupling risk and runtime validation failures.
 
 What and why:
-Updated `docker/Dockerfile` to copy `manifest.json` into `/workspace/manifest.json` and documented the packaging requirement in deployment docs. Verified image rebuild and container startup status are healthy.
+Introduced internal `HealthSnapshot` dataclass in `app/services/health.py` and switched `HealthService.snapshot()` to return it. API layers continue mapping that snapshot to `AddonHealth` response contracts.
 
 ###########

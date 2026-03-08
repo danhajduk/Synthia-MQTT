@@ -137,11 +137,12 @@ Completed Tasks
 61. Task 61: Add external broker advanced/manual direct-access model - Completed on 03/07/2026 22:01
 62. Task 62: Add end-to-end tests for setup, registration, and publish flows - Completed on 03/07/2026 22:05
 63. Task 63: Fix container startup packaging regression (manifest missing in image) - Completed on 03/07/2026 22:08
+64. Task 64: Fix health snapshot model contract for runtime safety - Completed on 03/07/2026 22:09
 
 ##################################
 Tasks in Progress
 ##################################
-64. Task 64: Fix health snapshot model contract for runtime safety
+65. Task 65: Add regression guards for startup packaging and health snapshot behavior
 
 ##################################
 Pending Tasks

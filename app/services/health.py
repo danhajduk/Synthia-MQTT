@@ -1,6 +1,13 @@
 import time
+from dataclasses import dataclass
 
-from app.models.addon_models import AddonHealth
+
+@dataclass(slots=True)
+class HealthSnapshot:
+    status: str
+    mqtt_connected: bool
+    last_error: str | None
+    uptime_seconds: int
 
 
 class HealthService:
@@ -23,14 +30,14 @@ class HealthService:
     def mark_offline(self) -> None:
         self._offline = True
 
-    def snapshot(self) -> AddonHealth:
+    def snapshot(self) -> HealthSnapshot:
         status = "healthy"
         if self._offline:
             status = "offline"
         elif not self._mqtt_connected or self._last_error:
             status = "degraded"
 
-        return AddonHealth(
+        return HealthSnapshot(
             status=status,
             mqtt_connected=self._mqtt_connected,
             last_error=self._last_error,
