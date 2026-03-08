@@ -84,11 +84,19 @@ Uses Docker SDK if available and updates install session verification state.
 ## MQTT publish routes
 
 - `POST /api/mqtt/publish`
+- `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
 
 HA sensor discovery publishes retained payload to:
 
 - `homeassistant/sensor/{unique_id}/config`
+
+MQTT registration endpoint:
+
+- `POST /api/mqtt/registrations` stores or updates approved addon registration with access mode:
+  - `gateway_only`
+  - `direct_mqtt`
+  - `both`
 
 Operational publish routes are blocked until setup state is complete:
 

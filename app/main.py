@@ -12,12 +12,14 @@ from app.api.broker_admin import build_broker_admin_router
 from app.api.ha_discovery import build_ha_discovery_router
 from app.api.install_workflow import build_install_workflow_router
 from app.api.mqtt_publish import build_mqtt_publish_router
+from app.api.mqtt_registration import build_mqtt_registration_router
 from app.services.config_store import ConfigStore
 from app.services.health import HealthService
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
 from app.services.telemetry_reporter import TelemetryReporter
 from app.services.token_auth import ServiceTokenValidator
+from app.services.registration_store import RegistrationStore
 
 app = FastAPI(title="Synthia MQTT Addon", version=ADDON_VERSION.version)
 
@@ -31,6 +33,7 @@ health_service = HealthService()
 mqtt_service: MqttClientService | None = None
 token_validator = ServiceTokenValidator(addon_id=ADDON_VERSION.addon_id)
 policy_cache = PolicyCache(service_name=ADDON_VERSION.addon_id)
+registration_store = RegistrationStore()
 runtime_dir = Path(__file__).resolve().parents[1] / "runtime"
 telemetry_reporter = TelemetryReporter(
     addon_id=ADDON_VERSION.addon_id,
@@ -97,6 +100,12 @@ app.include_router(
         require_scope(token_validator, "install.apply"),
         require_scope(token_validator, "core.register"),
         require_scope(token_validator, "install.reset"),
+    )
+)
+app.include_router(
+    build_mqtt_registration_router(
+        registration_store,
+        require_scope(token_validator, "core.register"),
     )
 )
 

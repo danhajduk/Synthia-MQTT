@@ -1,8 +1,8 @@
-Task #47 :
-Reasoning: Health reporting must separate addon runtime status from broker-specific readiness so Core/Supervisor can determine setup completeness and broker availability precisely.
+Task #48 :
+Reasoning: Core-approved MQTT access must be persisted in addon-side registration records with explicit access-mode semantics to support governed gateway/direct usage.
 What and why:
-- Extended `/api/addon/health` response model with setup and broker fields (`setup_state`, `broker_mode`, `broker_reachable`, `broker_health`, `direct_mqtt_supported`).
-- Composed addon health from install session state + MQTT runtime state + embedded broker runtime inspection.
-- Added explicit `error`/`unconfigured` status handling for clean readiness signaling.
-- Updated API docs with new health fields.
+- Added `POST /api/mqtt/registrations` endpoint with contract validation.
+- Added runtime-backed registration store (`runtime/mqtt_registrations.json`) with upsert behavior.
+- Added registration request/record/response models with access modes (`gateway_only`, `direct_mqtt`, `both`).
+- Updated README and API docs endpoint inventories.
 ###########

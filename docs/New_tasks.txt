@@ -121,6 +121,7 @@ Completed Tasks
 46.2 Task 46.2: Add setup UI control for explicit unvalidated external apply override - Completed on 03/07/2026 21:14
 46. Task 46: Implement external broker configuration and connection test - Completed on 03/07/2026 21:14
 47. Task 47: Add broker health service and readiness reporting - Completed on 03/07/2026 21:27
+48. Task 48: Implement MQTT registration API - Completed on 03/07/2026 21:28
 
 ##################################
 Tasks in Progress
