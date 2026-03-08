@@ -127,6 +127,11 @@ Gateway publish endpoint:
   - non-owned addon namespace publish topics
   - invalid lifecycle topic patterns (nested `/announce` or `/health`)
 - validation failures return HTTP `400` with explicit reason text
+- platform-envelope schema validation on platform topics (`synthia/addons/*` and reserved platform namespaces) requires:
+  - `type` in `announce|health|event|state|command|telemetry|policy`
+  - `source_addon_id`
+  - `timestamp`
+  - `data`
 
 MQTT registration endpoint:
 

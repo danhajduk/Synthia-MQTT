@@ -10,6 +10,7 @@ from app.models.publish_models import (
     MqttPublishResponse,
 )
 from app.services.config_store import ConfigStore
+from app.services.envelope_validation import EnvelopeValidationError, validate_platform_envelope
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
 from app.services.registration_store import RegistrationStore
@@ -56,6 +57,10 @@ def build_mqtt_publish_router(
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:
             raise HTTPException(status_code=500, detail="MQTT service unavailable")
+        try:
+            validate_platform_envelope(topic, request.payload)
+        except EnvelopeValidationError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         ok = mqtt_service.publish(
             topic=topic,
@@ -118,6 +123,10 @@ def build_mqtt_publish_router(
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "data": request.payload,
         }
+        try:
+            validate_platform_envelope(topic, envelope)
+        except EnvelopeValidationError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:

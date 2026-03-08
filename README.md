@@ -85,6 +85,7 @@ Registration applies ACL/topic realization with publish/subscribe separation and
 Registrations also include HA mode grants (`none`, `gateway_managed`, `direct_allowed`) enforced by HA gateway helper endpoints.
 Publish APIs now enforce topic validation (ownership, reserved namespace restrictions, lifecycle topic pattern checks)
 and return explicit HTTP 400 errors for invalid topic contracts.
+Platform topic publishes also enforce envelope schema (`type`, `source_addon_id`, `timestamp`, `data`) and message-type vocabulary.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
