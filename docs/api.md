@@ -8,6 +8,11 @@ Last Verified: 2026-03-07 (US/Pacific)
 - Health: `GET /healthz`
 - UI root redirect: `GET /` -> `/ui`
 
+## Ownership boundary note
+
+Core documentation may reference route assembly in `backend/app/main.py` for the Core repository.
+In this addon repository, the equivalent entrypoint is `app/main.py`.
+
 ## Addon contract routes
 
 - `GET /api/addon/meta`

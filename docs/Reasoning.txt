@@ -1,5 +1,5 @@
-Task #40.2 :
-Error context: Bootstrap flow stored artifact and compose file but did not materialize an `extracted/` build-context directory expected by SSAP layout guidance.
-Reasoning: Extend bootstrap to unpack `addon.tgz` into a deterministic per-version `extracted/` path while preserving existing artifact retention and compose extraction behavior.
-What and why: Added artifact extraction step in `scripts/bootstrap-install.sh` to populate `SynthiaAddons/services/mqtt/versions/<version>/extracted`, updated script output summary/comments, and synchronized `docs/deployment.md` with the new extracted-layout behavior.
+Task #40.3 :
+Error context: Golden Core API docs reference `backend/app/main.py`, which is accurate for Core but ambiguous for addon-repo readers validating this service.
+Reasoning: Add a local ownership-boundary note in addon docs to map Core-path references to this repository's actual entrypoint and remove implementation ambiguity.
+What and why: Updated `docs/api.md` with an ownership boundary section clarifying that Core references to `backend/app/main.py` map to `app/main.py` in this addon repository.
 ###########
