@@ -542,6 +542,17 @@ async function loadTopicExplorer() {
   );
 }
 
+async function loadMetrics() {
+  const response = await api("/api/mqtt/metrics");
+  setText("metrics-publish-count", String(response.publish_count ?? 0));
+  setText("metrics-denied-count", String(response.denied_publish_count ?? 0));
+  setText("metrics-reconnect-count", String(response.reconnect_count ?? 0));
+  setText("metrics-active-registrations", String(response.active_registrations ?? 0));
+  setText("metrics-broker-mode", String(response.broker_mode_summary?.mode || "-"));
+  setText("metrics-direct-model", String(response.broker_mode_summary?.direct_access_model || "-"));
+  $("metrics-output").textContent = JSON.stringify(response.per_addon_usage || [], null, 2);
+}
+
 async function publishTest() {
   const payload = {
     topic: $("pub-topic").value.trim(),
@@ -614,6 +625,7 @@ function bindEvents() {
   $("refresh-registrations").addEventListener("click", () => run(loadRegistrationInspector));
   $("refresh-traces").addEventListener("click", () => run(loadPublishTraces));
   $("refresh-topic-explorer").addEventListener("click", () => run(loadTopicExplorer));
+  $("refresh-metrics").addEventListener("click", () => run(loadMetrics));
   $("test-publish").addEventListener("click", () => run(publishTest));
 
   bindSetupNavigation();
@@ -644,7 +656,13 @@ async function initialize() {
     await loadDoneSummary();
   } else {
     setViewMode("dashboard");
-    await Promise.all([loadDashboardSummary(), loadRegistrationInspector(), loadPublishTraces(), loadTopicExplorer()]);
+    await Promise.all([
+      loadDashboardSummary(),
+      loadRegistrationInspector(),
+      loadPublishTraces(),
+      loadTopicExplorer(),
+      loadMetrics(),
+    ]);
   }
 }
 

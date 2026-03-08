@@ -17,6 +17,7 @@ from app.services.config_store import ConfigStore
 from app.services.health import HealthService
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
+from app.services.mqtt_metrics_store import MqttMetricsStore
 from app.services.publish_trace_store import PublishTraceStore
 from app.services.telemetry_reporter import TelemetryReporter
 from app.services.token_auth import ServiceTokenValidator
@@ -36,6 +37,7 @@ token_validator = ServiceTokenValidator(addon_id=ADDON_VERSION.addon_id)
 policy_cache = PolicyCache(service_name=ADDON_VERSION.addon_id)
 registration_store = RegistrationStore()
 publish_trace_store = PublishTraceStore()
+mqtt_metrics_store = MqttMetricsStore()
 runtime_dir = Path(__file__).resolve().parents[1] / "runtime"
 telemetry_reporter = TelemetryReporter(
     addon_id=ADDON_VERSION.addon_id,
@@ -58,6 +60,7 @@ def reload_mqtt_service() -> None:
         mode="standalone_service",
         announce_base_url=os.getenv("ANNOUNCE_BASE_URL", "http://localhost:18080"),
         policy_cache=policy_cache,
+        metrics_store=mqtt_metrics_store,
     )
     mqtt_service.start()
 
@@ -79,6 +82,7 @@ app.include_router(
         config_store,
         registration_store,
         publish_trace_store,
+        mqtt_metrics_store,
     )
 )
 app.include_router(

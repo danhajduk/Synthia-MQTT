@@ -10,9 +10,11 @@ from app.models.publish_models import (
     MqttPublishRequest,
     MqttPublishResponse,
 )
+from app.models.metrics_models import AddonUsageSummary, BrokerModeSummary, MqttUsageMetricsResponse
 from app.models.trace_models import PublishTraceLogRequest, PublishTraceResponse
 from app.services.config_store import ConfigStore
 from app.services.envelope_validation import EnvelopeValidationError, validate_platform_envelope
+from app.services.mqtt_metrics_store import MqttMetricsStore
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
 from app.services.publish_trace_store import PublishTraceStore
@@ -30,6 +32,7 @@ def build_mqtt_publish_router(
     config_store: ConfigStore,
     registration_store: RegistrationStore,
     trace_store: PublishTraceStore,
+    metrics_store: MqttMetricsStore,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/mqtt", tags=["mqtt"])
 
@@ -326,6 +329,55 @@ def build_mqtt_publish_router(
         _claims: ServiceTokenClaims = Depends(require_publish_scope),
     ) -> PublishTraceResponse:
         return PublishTraceResponse(ok=True, traces=trace_store.list_recent(limit=limit))
+
+    @router.get("/metrics", response_model=MqttUsageMetricsResponse)
+    def metrics(
+        _claims: ServiceTokenClaims = Depends(require_publish_scope),
+    ) -> MqttUsageMetricsResponse:
+        traces = trace_store.list_recent(limit=1000)
+        publish_traces = [trace for trace in traces if "publish" in trace.operation]
+        publish_count = sum(1 for trace in publish_traces if trace.outcome == "success")
+        denied_publish_count = sum(1 for trace in publish_traces if trace.outcome == "denied")
+
+        per_addon: dict[str, dict[str, int]] = {}
+        for trace in publish_traces:
+            addon_id = (trace.addon_id or trace.caller_sub or "unknown").strip() or "unknown"
+            if addon_id not in per_addon:
+                per_addon[addon_id] = {"success": 0, "denied": 0, "error": 0}
+            if trace.outcome == "success":
+                per_addon[addon_id]["success"] += 1
+            elif trace.outcome == "denied":
+                per_addon[addon_id]["denied"] += 1
+            else:
+                per_addon[addon_id]["error"] += 1
+
+        install_state = config_store.get_install_session_state()
+        direct_access_model = str(
+            config_store.get_install_state().get("external_direct_access_mode", "gateway_only")
+        ).strip() or "gateway_only"
+        mode = str(install_state.get("mode") or "external")
+        direct_mqtt_supported = mode == "embedded" or (mode == "external" and direct_access_model == "manual_direct_access")
+        return MqttUsageMetricsResponse(
+            ok=True,
+            publish_count=publish_count,
+            denied_publish_count=denied_publish_count,
+            reconnect_count=metrics_store.reconnect_count(),
+            active_registrations=len(registration_store.list_registrations()),
+            per_addon_usage=[
+                AddonUsageSummary(
+                    addon_id=addon_id,
+                    publish_success=counts["success"],
+                    publish_denied=counts["denied"],
+                    publish_error=counts["error"],
+                )
+                for addon_id, counts in sorted(per_addon.items())
+            ],
+            broker_mode_summary=BrokerModeSummary(
+                mode=mode,
+                direct_access_model=direct_access_model if mode == "external" else "embedded_managed",
+                direct_mqtt_supported=direct_mqtt_supported,
+            ),
+        )
 
     return router
 

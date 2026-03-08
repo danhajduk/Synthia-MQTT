@@ -86,6 +86,7 @@ Uses Docker SDK if available and updates install session verification state.
 - `POST /api/mqtt/publish`
 - `POST /api/mqtt/gateway/publish`
 - `GET /api/mqtt/publish-traces`
+- `GET /api/mqtt/metrics`
 - `GET /api/mqtt/registrations`
 - `GET /api/mqtt/topic-explorer`
 - `POST /api/mqtt/registrations`
@@ -145,6 +146,16 @@ Publish tracing/debug endpoint:
   - `addon_id`, `caller_sub`, `topic`, and `detail`
   - `message_id` and `correlation_id` when present in payloads
 - denied publishes and provisioning validation failures are persisted for operator debugging.
+
+MQTT usage metrics endpoint:
+
+- `GET /api/mqtt/metrics` returns:
+  - `publish_count`
+  - `denied_publish_count`
+  - `reconnect_count`
+  - `active_registrations`
+  - per-addon publish summaries (`publish_success`, `publish_denied`, `publish_error`)
+  - broker mode summary (`mode`, `direct_access_model`, `direct_mqtt_supported`)
 
 MQTT registration endpoint:
 

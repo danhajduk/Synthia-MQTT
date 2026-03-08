@@ -274,6 +274,22 @@
         </section>
 
         <section class="panel">
+          <h2>Usage Metrics</h2>
+          <div class="actions">
+            <button id="refresh-metrics" type="button">Refresh Metrics</button>
+          </div>
+          <div class="summary-grid">
+            <div><span>Publish Count</span><strong id="metrics-publish-count">-</strong></div>
+            <div><span>Denied Publishes</span><strong id="metrics-denied-count">-</strong></div>
+            <div><span>Reconnect Count</span><strong id="metrics-reconnect-count">-</strong></div>
+            <div><span>Active Registrations</span><strong id="metrics-active-registrations">-</strong></div>
+            <div><span>Broker Mode</span><strong id="metrics-broker-mode">-</strong></div>
+            <div><span>Direct Access Model</span><strong id="metrics-direct-model">-</strong></div>
+          </div>
+          <pre id="metrics-output">[]</pre>
+        </section>
+
+        <section class="panel">
           <h2>Test Publish</h2>
           <div class="form-grid">
             <label>Topic <input id="pub-topic" type="text" value="synthia/test" /></label>

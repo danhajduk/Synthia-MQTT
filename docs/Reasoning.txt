@@ -1,8 +1,8 @@
-Task #059 :
+Task #060 :
 
-Reasoning: Operators needed a safe overview of governed MQTT topic usage without enabling raw packet sniffing.
+Reasoning: Existing telemetry was Core-facing and not operator-facing; dashboard lacked local MQTT usage trend visibility.
 
 What and why:
-Added GET /api/mqtt/topic-explorer to summarize reserved namespaces, addon-owned namespaces, lifecycle topics, registration mappings, and derived topic families; added a dashboard topic explorer panel consuming this endpoint.
+Added runtime MQTT usage metrics endpoint (`GET /api/mqtt/metrics`) with publish/deny/reconnect counts, active registration count, per-addon usage summaries, and broker mode summary. Added dashboard Usage Metrics panel wired to the new endpoint.
 
 ###########

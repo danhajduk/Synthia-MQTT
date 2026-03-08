@@ -9,6 +9,7 @@ import paho.mqtt.client as mqtt
 
 from app.services.health import HealthService
 from app.services.lifecycle_topics import LifecycleTopicHelper
+from app.services.mqtt_metrics_store import MqttMetricsStore
 from app.services.policy_cache import PolicyCache
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class MqttClientService:
         mode: str = "standalone_service",
         announce_base_url: str = "http://mqtt-addon:8080",
         policy_cache: PolicyCache | None = None,
+        metrics_store: MqttMetricsStore | None = None,
     ) -> None:
         self._config = config
         self._health_service = health_service
@@ -36,6 +38,7 @@ class MqttClientService:
         self._mode = mode
         self._announce_base_url = announce_base_url
         self._policy_cache = policy_cache
+        self._metrics_store = metrics_store
 
         client_id = str(self._config["mqtt_client_id"])
         self._client = mqtt.Client(client_id=client_id)
@@ -128,6 +131,8 @@ class MqttClientService:
     def _on_disconnect(self, _client: mqtt.Client, _userdata: Any, rc: int) -> None:
         self._health_service.set_mqtt_connected(False)
         if rc != 0:
+            if self._metrics_store is not None:
+                self._metrics_store.increment_reconnects()
             error = f"MQTT disconnected unexpectedly rc={rc}"
             self._health_service.set_last_error(error)
             logger.warning("mqtt_disconnected", extra={"rc": rc})

@@ -63,6 +63,7 @@ open http://localhost:18080/ui
 - `POST /api/mqtt/publish`
 - `POST /api/mqtt/gateway/publish`
 - `GET /api/mqtt/publish-traces`
+- `GET /api/mqtt/metrics`
 - `GET /api/mqtt/registrations`
 - `GET /api/mqtt/topic-explorer`
 - `POST /api/mqtt/registrations`
@@ -92,6 +93,7 @@ and return explicit HTTP 400 errors for invalid topic contracts.
 Platform topic publishes also enforce envelope schema (`type`, `source_addon_id`, `timestamp`, `data`) and message-type vocabulary.
 `GET /api/mqtt/publish-traces` provides recent success/denied/error publish and provisioning trace records, including message/correlation IDs when present.
 `GET /api/mqtt/topic-explorer` provides operator-facing topic summaries (reserved namespaces, addon namespaces, lifecycle topics, and registration mappings).
+`GET /api/mqtt/metrics` provides publish/deny/reconnect counts, active registration count, per-addon publish summaries, and broker mode summary.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
