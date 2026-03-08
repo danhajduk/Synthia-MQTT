@@ -62,6 +62,7 @@ open http://localhost:18080/ui
 - `POST /api/broker/restart`
 - `POST /api/mqtt/publish`
 - `POST /api/mqtt/gateway/publish`
+- `GET /api/mqtt/registrations`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
 - `POST /api/ha/discovery/state/publish`
@@ -80,6 +81,7 @@ For external broker mode, `POST /api/install/apply` requires a prior successful
 `POST /api/install/test-external` for the same config unless `allow_unvalidated=true`.
 
 `POST /api/mqtt/registrations` supports `gateway_only`, `direct_mqtt`, and `both` access modes.
+`GET /api/mqtt/registrations` returns registration inspection details and setup capability summary for operators.
 Direct modes provision stable long-term broker credentials and support rotation with `reprovision=true`.
 Registration applies ACL/topic realization with publish/subscribe separation and reserved namespace restrictions.
 Registrations also include HA mode grants (`none`, `gateway_managed`, `direct_allowed`) enforced by HA gateway helper endpoints.

@@ -85,6 +85,7 @@ Uses Docker SDK if available and updates install session verification state.
 
 - `POST /api/mqtt/publish`
 - `POST /api/mqtt/gateway/publish`
+- `GET /api/mqtt/registrations`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
 - `POST /api/ha/discovery/state/publish`
@@ -135,6 +136,9 @@ Gateway publish endpoint:
 
 MQTT registration endpoint:
 
+- `GET /api/mqtt/registrations` provides an operator-facing inspection view with:
+  - setup capability summary (`setup_state`, `broker_mode`, `broker_reachable`, `direct_mqtt_supported`, `broker_profile`)
+  - current registration records with access mode, publish/subscribe scopes, HA mode, broker profile, and direct MQTT username (when provisioned)
 - `POST /api/mqtt/registrations` stores or updates approved addon registration with access mode:
   - `gateway_only`
   - `direct_mqtt`

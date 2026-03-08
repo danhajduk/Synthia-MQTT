@@ -1,9 +1,8 @@
-Task #56 :
-Reasoning: Platform-visible topics need strict envelope validation to prevent malformed event/control payloads from entering MQTT flows.
+Task #057 :
+
+Reasoning: Operators needed a single place to inspect active MQTT registrations and setup capabilities without reading runtime files.
+
 What and why:
-- Added centralized platform-envelope validator for platform topics.
-- Enforced schema checks on direct publish and gateway publish paths before broker publish.
-- Required envelope fields: `type`, `source_addon_id`, `timestamp`, `data`.
-- Enforced message type vocabulary: `announce|health|event|state|command|telemetry|policy`.
-- Updated docs for platform envelope validation behavior and HTTP 400 responses.
+Added GET /api/mqtt/registrations to return setup capability summary plus registration records (access mode, scopes, HA mode, broker profile, direct username, health signal) and added a dashboard registration inspector panel wired to this endpoint.
+
 ###########

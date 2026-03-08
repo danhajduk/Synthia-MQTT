@@ -229,6 +229,22 @@
         </section>
 
         <section class="panel">
+          <h2>Registration Inspector</h2>
+          <div class="actions">
+            <button id="refresh-registrations" type="button">Refresh Registrations</button>
+          </div>
+          <div class="summary-grid">
+            <div><span>Setup State</span><strong id="reg-setup-state">-</strong></div>
+            <div><span>Broker Mode</span><strong id="reg-broker-mode">-</strong></div>
+            <div><span>Broker Reachable</span><strong id="reg-broker-reachable">-</strong></div>
+            <div><span>Direct MQTT Supported</span><strong id="reg-direct-supported">-</strong></div>
+            <div><span>Broker Profile</span><strong id="reg-broker-profile">-</strong></div>
+            <div><span>Registration Count</span><strong id="reg-count">-</strong></div>
+          </div>
+          <pre id="registration-output">[]</pre>
+        </section>
+
+        <section class="panel">
           <h2>Test Publish</h2>
           <div class="form-grid">
             <label>Topic <input id="pub-topic" type="text" value="synthia/test" /></label>

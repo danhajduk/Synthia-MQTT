@@ -108,6 +108,7 @@ app.include_router(
     build_mqtt_registration_router(
         registration_store,
         config_store,
+        health_service,
         require_scope(token_validator, "core.register"),
     )
 )

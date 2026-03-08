@@ -496,6 +496,19 @@ async function loadDashboardSummary() {
   $("finish-output").textContent = JSON.stringify({ config, health, install }, null, 2);
 }
 
+async function loadRegistrationInspector() {
+  const response = await api("/api/mqtt/registrations");
+  const setup = response.setup || {};
+  const registrations = Array.isArray(response.registrations) ? response.registrations : [];
+  setText("reg-setup-state", String(setup.setup_state || "-"));
+  setText("reg-broker-mode", String(setup.broker_mode || "-"));
+  setText("reg-broker-reachable", String(setup.broker_reachable ?? "-"));
+  setText("reg-direct-supported", String(setup.direct_mqtt_supported ?? "-"));
+  setText("reg-broker-profile", String(setup.broker_profile || "-"));
+  setText("reg-count", String(registrations.length));
+  $("registration-output").textContent = JSON.stringify(registrations, null, 2);
+}
+
 async function publishTest() {
   const payload = {
     topic: $("pub-topic").value.trim(),
@@ -565,6 +578,7 @@ function bindEvents() {
     run(loadStatusSnapshot);
   });
   $("load-finish").addEventListener("click", () => run(loadDashboardSummary));
+  $("refresh-registrations").addEventListener("click", () => run(loadRegistrationInspector));
   $("test-publish").addEventListener("click", () => run(publishTest));
 
   bindSetupNavigation();
@@ -595,7 +609,7 @@ async function initialize() {
     await loadDoneSummary();
   } else {
     setViewMode("dashboard");
-    await loadDashboardSummary();
+    await Promise.all([loadDashboardSummary(), loadRegistrationInspector()]);
   }
 }
 

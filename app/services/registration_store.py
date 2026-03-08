@@ -76,6 +76,29 @@ class RegistrationStore:
         except Exception:
             return None
 
+    def list_registrations(self) -> list[MqttRegistrationRecord]:
+        data = self._load_all()
+        records: list[MqttRegistrationRecord] = []
+        for raw in data.values():
+            if not isinstance(raw, dict):
+                continue
+            try:
+                records.append(MqttRegistrationRecord.model_validate(raw))
+            except Exception:
+                continue
+        records.sort(key=lambda record: record.updated_at, reverse=True)
+        return records
+
+    def broker_profile_for(self, addon_id: str) -> str:
+        data = self._load_all()
+        raw = data.get(addon_id.strip())
+        if not isinstance(raw, dict):
+            return "unknown"
+        profile = raw.get("acl_mode")
+        if isinstance(profile, str) and profile.strip():
+            return profile.strip()
+        return "unknown"
+
     def _issue_direct_credentials(
         self,
         addon_id: str,

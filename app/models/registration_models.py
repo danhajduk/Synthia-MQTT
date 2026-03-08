@@ -42,3 +42,29 @@ class MqttRegistrationRecord(BaseModel):
 class MqttRegistrationResponse(BaseModel):
     ok: bool
     registration: MqttRegistrationRecord
+
+
+class SetupCapabilitySummary(BaseModel):
+    setup_state: Literal["unconfigured", "configuring", "ready", "error", "degraded"]
+    broker_mode: Literal["external", "embedded"]
+    broker_reachable: bool
+    direct_mqtt_supported: bool
+    broker_profile: Literal["embedded-managed", "external-manual"]
+
+
+class RegistrationInspectionRecord(BaseModel):
+    addon_id: str
+    access_mode: Literal["gateway_only", "direct_mqtt", "both"]
+    ha_mode: Literal["none", "gateway_managed", "direct_allowed"]
+    publish_scopes: list[str]
+    subscribe_scopes: list[str]
+    broker_profile: str
+    health: Literal["healthy", "degraded", "unreachable", "unknown"]
+    direct_mqtt_username: str | None = None
+    updated_at: datetime
+
+
+class MqttRegistrationInspectionResponse(BaseModel):
+    ok: bool
+    setup: SetupCapabilitySummary
+    registrations: list[RegistrationInspectionRecord]
