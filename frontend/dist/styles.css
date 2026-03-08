@@ -225,6 +225,22 @@ button.secondary {
   align-items: start;
 }
 
+.optional-group-card[data-status="failed"] {
+  border-color: #c55a5a;
+}
+
+.optional-group-card[data-status="starting"] {
+  border-color: #b1882f;
+}
+
+.optional-group-card[data-status="active"] {
+  border-color: #2f6b48;
+}
+
+.optional-group-card[data-status="waiting-for-reconcile"] {
+  border-color: #6f756f;
+}
+
 .optional-group-details {
   display: grid;
   gap: 3px;

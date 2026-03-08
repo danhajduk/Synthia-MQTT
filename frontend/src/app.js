@@ -317,11 +317,16 @@ function renderOptionalGroups(install) {
   const active = new Set(normalizeOptionalGroupIds(install.optional_groups_active));
   const starting = new Set(normalizeOptionalGroupIds(install.optional_groups_starting));
   const failed = new Set(normalizeOptionalGroupIds(install.optional_groups_failed));
+  const waiting = requested.filter((id) => !active.has(id) && !starting.has(id) && !failed.has(id));
+  const mismatch = requested.filter((id) => !active.has(id));
   const pending = Boolean(install.optional_groups_pending_reconcile);
   const requestedList = requested.length ? requested.join(", ") : "none";
   const activeList = active.size ? Array.from(active).join(", ") : "none";
+  const startingList = starting.size ? Array.from(starting).join(", ") : "none";
   const failedList = failed.size ? Array.from(failed).join(", ") : "none";
-  const summary = `Requested: ${requestedList} | Active: ${activeList} | Failed: ${failedList} | Pending: ${pending}`;
+  const waitingList = waiting.length ? waiting.join(", ") : "none";
+  const mismatchList = mismatch.length ? mismatch.join(", ") : "none";
+  const summary = `Requested: ${requestedList} | Active: ${activeList} | Starting: ${startingList} | Waiting: ${waitingList} | Failed: ${failedList} | Mismatch: ${mismatchList} | Pending: ${pending}`;
   setText("optional-groups-summary", summary);
   setText("dash-optional-groups-summary", summary);
   state.optionalGroups.requested = requested;
@@ -359,6 +364,7 @@ function renderOptionalGroups(install) {
         : requested.includes(group.id)
           ? "waiting for reconcile"
             : "base-only";
+      card.dataset.status = status.replaceAll(" ", "-");
       details.innerHTML = `
         <strong>${group.name}</strong>
         <span>${group.description}</span>
@@ -394,6 +400,16 @@ async function saveOptionalGroups() {
     "dash-optional-groups-result",
     `Optional groups saved: ${response.requested_group_ids.join(", ") || "none"} (${pending}).`
   );
+  await loadStatusSnapshot();
+}
+
+async function resetOptionalGroups() {
+  const response = await api("/api/install/optional-groups/reset", "POST", {});
+  const pending = response.pending_reconcile
+    ? "Reset requested; supervisor reconcile pending."
+    : "Reset complete; base-only deployment requested.";
+  setResult("optional-groups-result", pending);
+  setResult("dash-optional-groups-result", pending);
   await loadStatusSnapshot();
 }
 
@@ -760,7 +776,9 @@ function bindEvents() {
 
   $("refresh-dashboard").addEventListener("click", () => run(loadStatusSnapshot));
   $("save-optional-groups").addEventListener("click", () => run(saveOptionalGroups));
+  $("reset-optional-groups").addEventListener("click", () => run(resetOptionalGroups));
   $("dash-save-optional-groups").addEventListener("click", () => run(saveOptionalGroups));
+  $("dash-reset-optional-groups").addEventListener("click", () => run(resetOptionalGroups));
   $("open-setup").addEventListener("click", () => {
     setViewMode("setup");
     setStep(1);
