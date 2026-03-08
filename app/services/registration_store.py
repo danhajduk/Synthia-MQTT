@@ -10,7 +10,9 @@ from app.models.registration_models import (
     DirectMqttCredentials,
     MqttRegistrationRecord,
     MqttRegistrationRequest,
+    RegistrationPermissions,
 )
+from app.services.topic_permissions import realize_topic_permissions
 
 
 class RegistrationStore:
@@ -18,11 +20,13 @@ class RegistrationStore:
         base_dir = Path(__file__).resolve().parents[2]
         self._path = path or (base_dir / "runtime" / "mqtt_registrations.json")
         self._seed_path = base_dir / "runtime" / "mqtt_credential_seed"
+        self._base_dir = base_dir
 
-    def upsert(self, request: MqttRegistrationRequest) -> MqttRegistrationRecord:
+    def upsert(self, request: MqttRegistrationRequest, broker_mode: str = "external") -> MqttRegistrationRecord:
         data = self._load_all()
         addon_id = request.addon_id.strip()
         existing = data.get(addon_id, {})
+        realized = realize_topic_permissions(addon_id, request.publish_topics, request.subscribe_topics)
 
         direct_credentials: DirectMqttCredentials | None = None
         credential_meta = existing.get("credential_meta") if isinstance(existing, dict) else None
@@ -39,8 +43,12 @@ class RegistrationStore:
             addon_id=addon_id,
             status="approved",
             access_mode=request.access_mode,
-            publish_topics=[topic.strip() for topic in request.publish_topics if topic.strip()],
-            subscribe_topics=[topic.strip() for topic in request.subscribe_topics if topic.strip()],
+            publish_topics=realized.publish,
+            subscribe_topics=realized.subscribe,
+            permissions=RegistrationPermissions(
+                publish=realized.publish,
+                subscribe=realized.subscribe,
+            ),
             capabilities=request.capabilities,
             direct_mqtt=direct_credentials,
             updated_at=datetime.now(timezone.utc),
@@ -48,9 +56,24 @@ class RegistrationStore:
         payload = record.model_dump(mode="json")
         if credential_meta is not None:
             payload["credential_meta"] = credential_meta
+        payload["acl_mode"] = "embedded-generated" if broker_mode == "embedded" else "external-manual"
         data[record.addon_id] = payload
         self._save_all(data)
+        if broker_mode == "embedded":
+            self._write_embedded_acl(record)
+        else:
+            self._write_external_acl_note(record)
         return record
+
+    def get_registration(self, addon_id: str) -> MqttRegistrationRecord | None:
+        data = self._load_all()
+        raw = data.get(addon_id.strip())
+        if not isinstance(raw, dict):
+            return None
+        try:
+            return MqttRegistrationRecord.model_validate(raw)
+        except Exception:
+            return None
 
     def _issue_direct_credentials(
         self,
@@ -99,3 +122,22 @@ class RegistrationStore:
     def _save_all(self, payload: dict[str, dict[str, object]]) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+    def _write_embedded_acl(self, record: MqttRegistrationRecord) -> None:
+        acl_dir = self._base_dir / "runtime" / "broker" / "acl_generated"
+        acl_dir.mkdir(parents=True, exist_ok=True)
+        lines = [f"user addon_{record.addon_id}_mqtt"]
+        lines.extend(f"topic write {topic}" for topic in record.permissions.publish)
+        lines.extend(f"topic read {topic}" for topic in record.permissions.subscribe)
+        (acl_dir / f"{record.addon_id}.acl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    def _write_external_acl_note(self, record: MqttRegistrationRecord) -> None:
+        note_dir = self._base_dir / "runtime" / "broker" / "external_acl_notes"
+        note_dir.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "addon_id": record.addon_id,
+            "publish": record.permissions.publish,
+            "subscribe": record.permissions.subscribe,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        (note_dir / f"{record.addon_id}.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")

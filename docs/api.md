@@ -99,6 +99,14 @@ MQTT registration endpoint:
   - `both`
 - request flag `reprovision=true` rotates direct MQTT credential version for `direct_mqtt`/`both` registrations.
 - direct modes return stable broker credentials (`username`, `password`) derived from persisted local credential metadata.
+- registration now realizes effective ACL permissions:
+  - separate `permissions.publish` and `permissions.subscribe`
+  - publish to reserved namespaces is rejected
+  - publish topics must stay in `synthia/addons/<addon_id>/...`
+  - subscribe topics must be addon-owned or reserved namespace topics
+- broker mode output behavior:
+  - embedded mode writes generated ACL snippets under `runtime/broker/acl_generated/`
+  - external mode writes operator notes under `runtime/broker/external_acl_notes/`
 
 Operational publish routes are blocked until setup state is complete:
 

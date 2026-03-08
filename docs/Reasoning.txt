@@ -1,9 +1,10 @@
-Task #49 :
-Reasoning: Direct MQTT registrations need stable long-term credentials without storing plaintext secrets in persisted records; reprovision must rotate credentials deterministically.
+Task #50 :
+Reasoning: Registration provisioning needs explicit topic-scope realization so publish/subscribe permissions are enforceable and broker-mode outputs are prepared for embedded or external workflows.
 What and why:
-- Extended MQTT registration request with `reprovision` flag.
-- Added direct credential response model (`username`, `password`) for direct access modes.
-- Implemented deterministic credential derivation from persisted local seed + version counter and stored only credential metadata (`username`, `version`, `password_hash`).
-- Implemented reprovision rotation by incrementing credential version.
-- Updated docs to describe direct credential provisioning and reprovision behavior.
+- Added topic-permission realization with reserved namespace publish restrictions and addon-owned namespace enforcement.
+- Extended MQTT registration record with explicit `permissions.publish` and `permissions.subscribe`.
+- Added broker-mode-aware ACL output:
+  - embedded: generated ACL snippets in `runtime/broker/acl_generated/`
+  - external: operator note files in `runtime/broker/external_acl_notes/`
+- Wired registration API to current broker mode and return 400 for invalid topic scopes.
 ###########

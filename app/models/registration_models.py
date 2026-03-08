@@ -20,12 +20,18 @@ class DirectMqttCredentials(BaseModel):
     password: str
 
 
+class RegistrationPermissions(BaseModel):
+    publish: list[str]
+    subscribe: list[str]
+
+
 class MqttRegistrationRecord(BaseModel):
     addon_id: str
     status: Literal["approved"]
     access_mode: Literal["gateway_only", "direct_mqtt", "both"]
     publish_topics: list[str]
     subscribe_topics: list[str]
+    permissions: RegistrationPermissions
     capabilities: dict[str, object]
     direct_mqtt: DirectMqttCredentials | None = None
     updated_at: datetime

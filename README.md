@@ -79,6 +79,7 @@ For external broker mode, `POST /api/install/apply` requires a prior successful
 
 `POST /api/mqtt/registrations` supports `gateway_only`, `direct_mqtt`, and `both` access modes.
 Direct modes provision stable long-term broker credentials and support rotation with `reprovision=true`.
+Registration applies ACL/topic realization with publish/subscribe separation and reserved namespace restrictions.
 
 ## Optional Service-Token Auth
 
