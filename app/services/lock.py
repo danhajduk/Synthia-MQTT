@@ -7,3 +7,9 @@ def broker_lock(runtime_root: Path) -> FileLock:
     lock_dir = runtime_root / "locks"
     lock_dir.mkdir(parents=True, exist_ok=True)
     return FileLock(str(lock_dir / "broker.lock"), timeout=10)
+
+
+def state_file_lock(path: Path, timeout_s: int = 10) -> FileLock:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_suffix(f"{path.suffix}.lock")
+    return FileLock(str(lock_path), timeout=timeout_s)

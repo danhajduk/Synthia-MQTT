@@ -102,6 +102,7 @@ Addon optional docker-group requests are persisted into desired state (no compos
   - file lock (`*.lock`) + atomic replace write
   - unrelated JSON fields preserved
   - requested IDs stored under `runtime.optional_docker_groups.requested`
+  - reusable path/IO helper is centralized in `app/services/mounted_state_store.py`
 
 Runtime feedback path resolution:
 
@@ -112,3 +113,8 @@ Runtime feedback path resolution:
 Runtime feedback consumed by install status/UI:
 
 - requested, active, starting, failed, and pending reconcile state.
+
+Pre-reconcile asset preparation:
+
+- selected optional groups get runtime assets prepared under `runtime/optional_groups/<group_id>/`
+- deselected groups are cleaned up during reset/reconfigure

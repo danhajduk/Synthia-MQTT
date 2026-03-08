@@ -50,6 +50,7 @@ Current capability values:
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
 - `POST /api/install/optional-groups`
+- `POST /api/install/optional-groups/reset`
 - `POST /api/install/register-core`
 - `POST /api/install/reset`
 
@@ -103,6 +104,8 @@ Runtime feedback is read from `runtime.json` fields:
 - `runtime.optional_docker_groups.starting`
 - `runtime.optional_docker_groups.failed`
 - `runtime.optional_docker_groups.pending_reconcile`
+
+`POST /api/install/optional-groups/reset` clears requested optional group IDs (base-only reset) and returns current pending-reconcile flag.
 
 ## Broker admin route
 

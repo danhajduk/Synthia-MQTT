@@ -85,9 +85,21 @@ class RegressionGuardsTest(unittest.TestCase):
     def test_optional_group_desired_write_uses_atomic_locking(self) -> None:
         config_store = Path(__file__).resolve().parents[1] / "app" / "services" / "config_store.py"
         text = config_store.read_text(encoding="utf-8")
-        self.assertIn("FileLock", text)
-        self.assertIn("atomic_write(", text)
+        self.assertIn("MountedStateStore", text)
         self.assertIn("_write_desired_optional_groups", text)
+
+    def test_mounted_state_store_has_path_abstraction(self) -> None:
+        state_store = Path(__file__).resolve().parents[1] / "app" / "services" / "mounted_state_store.py"
+        text = state_store.read_text(encoding="utf-8")
+        self.assertIn("SYNTHIA_DESIRED_STATE_PATH", text)
+        self.assertIn("SYNTHIA_RUNTIME_STATE_PATH", text)
+        self.assertIn("state_file_lock", text)
+        self.assertIn("atomic_write", text)
+
+    def test_optional_group_reset_route_exists(self) -> None:
+        install_workflow = Path(__file__).resolve().parents[1] / "app" / "api" / "install_workflow.py"
+        text = install_workflow.read_text(encoding="utf-8")
+        self.assertIn('"/optional-groups/reset"', text)
 
 
 if __name__ == "__main__":

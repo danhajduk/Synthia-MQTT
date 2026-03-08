@@ -13,6 +13,7 @@ from app.api.mqtt_publish import build_mqtt_publish_router
 from app.api.mqtt_registration import build_mqtt_registration_router
 from app.services.config_store import ConfigStore
 from app.services.mqtt_metrics_store import MqttMetricsStore
+from app.services.mounted_state_store import MountedStateStore
 from app.services.policy_cache import PolicyCache
 from app.services.publish_trace_store import PublishTraceStore
 from app.services.registration_store import RegistrationStore
@@ -43,6 +44,7 @@ class MqttAddonE2ETest(unittest.TestCase):
 
         self.config_store = ConfigStore(config_path=runtime_dir / "config.json")
         self.config_store._base_dir = self.tmp_path  # type: ignore[attr-defined]
+        self.config_store._state_store = MountedStateStore(base_dir=self.tmp_path, addon_id="mqtt")  # type: ignore[attr-defined]
         self.config_store._install_state_path = runtime_dir / "install_state.json"  # type: ignore[attr-defined]
         self.config_store.apply_embedded_runtime = lambda _payload: (True, None)  # type: ignore[method-assign]
 
@@ -130,6 +132,9 @@ class MqttAddonE2ETest(unittest.TestCase):
         desired = json.loads((self.runtime_dir / "desired.json").read_text(encoding="utf-8"))
         self.assertEqual(desired["runtime"]["optional_docker_groups"]["requested"], ["mqtt_tools"])
         self.assertEqual(desired["preserve_me"], {"a": 1})
+        asset_dir = self.runtime_dir / "optional_groups" / "mqtt_tools"
+        self.assertTrue(asset_dir.exists())
+        self.assertTrue((asset_dir / "group.json").exists())
 
         mode = self.client.post(
             "/api/install/mode",
@@ -182,6 +187,15 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(payload["optional_groups_failed"], [])
         self.assertTrue(payload["optional_groups_pending_reconcile"])
         self.assertEqual(payload["optional_groups_reconcile_state"], "starting")
+
+    def test_optional_group_reset_reconfigures_back_to_base_only(self) -> None:
+        self.client.post("/api/install/optional-groups", json={"requested_group_ids": ["mqtt_tools"]})
+        reset = self.client.post("/api/install/optional-groups/reset", json={})
+        self.assertEqual(reset.status_code, 200)
+        self.assertEqual(reset.json()["requested_group_ids"], [])
+        desired = json.loads((self.runtime_dir / "desired.json").read_text(encoding="utf-8"))
+        self.assertEqual(desired["runtime"]["optional_docker_groups"]["requested"], [])
+        self.assertFalse((self.runtime_dir / "optional_groups" / "mqtt_tools").exists())
 
     def test_embedded_flow_registration_and_acl_realization(self) -> None:
         apply_embedded = self.client.post(

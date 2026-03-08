@@ -118,6 +118,14 @@ def build_install_workflow_router(
     repo_root = Path(__file__).resolve().parents[2]
     supported_optional_groups = MANIFEST_OPTIONAL_DOCKER_GROUPS
     supported_optional_group_ids = {group.id for group in supported_optional_groups}
+    supported_optional_group_map = {
+        group.id: {
+            "name": group.name,
+            "compose_file": group.compose_file,
+            "setup_required": group.setup_required,
+        }
+        for group in supported_optional_groups
+    }
 
     @router.get("/status", response_model=InstallStatusResponse)
     def get_status() -> InstallStatusResponse:
@@ -214,7 +222,25 @@ def build_install_workflow_router(
     ) -> OptionalGroupSelectionResponse:
         updated = config_store.set_requested_optional_groups(
             requested_group_ids=payload.requested_group_ids,
-            supported_group_ids=supported_optional_group_ids,
+            supported_groups=supported_optional_group_map,
+        )
+        requested = [str(group_id) for group_id in updated.get("optional_groups_requested", []) if str(group_id)]
+        runtime_feedback = config_store.get_runtime_optional_groups_feedback()
+        active = [str(group_id) for group_id in runtime_feedback.get("active", []) if str(group_id)]
+        pending_from_runtime = runtime_feedback.get("pending_reconcile")
+        return OptionalGroupSelectionResponse(
+            ok=True,
+            requested_group_ids=requested,
+            pending_reconcile=bool(pending_from_runtime) if isinstance(pending_from_runtime, bool) else sorted(requested) != sorted(active),
+        )
+
+    @router.post("/optional-groups/reset", response_model=OptionalGroupSelectionResponse)
+    def reset_optional_groups(
+        _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
+    ) -> OptionalGroupSelectionResponse:
+        updated = config_store.set_requested_optional_groups(
+            requested_group_ids=[],
+            supported_groups=supported_optional_group_map,
         )
         requested = [str(group_id) for group_id in updated.get("optional_groups_requested", []) if str(group_id)]
         runtime_feedback = config_store.get_runtime_optional_groups_feedback()

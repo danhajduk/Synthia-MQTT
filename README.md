@@ -64,6 +64,7 @@ open http://localhost:18080/ui/
 - `POST /api/install/test-external`
 - `POST /api/install/apply`
 - `POST /api/install/optional-groups`
+- `POST /api/install/optional-groups/reset`
 - `POST /api/install/register-core`
 - `POST /api/install/reset`
 - `POST /api/broker/restart`
@@ -118,6 +119,7 @@ Platform topic publishes also enforce envelope schema (`type`, `source_addon_id`
 Optional docker groups can be requested from setup/dashboard UI and are persisted through `POST /api/install/optional-groups`
 as desired deployment shape, while base startup remains fully functional with zero optional groups enabled.
 Optional group requests are written atomically to desired state (`runtime.optional_docker_groups.requested`) and runtime feedback is read from `runtime.json` to distinguish requested vs active/starting/failed groups.
+`POST /api/install/optional-groups/reset` resets requested optional groups to base-only deployment intent.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
