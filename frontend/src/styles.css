@@ -43,6 +43,10 @@ body {
   color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
 }
 
+html.in-iframe .hero {
+  display: none;
+}
+
 .banner {
   border-left: 4px solid hsl(var(--color-primary, var(--local-color-primary)));
 }

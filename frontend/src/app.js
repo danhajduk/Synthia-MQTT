@@ -115,6 +115,7 @@ function applyThemeMode(hasCoreTheme) {
   document.documentElement.classList.toggle("core-theme-detected", hasCoreTheme);
   document.documentElement.classList.toggle("core-theme-fallback", !hasCoreTheme);
   setText("theme-mode", hasCoreTheme ? "Theme: Core CSS tokens detected in iframe" : "Theme: local fallback CSS");
+  $("iframe-css-note")?.classList.toggle("hidden", !hasCoreTheme);
 
   document.querySelectorAll(".panel").forEach((element) => {
     element.classList.toggle("card", hasCoreTheme);
@@ -126,6 +127,14 @@ function applyThemeMode(hasCoreTheme) {
 }
 
 function startThemeDetection() {
+  const inIframe = (() => {
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
+  })();
+  document.documentElement.classList.toggle("in-iframe", inIframe);
   applyThemeMode(hasCoreThemeTokens());
   const observer = new MutationObserver(() => {
     applyThemeMode(hasCoreThemeTokens());
@@ -450,6 +459,11 @@ async function loadStatusSnapshot() {
   updateDashboardStatus(install, health);
   renderOptionalGroups(install);
   return { install, health };
+}
+
+async function loadAddonVersion() {
+  const version = await api("/api/addon/version");
+  setText("addon-version", version.version || "-");
 }
 
 async function runTestStep() {
@@ -817,6 +831,7 @@ async function initialize() {
   bindEvents();
   syncModeUI();
   setStep(state.currentStep);
+  await run(loadAddonVersion);
 
   const forceSetup = new URLSearchParams(window.location.search).get("setup") === "1";
   const { install } = await loadStatusSnapshot();
