@@ -55,6 +55,7 @@ Recommended correction:
 
 - Keep Core golden docs unchanged from this repository.
 - Preserve local mitigation by sourcing version dynamically from `manifest.json` in docs/scripts.
+- Upstream correction request draft is maintained in `docs/upstream-golden-change-request.md`.
 
 ### Finding 2: Core API path example boundary ambiguity for addon repo
 

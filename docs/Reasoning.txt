@@ -1,8 +1,8 @@
-Task #067 :
+Task #068 :
 
-Reasoning: Requested local-vs-golden documentation verification requires a refreshed mismatch artifact with explicit current audit scope.
+Reasoning: The only open mismatch is upstream-owned; it needed a concrete handoff artifact so correction can be actioned outside this repository.
 
 What and why:
-Re-verified local docs against golden docs and refreshed `docs/mismatch-report.md` as the current mismatch document, including audit run metadata and reviewed local source-of-truth files. Findings remain unchanged: one upstream-golden open item and zero open local-fixable items.
+Added `docs/upstream-golden-change-request.md` with explicit issue summary, code evidence, and proposed correction for golden `addons.md` version drift; linked this request from `docs/mismatch-report.md` Finding 1.
 
 ###########
