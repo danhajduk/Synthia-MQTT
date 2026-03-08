@@ -112,3 +112,12 @@ What and why:
 Updated `docs/deployment.md` with desired runtime port intent defaults and validation invariants. Updated `docs/mismatch-report.md` Finding 3 status to `mitigated-local` with refreshed code evidence and summary counts.
 
 ###########
+
+Task #082 :
+
+Reasoning: Golden `store.md` and `supervisor.md` updates were requested for compatibility awareness, and local bootstrap-generated artifacts should remain untracked.
+
+What and why:
+Reviewed latest golden `store.md` and `supervisor.md` updates and confirmed local runtime-port intent alignment remains compatible with current supervisor/store contract statements. Added `SynthiaAddons/` to `.gitignore` to prevent local bootstrap output from polluting repository status.
+
+###########
