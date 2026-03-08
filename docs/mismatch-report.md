@@ -2,19 +2,24 @@
 
 Status: Active
 Last Verified: 2026-03-08 (US/Pacific)
-Audit Run: 2026-03-08 10:07 US/Pacific
+Audit Run: 2026-03-08 13:33 US/Pacific
 Compared docs:
 
 - `/home/dan/Projects/Synthia/docs/addons.md`
 - `/home/dan/Projects/Synthia/docs/standalone-addon.md`
 - `/home/dan/Projects/Synthia/docs/api.md`
+- `/home/dan/Projects/Synthia/docs/store.md`
+- `/home/dan/Projects/Synthia/docs/supervisor.md`
 - `/home/dan/Projects/Synthia/docs/Policies/Synthia_Addon_API_and_MQTT_Standard.md`
 
 Local docs reviewed:
 
 - `docs/core.md`
+- `docs/architecture-map.md`
 - `docs/api.md`
 - `docs/deployment.md`
+- `docs/store.md`
+- `docs/supervisor.md`
 
 ## Summary
 
