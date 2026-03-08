@@ -127,6 +127,7 @@ Completed Tasks
 51. Task 51: Implement gateway publish API - Completed on 03/07/2026 21:35
 52. Task 52: Implement lifecycle topic helpers - Completed on 03/07/2026 21:36
 53. Task 53: Implement LWT/offline behavior for managed clients - Completed on 03/07/2026 21:39
+54. Task 54: Add HA discovery mode handling - Completed on 03/07/2026 21:41
 
 ##################################
 Tasks in Progress

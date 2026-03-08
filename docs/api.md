@@ -87,10 +87,13 @@ Uses Docker SDK if available and updates install session verification state.
 - `POST /api/mqtt/gateway/publish`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
+- `POST /api/ha/discovery/state/publish`
 
 HA sensor discovery publishes retained payload to:
 
 - `homeassistant/sensor/{unique_id}/config`
+- request includes `addon_id` and requires registration `ha_mode != none`
+- `POST /api/ha/discovery/state/publish` publishes HA state payloads via gateway using the same HA mode enforcement
 
 Lifecycle topic helpers:
 
@@ -125,6 +128,10 @@ MQTT registration endpoint:
   - `gateway_only`
   - `direct_mqtt`
   - `both`
+- registration includes HA mode grant:
+  - `none`
+  - `gateway_managed`
+  - `direct_allowed`
 - request flag `reprovision=true` rotates direct MQTT credential version for `direct_mqtt`/`both` registrations.
 - direct modes return stable broker credentials (`username`, `password`) derived from persisted local credential metadata.
 - registration now realizes effective ACL permissions:
@@ -183,6 +190,7 @@ Source operations currently reported:
 - successful `POST /api/mqtt/publish`
 - successful `POST /api/mqtt/gateway/publish`
 - successful `POST /api/ha/discovery/sensor`
+- successful `POST /api/ha/discovery/state/publish`
 
 Reporting behavior:
 

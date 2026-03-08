@@ -49,6 +49,7 @@ class RegistrationStore:
                 publish=realized.publish,
                 subscribe=realized.subscribe,
             ),
+            ha_mode=request.ha_mode,
             capabilities=request.capabilities,
             direct_mqtt=direct_credentials,
             updated_at=datetime.now(timezone.utc),

@@ -64,6 +64,7 @@ open http://localhost:18080/ui
 - `POST /api/mqtt/gateway/publish`
 - `POST /api/mqtt/registrations`
 - `POST /api/ha/discovery/sensor`
+- `POST /api/ha/discovery/state/publish`
 
 ## First-Run Setup State
 
@@ -81,6 +82,7 @@ For external broker mode, `POST /api/install/apply` requires a prior successful
 `POST /api/mqtt/registrations` supports `gateway_only`, `direct_mqtt`, and `both` access modes.
 Direct modes provision stable long-term broker credentials and support rotation with `reprovision=true`.
 Registration applies ACL/topic realization with publish/subscribe separation and reserved namespace restrictions.
+Registrations also include HA mode grants (`none`, `gateway_managed`, `direct_allowed`) enforced by HA gateway helper endpoints.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`

@@ -1,8 +1,8 @@
-Task #53 :
-Reasoning: Offline/stale detection should be explicit in retained lifecycle payloads so operators and dependent services can detect stale clients deterministically.
+Task #54 :
+Reasoning: HA discovery/state publishing must be explicitly governed per registration so access is auditable and enforceable by mode.
 What and why:
-- Added freshness metadata to lifecycle health payloads (`last_seen`, `fresh_until`, `stale_after_s`).
-- Added explicit retained LWT offline payload metadata with `offline_reason=lwt`.
-- Refactored MQTT health loop to use configurable heartbeat interval variable and lifecycle helper freshness semantics.
-- Updated README/API docs to describe retained health/offline semantics.
+- Added HA mode grant to registration contract/records: `none`, `gateway_managed`, `direct_allowed`.
+- Updated HA discovery sensor endpoint to require `addon_id` and enforce registration `ha_mode != none`.
+- Added HA gateway state helper endpoint: `POST /api/ha/discovery/state/publish` with same HA mode enforcement.
+- Wired telemetry tracking for HA state publish and updated API/README docs.
 ###########

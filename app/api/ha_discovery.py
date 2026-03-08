@@ -2,10 +2,11 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.models.publish_models import HaDiscoverySensorRequest, MqttPublishResponse
+from app.models.publish_models import HaDiscoverySensorRequest, HaStatePublishRequest, MqttPublishResponse
 from app.services.config_store import ConfigStore
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
+from app.services.registration_store import RegistrationStore
 from app.services.telemetry_reporter import TelemetryReporter
 from app.services.token_auth import ServiceTokenClaims
 
@@ -16,6 +17,7 @@ def build_ha_discovery_router(
     policy_cache: PolicyCache,
     telemetry_reporter: TelemetryReporter,
     config_store: ConfigStore,
+    registration_store: RegistrationStore,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/ha/discovery", tags=["home-assistant"])
 
@@ -34,6 +36,12 @@ def build_ha_discovery_router(
         allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
         if not allowed:
             raise HTTPException(status_code=403, detail=reason or "Policy denied HA discovery publish")
+
+        registration = registration_store.get_registration(request.addon_id)
+        if registration is None:
+            raise HTTPException(status_code=404, detail=f"No registration found for addon_id={request.addon_id}")
+        if registration.ha_mode == "none":
+            raise HTTPException(status_code=403, detail="HA discovery mode is not enabled for this registration")
 
         mqtt_service = mqtt_service_getter()
         if mqtt_service is None:
@@ -60,6 +68,48 @@ def build_ha_discovery_router(
         telemetry_reporter.enqueue_usage(
             consumer_addon_id=claims.sub,
             operation="mqtt.ha.discovery.publish",
+            count=1,
+        )
+        return MqttPublishResponse(ok=True)
+
+    @router.post("/state/publish", response_model=MqttPublishResponse)
+    def publish_gateway_state(
+        request: HaStatePublishRequest,
+        claims: ServiceTokenClaims = Depends(require_discovery_scope),
+    ) -> MqttPublishResponse:
+        install_state = config_store.get_install_session_state()
+        if install_state.get("setup_state") not in {"ready", "degraded"}:
+            raise HTTPException(
+                status_code=409,
+                detail="Setup is not complete. Finish setup before using HA state publish APIs.",
+            )
+
+        allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
+        if not allowed:
+            raise HTTPException(status_code=403, detail=reason or "Policy denied HA state publish")
+
+        registration = registration_store.get_registration(request.addon_id)
+        if registration is None:
+            raise HTTPException(status_code=404, detail=f"No registration found for addon_id={request.addon_id}")
+        if registration.ha_mode == "none":
+            raise HTTPException(status_code=403, detail="HA state mode is not enabled for this registration")
+
+        mqtt_service = mqtt_service_getter()
+        if mqtt_service is None:
+            raise HTTPException(status_code=500, detail="MQTT service unavailable")
+
+        ok = mqtt_service.publish(
+            topic=request.topic.strip(),
+            payload=request.payload,
+            retain=request.retain,
+            qos=request.qos,
+        )
+        if not ok:
+            raise HTTPException(status_code=500, detail="Failed to publish HA state payload")
+
+        telemetry_reporter.enqueue_usage(
+            consumer_addon_id=claims.sub,
+            operation="mqtt.ha.state.publish",
             count=1,
         )
         return MqttPublishResponse(ok=True)

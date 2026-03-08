@@ -12,6 +12,7 @@ class MqttRegistrationRequest(BaseModel):
     publish_topics: list[str] = Field(default_factory=list)
     subscribe_topics: list[str] = Field(default_factory=list)
     capabilities: dict[str, object] = Field(default_factory=dict)
+    ha_mode: Literal["none", "gateway_managed", "direct_allowed"] = "none"
     reprovision: bool = False
 
 
@@ -32,6 +33,7 @@ class MqttRegistrationRecord(BaseModel):
     publish_topics: list[str]
     subscribe_topics: list[str]
     permissions: RegistrationPermissions
+    ha_mode: Literal["none", "gateway_managed", "direct_allowed"]
     capabilities: dict[str, object]
     direct_mqtt: DirectMqttCredentials | None = None
     updated_at: datetime
