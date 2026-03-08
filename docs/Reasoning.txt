@@ -1,8 +1,8 @@
-Task #066 :
+Task #067 :
 
-Reasoning: Local docs were mostly aligned already, but active source-of-truth pages needed explicit coverage of the latest runtime packaging and validation guard changes for completeness.
+Reasoning: Requested local-vs-golden documentation verification requires a refreshed mismatch artifact with explicit current audit scope.
 
 What and why:
-Updated active docs (`docs/core.md`, `docs/api.md`) to reflect manifest packaging requirement, regression guard validation path, and internal health snapshot modeling mapped to API contracts.
+Re-verified local docs against golden docs and refreshed `docs/mismatch-report.md` as the current mismatch document, including audit run metadata and reviewed local source-of-truth files. Findings remain unchanged: one upstream-golden open item and zero open local-fixable items.
 
 ###########

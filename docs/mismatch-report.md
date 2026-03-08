@@ -2,12 +2,19 @@
 
 Status: Active
 Last Verified: 2026-03-07 (US/Pacific)
+Audit Run: 2026-03-07 22:14 US/Pacific
 Compared docs:
 
 - `/home/dan/Projects/Synthia/docs/addons.md`
 - `/home/dan/Projects/Synthia/docs/standalone-addon.md`
 - `/home/dan/Projects/Synthia/docs/api.md`
 - `/home/dan/Projects/Synthia/docs/Policies/Synthia_Addon_API_and_MQTT_Standard.md`
+
+Local docs reviewed:
+
+- `docs/core.md`
+- `docs/api.md`
+- `docs/deployment.md`
 
 ## Summary
 
@@ -84,4 +91,3 @@ Recommended correction:
 
 - `local-fixable`: mismatch can be remediated in this repository only.
 - `golden-upstream`: mismatch exists in golden docs and must be addressed upstream.
-
