@@ -182,6 +182,16 @@ function startThemeDetection() {
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["style", "class"] });
 }
 
+function applyHomeMiniStatusClasses() {
+  document.querySelectorAll(".status-grid > div").forEach((card) => {
+    card.classList.add("home-mini");
+    const title = card.querySelector("span");
+    const value = card.querySelector("strong");
+    title?.classList.add("home-mini-title");
+    value?.classList.add("home-mini-value");
+  });
+}
+
 function saveState() {
   const persist = {
     ...state,
@@ -866,6 +876,7 @@ async function run(action) {
 async function initialize() {
   loadSavedState();
   startThemeDetection();
+  applyHomeMiniStatusClasses();
   fillFieldsFromState();
   bindEvents();
   syncModeUI();

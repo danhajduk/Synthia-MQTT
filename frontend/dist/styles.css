@@ -45,12 +45,6 @@ html.in-iframe .hero {
   margin-bottom: 10px;
 }
 
-.status-grid div {
-  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
-  border-radius: var(--radius-sm, var(--local-radius-sm));
-  padding: 8px;
-}
-
 .status-grid span {
   color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
   display: block;

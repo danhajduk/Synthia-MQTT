@@ -130,6 +130,19 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("THEME_STORAGE_KEY", text)
         self.assertIn("data-theme", text)
 
+    def test_status_cards_use_home_mini_structure(self) -> None:
+        index_html = Path(__file__).resolve().parents[1] / "frontend" / "src" / "index.html"
+        app_js = Path(__file__).resolve().parents[1] / "frontend" / "src" / "app.js"
+        components_css = Path(__file__).resolve().parents[1] / "frontend" / "src" / "theme" / "components.css"
+        html_text = index_html.read_text(encoding="utf-8")
+        js_text = app_js.read_text(encoding="utf-8")
+        css_text = components_css.read_text(encoding="utf-8")
+        self.assertIn("status-grid", html_text)
+        self.assertIn("applyHomeMiniStatusClasses", js_text)
+        self.assertIn(".home-mini", css_text)
+        self.assertIn(".home-mini-title", css_text)
+        self.assertIn(".home-mini-value", css_text)
+
 
 if __name__ == "__main__":
     unittest.main()

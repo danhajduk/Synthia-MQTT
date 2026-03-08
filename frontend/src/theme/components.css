@@ -32,3 +32,31 @@ button:not(.secondary) {
   color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
   background: color-mix(in srgb, hsl(var(--color-panel, var(--local-color-panel))) 78%, white);
 }
+
+.home-mini {
+  border: 2px solid hsl(var(--color-border, var(--local-color-border)));
+  border-radius: var(--radius-md, var(--local-radius-md));
+  background: hsl(var(--color-panel, var(--local-color-panel)));
+  padding: 10px;
+}
+
+.home-mini.warn {
+  border-color: hsl(var(--color-warning, var(--local-color-warning)));
+}
+
+.home-mini.bad {
+  border-color: hsl(var(--color-danger, var(--local-color-danger)));
+}
+
+.home-mini-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
+}
+
+.home-mini-value {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}

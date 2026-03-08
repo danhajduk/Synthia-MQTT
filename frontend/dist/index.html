@@ -9,17 +9,12 @@
   </head>
   <body>
     <main class="layout">
-      <header class="hero">
-        <h1>Synthia MQTT Setup</h1>
-        <p>Unconfigured installs open the setup wizard. Configured installs open the dashboard.</p>
-        <p id="theme-mode" class="result pill">Theme: local fallback CSS</p>
-        <p id="iframe-css-note" class="result pill hidden">Core iframe CSS injection detected. Using shared theme tokens/classes.</p>
-        <p class="result pill">Addon version: <strong id="addon-version">-</strong></p>
-      </header>
-
       <section id="setup-view" class="hidden">
         <section class="panel banner">
           <h2>Install Status</h2>
+          <p class="result pill">Addon version: <strong id="addon-version">-</strong></p>
+          <p id="theme-mode" class="result pill">Theme: local fallback CSS</p>
+          <p id="iframe-css-note" class="result pill hidden">Core iframe CSS injection detected. Using shared theme tokens/classes.</p>
             <div class="status-grid">
               <div><span>Setup State</span><strong id="status-setup-state">-</strong></div>
               <div><span>Setup Guidance</span><strong id="status-setup-guidance">-</strong></div>
