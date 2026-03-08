@@ -18,6 +18,7 @@ const state = {
     baseTopic: "synthia",
     haPrefix: "homeassistant",
     qos: 1,
+    allowUnvalidated: false,
   },
   embedded: {
     allowAnonymous: false,
@@ -117,6 +118,7 @@ function fillFieldsFromState() {
   $("external-base-topic").value = state.external.baseTopic;
   $("external-ha-prefix").value = state.external.haPrefix;
   $("external-qos").value = String(state.external.qos);
+  $("allow-unvalidated").checked = Boolean(state.external.allowUnvalidated);
 
   $("embedded-anon").checked = Boolean(state.embedded.allowAnonymous);
   $("embedded-persist").checked = Boolean(state.embedded.persistence);
@@ -144,6 +146,7 @@ function snapshotFieldsToState() {
   state.external.baseTopic = $("external-base-topic").value.trim() || "synthia";
   state.external.haPrefix = $("external-ha-prefix").value.trim() || "homeassistant";
   state.external.qos = Number($("external-qos").value);
+  state.external.allowUnvalidated = $("allow-unvalidated").checked;
 
   state.embedded.allowAnonymous = $("embedded-anon").checked;
   state.embedded.persistence = $("embedded-persist").checked;
@@ -174,6 +177,7 @@ function syncModeUI() {
   $("external-form").classList.toggle("hidden", mode !== "external");
   $("embedded-form").classList.toggle("hidden", mode !== "embedded");
   $("restart-broker").classList.toggle("hidden", mode !== "embedded");
+  $("allow-unvalidated-wrap").classList.toggle("hidden", mode !== "external");
 
   const registerToggle = $("register-enabled");
   if (mode === "embedded") {
@@ -319,6 +323,7 @@ function buildApplyPayload() {
       base_topic: state.external.baseTopic,
       ha_discovery_prefix: state.external.haPrefix,
       qos_default: state.external.qos,
+      allow_unvalidated: state.external.allowUnvalidated,
     };
   }
   return {
@@ -445,6 +450,7 @@ function resetStateDefaults() {
       baseTopic: "synthia",
       haPrefix: "homeassistant",
       qos: 1,
+      allowUnvalidated: false,
     },
     embedded: {
       allowAnonymous: false,

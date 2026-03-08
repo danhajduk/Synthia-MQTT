@@ -118,11 +118,12 @@ Completed Tasks
 45.2 Task 45.2: Surface managed broker runtime status in setup/dashboard UI shell - Completed on 03/07/2026 21:11
 45. Task 45: Implement built-in Mosquitto container management - Completed on 03/07/2026 21:11
 46.1 Task 46.1: Enforce validated external apply flow with explicit allow_unvalidated override - Completed on 03/07/2026 21:12
+46.2 Task 46.2: Add setup UI control for explicit unvalidated external apply override - Completed on 03/07/2026 21:14
+46. Task 46: Implement external broker configuration and connection test - Completed on 03/07/2026 21:14
 
 ##################################
 Tasks in Progress
 ##################################
-46. Task 46: Implement external broker configuration and connection test
 
 ##################################
 Pending Tasks

@@ -1,9 +1,8 @@
-Task #46.1 :
-Reasoning: Task 46 requires external broker config persistence to be gated by a successful connectivity validation unless operators explicitly override.
+Task #46.2 :
+Reasoning: Operators need an explicit UI control for the backend `allow_unvalidated` override path so default behavior remains safe while still allowing deliberate bypass.
 What and why:
-- Added `allow_unvalidated` to install apply payload.
-- Added external connection signature tracking in install session state (`external_test_ok`, `external_test_signature`).
-- `POST /api/install/test-external` now records successful test signature.
-- `POST /api/install/apply` (external mode) now rejects unvalidated/mismatched configs unless `allow_unvalidated=true`.
-- Updated API/README docs for this validation rule.
+- Added setup apply-step checkbox to allow unvalidated external apply (with warning text).
+- Persisted checkbox state in local setup state and sent `allow_unvalidated` in external apply payload.
+- Hid override control for embedded mode to avoid irrelevant UI noise.
+- Rebuilt frontend distribution assets.
 ###########
