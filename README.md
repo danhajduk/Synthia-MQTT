@@ -62,6 +62,16 @@ open http://localhost:18080/ui
 - `POST /api/mqtt/publish`
 - `POST /api/ha/discovery/sensor`
 
+## First-Run Setup State
+
+`GET /api/install/status` exposes persisted setup readiness:
+
+- `setup_state`: `unconfigured | configuring | ready | error | degraded`
+- `setup_guidance`: next-action hint for operators
+
+Fresh installs remain `unconfigured` until broker mode/config is applied.
+`POST /api/mqtt/publish` and `POST /api/ha/discovery/sensor` return `409` until setup reaches `ready` (or `degraded`).
+
 ## Optional Service-Token Auth
 
 Privileged write endpoints can enforce service-token JWT validation.

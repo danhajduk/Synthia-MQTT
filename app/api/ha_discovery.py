@@ -3,6 +3,7 @@ from typing import Callable
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.publish_models import HaDiscoverySensorRequest, MqttPublishResponse
+from app.services.config_store import ConfigStore
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
 from app.services.telemetry_reporter import TelemetryReporter
@@ -14,6 +15,7 @@ def build_ha_discovery_router(
     require_discovery_scope: Callable[[], ServiceTokenClaims],
     policy_cache: PolicyCache,
     telemetry_reporter: TelemetryReporter,
+    config_store: ConfigStore,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/ha/discovery", tags=["home-assistant"])
 
@@ -22,6 +24,13 @@ def build_ha_discovery_router(
         request: HaDiscoverySensorRequest,
         claims: ServiceTokenClaims = Depends(require_discovery_scope),
     ) -> MqttPublishResponse:
+        install_state = config_store.get_install_session_state()
+        if install_state.get("setup_state") not in {"ready", "degraded"}:
+            raise HTTPException(
+                status_code=409,
+                detail="Setup is not complete. Finish setup before using HA discovery publish APIs.",
+            )
+
         allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
         if not allowed:
             raise HTTPException(status_code=403, detail=reason or "Policy denied HA discovery publish")

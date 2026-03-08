@@ -48,6 +48,14 @@ Implemented install modes:
 - `external`: stores broker host/port/tls/credentials and reloads MQTT client
 - `embedded`: writes broker files under `runtime/broker/` and attempts `docker compose up` for `mosquitto` + `mqtt-addon`
 
+`GET /api/install/status` now reports first-run setup readiness fields:
+
+- `setup_state`: `unconfigured | configuring | ready | error | degraded`
+- `setup_guidance`: operator-facing guidance for next action
+- `direct_mqtt_supported`: expected direct MQTT support for selected mode
+
+Fresh installs report `setup_state=unconfigured` until mode/config is applied.
+
 ## Broker admin route
 
 - `POST /api/broker/restart`
@@ -62,6 +70,10 @@ Uses Docker SDK if available and updates install session verification state.
 HA sensor discovery publishes retained payload to:
 
 - `homeassistant/sensor/{unique_id}/config`
+
+Operational publish routes are blocked until setup state is complete:
+
+- when setup state is not `ready` or `degraded`, publish/discovery returns HTTP `409`
 
 ## Service-token auth for privileged operations
 

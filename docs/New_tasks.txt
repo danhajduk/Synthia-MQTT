@@ -108,11 +108,336 @@ Completed Tasks
 41.5 Task 41.5: Add release-gate checklist step requiring golden-doc alignment recheck and mismatch report refresh before publishing a new addon version - Completed on 03/07/2026 19:59
 41. Task 41: Establish continuous golden-document alignment controls for this repository - Completed on 03/07/2026 19:59
 42. Task 42: Re-verify and align local documentation with current implemented repository state - Completed on 03/07/2026 20:06
+43.1 Task 43.1: Persist setup_state lifecycle and enforce readiness gating on operational publish APIs - Completed on 03/07/2026 21:04
 
 ##################################
 Tasks in Progress
 ##################################
+43. Task 43: Add first-run setup state and setup UI shell
 
 ##################################
 Pending Tasks
 ##################################
+
+# MQTT Addon Tasks — Implementation Roadmap
+Start at **Task 43**.
+check the synthia_mqtt_addon_blueprint.md for reference
+
+## Working Rules
+For every task below:
+- document and commit after each step
+- sign off completed_task.txt with date and summary of work done
+- run the project rebuild script when finished
+- ensure completed_task.txt remains gitignored
+
+---
+
+## Task 43 — Add first-run setup state and setup UI shell
+Create the initial setup flow for the MQTT addon.
+
+### Scope
+- add persisted setup state:
+  - `unconfigured`
+  - `configuring`
+  - `ready`
+  - `error`
+  - `degraded`
+- expose setup UI after install
+- block normal operational state until setup is completed
+- show current status and guidance
+
+### Acceptance
+- fresh install lands in setup UI
+- addon reports unconfigured until broker mode is selected and saved
+
+---
+
+## Task 44 — Add broker mode selection UI and persistence
+Support choosing built-in or external broker.
+
+### Scope
+- setup UI option for:
+  - built-in managed Mosquitto
+  - external broker
+- persist selected broker mode
+- surface whether direct MQTT support is expected in the chosen mode
+
+### Acceptance
+- chosen broker mode persists across restart
+- UI clearly reflects selected mode
+
+---
+
+## Task 45 — Implement built-in Mosquitto container management
+Add managed built-in broker support.
+
+### Scope
+- start/stop/reconcile Mosquitto container using stable name:
+  - `synthia-addon-mqtt-mosquitto`
+- generate runtime config files
+- expose health/status for the managed broker
+- ensure addon can connect to managed broker
+
+### Acceptance
+- addon can bring up and monitor its managed broker container reliably
+
+---
+
+## Task 46 — Implement external broker configuration and connection test
+Make external broker setup actually usable.
+
+### Scope
+- store external broker settings:
+  - host
+  - port
+  - TLS
+  - username/password
+  - optional base topic
+- add connection test from setup UI
+- save only validated config unless explicitly allowed otherwise
+
+### Acceptance
+- operator can test and save external broker connection successfully
+
+---
+
+## Task 47 — Add broker health service and readiness reporting
+Build the broker health layer.
+
+### Scope
+- report addon health and broker health separately
+- expose health endpoint/API response with:
+  - setup state
+  - broker mode
+  - broker reachable/unreachable
+  - direct MQTT supported yes/no
+- support degraded/error states cleanly
+
+### Acceptance
+- Core/Supervisor can tell whether MQTT addon is configured and healthy
+
+---
+
+## Task 48 — Implement MQTT registration API
+Create the addon-side provisioning endpoint used by Core.
+
+### Scope
+- receive approved registration requests from Core
+- validate request contract
+- create/update registration records
+- support access modes:
+  - gateway only
+  - direct MQTT
+  - both
+
+### Acceptance
+- MQTT addon can accept and persist Core-approved registration requests
+
+---
+
+## Task 49 — Implement long-term credential provisioning
+Provision broker credentials for direct MQTT clients.
+
+### Scope
+- generate long-term username/password credentials
+- keep broker identity separate from addon identity
+- persist credential records securely
+- support reprovision/update path
+
+### Acceptance
+- direct MQTT registrations receive stable broker credentials
+
+---
+
+## Task 50 — Implement ACL/topic permission realization
+Translate approved topic scopes into broker permissions.
+
+### Scope
+- realize separate publish and subscribe scopes
+- enforce reserved namespace restrictions
+- support addon-owned topic scopes
+- prepare for built-in broker ACL output and external manual/adapter-aware modes
+
+### Acceptance
+- provisioned registrations have effective publish/subscribe limits
+
+---
+
+## Task 51 — Implement gateway publish API
+Add the HTTP/API publish path.
+
+### Scope
+- accept structured publish requests
+- support standard JSON envelope payloads
+- support QoS/retain defaults
+- publish through addon-managed broker connection
+- return useful success/error responses
+
+### Acceptance
+- clients can publish via API without direct broker credentials
+
+---
+
+## Task 52 — Implement lifecycle topic helpers
+Make announce and health first-class.
+
+### Scope
+- helper logic for:
+  - `synthia/addons/<addon_id>/announce`
+  - `synthia/addons/<addon_id>/health`
+- retained + QoS 1 defaults
+- periodic health heartbeat support
+- reconnect republish behavior
+
+### Acceptance
+- MQTT-enabled addons can rely on standard lifecycle topic handling patterns
+
+---
+
+## Task 53 — Implement LWT/offline behavior for managed clients
+Handle stale health honestly.
+
+### Scope
+- support last will/offline behavior where applicable
+- ensure health timestamps/freshness are included
+- document retained health semantics
+
+### Acceptance
+- offline/stale clients are detectable without guesswork
+
+---
+
+## Task 54 — Add HA discovery mode handling
+Support governed HA MQTT integration.
+
+### Scope
+- support HA modes:
+  - none
+  - gateway-managed
+  - direct-allowed
+- persist granted HA mode per registration
+- add gateway helper endpoints for discovery/state publishing
+
+### Acceptance
+- HA discovery capability is explicit and governed
+
+---
+
+## Task 55 — Add topic validation layer
+Start Phase 2 governance with topic validation.
+
+### Scope
+- validate topic ownership rules
+- reject illegal reserved namespace use
+- validate standard lifecycle topic patterns
+- surface clear operator/developer errors
+
+### Acceptance
+- bad topic contracts are rejected early and clearly
+
+---
+
+## Task 56 — Add schema validation for platform envelopes
+Validate platform-visible payload structure.
+
+### Scope
+- validate required JSON envelope fields for platform topics
+- support message types:
+  - announce
+  - health
+  - event
+  - state
+  - command
+  - telemetry
+  - policy
+- allow flexibility later for explicitly private traffic
+
+### Acceptance
+- invalid platform payloads are detected before publish
+
+---
+
+## Task 57 — Add registration inspection API/UI views
+Make registrations observable.
+
+### Scope
+- list current MQTT registrations
+- show access mode, scopes, HA mode, health, broker profile
+- include setup capability summary
+
+### Acceptance
+- operator can inspect who has MQTT access and what they are allowed to do
+
+---
+
+## Task 58 — Add tracing/debugging for publish attempts
+Add operator sanity tools.
+
+### Scope
+- store recent publish attempts and failures
+- include message IDs/correlation IDs when present
+- surface denied publishes and provisioning errors
+
+### Acceptance
+- debugging broker and contract issues is no longer blindfolded
+
+---
+
+## Task 59 — Add topic explorer UI
+Provide operator-facing topic visibility.
+
+### Scope
+- show known topic families
+- show reserved vs addon-owned namespaces
+- show lifecycle topics and registration mappings
+- focus on safe summaries, not full uncontrolled packet snooping at first
+
+### Acceptance
+- UI gives useful topic insight without becoming a chaos console
+
+---
+
+## Task 60 — Add MQTT usage metrics
+Measure the platform.
+
+### Scope
+- publish counts
+- denied publishes
+- reconnect counts
+- active registrations
+- per-addon usage summaries
+- broker mode summary
+
+### Acceptance
+- operator can see MQTT usage and health trends
+
+---
+
+## Task 61 — Add external broker advanced/manual direct-access model
+Handle the honest hard case cleanly.
+
+### Scope
+- support external broker mode with:
+  - gateway-only
+  - advanced/manual direct access
+- allow recording manual external credential mapping when Synthia cannot provision broker-side users
+- surface capability limitations clearly in setup UI
+
+### Acceptance
+- external broker mode has explicit rules instead of fake magic
+
+---
+
+## Task 62 — Add end-to-end tests for setup, registration, and publish flows
+Protect the whole stack.
+
+### Scope
+- test setup states
+- test built-in broker flow
+- test external broker flow
+- test registration and ACL realization
+- test gateway publish
+- test reserved namespace enforcement
+
+### Acceptance
+- MQTT addon test coverage protects both setup and governance behavior

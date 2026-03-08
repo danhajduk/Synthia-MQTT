@@ -1,7 +1,8 @@
-Task #42 :
-Reasoning: Re-verify local documentation against implemented repository behavior and remediate any local drift only.
+Task #43.1 :
+Reasoning: Introduce explicit first-run setup state in persisted install session data and enforce setup completion before operational publish APIs are usable.
 What and why:
-- Ran `scripts/check-doc-alignment.sh` and manual code-to-doc route/capability/auth/policy/telemetry checks across `app/`, `README.md`, and `docs/*`.
-- Confirmed local docs already match implemented behavior; no local code/doc remediation was required.
-- Recorded this verification task and completion in task tracking files to keep local alignment status explicit.
+- Extended install status contract with `setup_state`, `setup_guidance`, and `direct_mqtt_supported`.
+- Persisted `setup_state` in install session state and wired state transitions across install apply/reset paths.
+- Added API gating so MQTT publish and HA discovery publish return HTTP 409 until setup reaches `ready`/`degraded`.
+- Updated local docs (`README.md`, `docs/api.md`) to reflect new status fields and gating behavior.
 ###########

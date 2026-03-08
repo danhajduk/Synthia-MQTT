@@ -96,6 +96,7 @@ class ConfigStore:
         raw = self._load_install_session_state()
         if isinstance(raw, dict):
             state["mode"] = raw.get("mode", state["mode"])
+            state["setup_state"] = raw.get("setup_state", state["setup_state"])
             state["configured"] = bool(raw.get("configured", state["configured"]))
             state["verified"] = bool(raw.get("verified", state["verified"]))
             state["registered_to_core"] = bool(raw.get("registered_to_core", state["registered_to_core"]))
@@ -110,7 +111,7 @@ class ConfigStore:
 
     def update_install_session_state(self, **updates: Any) -> dict[str, Any]:
         state = self.get_install_session_state()
-        for key in ("mode", "configured", "verified", "registered_to_core", "last_error"):
+        for key in ("mode", "setup_state", "configured", "verified", "registered_to_core", "last_error"):
             if key in updates:
                 state[key] = updates[key]
         self._save_install_session_state(state)
@@ -217,6 +218,7 @@ class ConfigStore:
     def _default_install_session_state() -> dict[str, Any]:
         return {
             "mode": "external",
+            "setup_state": "unconfigured",
             "configured": False,
             "verified": False,
             "registered_to_core": False,

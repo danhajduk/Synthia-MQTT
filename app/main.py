@@ -71,6 +71,7 @@ app.include_router(
         require_scope(token_validator, "mqtt.publish"),
         policy_cache,
         telemetry_reporter,
+        config_store,
     )
 )
 app.include_router(
@@ -79,6 +80,7 @@ app.include_router(
         require_scope(token_validator, "mqtt.publish"),
         policy_cache,
         telemetry_reporter,
+        config_store,
     )
 )
 app.include_router(

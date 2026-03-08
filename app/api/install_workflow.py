@@ -48,6 +48,18 @@ def _normalize_http_url(url_value: str) -> str:
     return normalized
 
 
+def _setup_guidance(setup_state: str) -> str:
+    if setup_state == "unconfigured":
+        return "Select broker mode and apply configuration in setup wizard."
+    if setup_state == "configuring":
+        return "Setup is in progress. Complete apply and verification steps."
+    if setup_state == "ready":
+        return "Setup is complete and runtime is ready."
+    if setup_state == "degraded":
+        return "Setup completed but broker connectivity is degraded. Check broker reachability and credentials."
+    return "Setup is in error state. Review last_error and re-run setup."
+
+
 def build_install_workflow_router(
     config_store: ConfigStore,
     health_service: HealthService,
@@ -64,12 +76,25 @@ def build_install_workflow_router(
         install_state = config_store.get_install_session_state()
         health = health_service.snapshot()
         last_error = health.last_error or install_state.get("last_error")
+        setup_state = str(install_state.get("setup_state") or "unconfigured")
+
+        if not bool(install_state["configured"]):
+            setup_state = "unconfigured"
+        elif setup_state == "ready" and (not health.mqtt_connected or bool(last_error)):
+            setup_state = "degraded"
+        elif setup_state not in {"unconfigured", "configuring", "ready", "error", "degraded"}:
+            setup_state = "error"
+
+        direct_mqtt_supported = install_state["mode"] == "embedded"
 
         return InstallStatusResponse(
             mode=install_state["mode"],
+            setup_state=setup_state,
+            setup_guidance=_setup_guidance(setup_state),
             configured=bool(install_state["configured"]),
             verified=bool(install_state["verified"]),
             registered_to_core=bool(install_state["registered_to_core"]),
+            direct_mqtt_supported=direct_mqtt_supported,
             docker_sock_available=False,
             embedded_profile_required=False,
             broker_running=False,
@@ -99,39 +124,74 @@ def build_install_workflow_router(
         payload: InstallApplyRequest,
         _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
     ) -> InstallApplyResponse:
+        config_store.update_install_session_state(
+            mode=payload.mode,
+            setup_state="configuring",
+            configured=False,
+            verified=False,
+            last_error=None,
+        )
         try:
             config_store.apply_install_config(payload)
         except ValueError as exc:
-            config_store.update_install_session_state(mode=payload.mode, configured=False, last_error=str(exc))
+            config_store.update_install_session_state(
+                mode=payload.mode,
+                setup_state="error",
+                configured=False,
+                verified=False,
+                last_error=str(exc),
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except Exception as exc:  # pragma: no cover
             config_store.update_install_session_state(
                 mode=payload.mode,
+                setup_state="error",
                 configured=False,
+                verified=False,
                 last_error="Failed to persist install config",
             )
             raise HTTPException(status_code=500, detail="Failed to persist install config") from exc
 
         if payload.mode == "external":
             reload_mqtt_service()
-            config_store.update_install_session_state(mode="external", configured=True, last_error=None)
+            config_store.update_install_session_state(
+                mode="external",
+                setup_state="ready",
+                configured=True,
+                verified=True,
+                last_error=None,
+            )
             return InstallApplyResponse(ok=True)
 
         try:
             ok, reason = config_store.apply_embedded_runtime(payload)
         except ValueError as exc:
-            config_store.update_install_session_state(mode="embedded", configured=False, last_error=str(exc))
+            config_store.update_install_session_state(
+                mode="embedded",
+                setup_state="error",
+                configured=False,
+                verified=False,
+                last_error=str(exc),
+            )
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         except Exception as exc:  # pragma: no cover
             config_store.update_install_session_state(
                 mode="embedded",
+                setup_state="error",
                 configured=False,
+                verified=False,
                 last_error="Failed to apply embedded broker runtime",
             )
             raise HTTPException(status_code=500, detail="Failed to apply embedded broker runtime") from exc
 
         if ok:
-            config_store.update_install_session_state(mode="embedded", configured=True, verified=True, last_error=None)
+            config_store.update_install_session_state(
+                mode="embedded",
+                setup_state="ready",
+                configured=True,
+                verified=True,
+                last_error=None,
+            )
             return InstallApplyResponse(ok=True)
 
         operator_action = (
@@ -145,7 +205,13 @@ def build_install_workflow_router(
                 "Docker CLI is not available in addon runtime. "
                 "Run the operator action command on host terminal."
             )
-        config_store.update_install_session_state(mode="embedded", configured=False, verified=False, last_error=reason)
+        config_store.update_install_session_state(
+            mode="embedded",
+            setup_state="error",
+            configured=False,
+            verified=False,
+            last_error=reason,
+        )
         return InstallApplyResponse(
             ok=False,
             requires_operator_action=True,

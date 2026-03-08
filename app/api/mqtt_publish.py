@@ -3,6 +3,7 @@ from typing import Callable
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.publish_models import MqttPublishRequest, MqttPublishResponse
+from app.services.config_store import ConfigStore
 from app.services.mqtt_client import MqttClientService
 from app.services.policy_cache import PolicyCache
 from app.services.telemetry_reporter import TelemetryReporter
@@ -14,6 +15,7 @@ def build_mqtt_publish_router(
     require_publish_scope: Callable[[], ServiceTokenClaims],
     policy_cache: PolicyCache,
     telemetry_reporter: TelemetryReporter,
+    config_store: ConfigStore,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/mqtt", tags=["mqtt"])
 
@@ -22,6 +24,13 @@ def build_mqtt_publish_router(
         request: MqttPublishRequest,
         claims: ServiceTokenClaims = Depends(require_publish_scope),
     ) -> MqttPublishResponse:
+        install_state = config_store.get_install_session_state()
+        if install_state.get("setup_state") not in {"ready", "degraded"}:
+            raise HTTPException(
+                status_code=409,
+                detail="Setup is not complete. Finish setup before using MQTT publish APIs.",
+            )
+
         allowed, reason = policy_cache.authorize(claims, required_scope="mqtt.publish")
         if not allowed:
             raise HTTPException(status_code=403, detail=reason or "Policy denied MQTT publish")
