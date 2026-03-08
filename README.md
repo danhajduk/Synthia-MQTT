@@ -89,8 +89,10 @@ open http://localhost:18080/ui/
 - `optional_groups_supported`: optional docker groups declared by manifest metadata
 - `optional_groups_requested`: selected optional docker group ids
 - `optional_groups_active`: currently active optional docker group ids reported by runtime session
+- `optional_groups_starting`: optional docker group ids currently starting
 - `optional_groups_failed`: optional docker group ids currently marked failed
 - `optional_groups_pending_reconcile`: `true` while requested groups are not fully active
+- `optional_groups_reconcile_state`: `idle | waiting_for_reconcile | starting | active | failed | mixed`
 
 Fresh installs remain `unconfigured` until broker mode/config is applied.
 `POST /api/mqtt/publish` and `POST /api/ha/discovery/sensor` return `409` until setup reaches `ready` (or `degraded`).
@@ -115,6 +117,7 @@ Platform topic publishes also enforce envelope schema (`type`, `source_addon_id`
 
 Optional docker groups can be requested from setup/dashboard UI and are persisted through `POST /api/install/optional-groups`
 as desired deployment shape, while base startup remains fully functional with zero optional groups enabled.
+Optional group requests are written atomically to desired state (`runtime.optional_docker_groups.requested`) and runtime feedback is read from `runtime.json` to distinguish requested vs active/starting/failed groups.
 
 Lifecycle announce/health publishing uses shared helper logic for
 `synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`

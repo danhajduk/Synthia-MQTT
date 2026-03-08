@@ -163,6 +163,10 @@ Completed Tasks
 86. Task 86: Add base-only initial startup flow - Completed on 03/08/2026 12:36
 87. Task 87: Add setup/admin UI for optional docker groups - Completed on 03/08/2026 12:36
 
+88. Task 88: Add desired-state writer for docker group selection - Completed on 03/08/2026 12:44
+89. Task 89: Add runtime-state reader for docker group feedback - Completed on 03/08/2026 12:44
+90. Task 90: Add pending/reconcile UX for optional docker groups - Completed on 03/08/2026 12:44
+
 ##################################
 Tasks in Progress
 ##################################
@@ -172,7 +176,7 @@ Tasks in Progress
 Pending Tasks
 ##################################
 # Addon Tasks — Optional Docker Group Support
-Start at **Task 88**.
+Start at **Task 91**.
 
 ## Working Rules
 For every task below:
@@ -180,54 +184,6 @@ For every task below:
 - sign off completed_task.txt with date and summary of work done
 - run the project rebuild script when finished
 - ensure completed_task.txt remains gitignored
-
----
-
-## Task 88 — Add desired-state writer for docker group selection
-Write requested docker groups into mounted desired state.
-
-### Scope
-- update mounted desired state with selected optional docker groups
-- use atomic write with locking
-- preserve unrelated desired-state fields
-- do not attempt to edit compose files directly
-
-### Acceptance
-- addon can safely request deployment shape changes through desired state
-
----
-
-## Task 89 — Add runtime-state reader for docker group feedback
-Read actual deployment result from runtime state.
-
-### Scope
-- read runtime.json
-- show:
-  - requested groups
-  - active groups
-  - failed groups
-  - pending reconcile state
-- use this in setup/admin UI
-
-### Acceptance
-- addon can distinguish requested optional services from actually running ones
-
----
-
-## Task 90 — Add pending/reconcile UX for optional docker groups
-Make delayed deployment changes visible and understandable.
-
-### Scope
-- after user enables or disables a group, show:
-  - requested
-  - waiting for reconcile
-  - starting
-  - active
-  - failed
-- support multiple groups cleanly
-
-### Acceptance
-- UI stays honest while supervisor catches up with desired-state changes
 
 ---
 

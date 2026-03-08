@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+from filelock import FileLock
+
 from app.models.addon_models import AddonConfigUpdate
 from app.models.install_models import InstallApplyRequest
 from app.services.broker_manager import (
@@ -10,6 +12,7 @@ from app.services.broker_manager import (
     write_embedded_broker_files,
     write_embedded_compose_override,
 )
+from app.services.fs_utils import atomic_write
 
 
 class ConfigStore:
@@ -151,11 +154,50 @@ class ConfigStore:
         state = self.get_install_session_state()
         active = [group_id for group_id in self._normalize_string_list(state.get("optional_groups_active")) if group_id in requested]
         failed = [group_id for group_id in self._normalize_string_list(state.get("optional_groups_failed")) if group_id in requested]
+        self._write_desired_optional_groups(requested)
         return self.update_install_session_state(
             optional_groups_requested=requested,
             optional_groups_active=active,
             optional_groups_failed=failed,
         )
+
+    def get_desired_optional_groups(self) -> list[str]:
+        desired = self._load_json_object(self._resolve_desired_state_path())
+        runtime = desired.get("runtime")
+        if isinstance(runtime, dict):
+            optional_groups = runtime.get("optional_docker_groups")
+            if isinstance(optional_groups, dict):
+                requested = self._normalize_string_list(optional_groups.get("requested"))
+                if requested:
+                    return requested
+        return self._normalize_string_list(desired.get("optional_groups_requested"))
+
+    def get_runtime_optional_groups_feedback(self) -> dict[str, list[str] | bool | None]:
+        runtime_state = self._load_json_object(self._resolve_runtime_state_path())
+        requested = self._normalize_string_list(runtime_state.get("optional_groups_requested"))
+        active = self._normalize_string_list(runtime_state.get("optional_groups_active"))
+        starting = self._normalize_string_list(runtime_state.get("optional_groups_starting"))
+        failed = self._normalize_string_list(runtime_state.get("optional_groups_failed"))
+        pending: bool | None = None
+
+        runtime = runtime_state.get("runtime")
+        if isinstance(runtime, dict):
+            optional_groups = runtime.get("optional_docker_groups")
+            if isinstance(optional_groups, dict):
+                requested = requested or self._normalize_string_list(optional_groups.get("requested"))
+                active = active or self._normalize_string_list(optional_groups.get("active"))
+                starting = starting or self._normalize_string_list(optional_groups.get("starting"))
+                failed = failed or self._normalize_string_list(optional_groups.get("failed"))
+                if isinstance(optional_groups.get("pending_reconcile"), bool):
+                    pending = bool(optional_groups.get("pending_reconcile"))
+
+        return {
+            "requested": requested,
+            "active": active,
+            "starting": starting,
+            "failed": failed,
+            "pending_reconcile": pending,
+        }
 
     def set_selected_mode(self, mode: str, external_direct_access_mode: str = "gateway_only") -> dict[str, Any]:
         if mode not in {"external", "embedded"}:
@@ -273,6 +315,58 @@ class ConfigStore:
         self._install_state_path.parent.mkdir(parents=True, exist_ok=True)
         with self._install_state_path.open("w", encoding="utf-8") as file:
             json.dump(state, file, indent=2, sort_keys=True)
+
+    def _write_desired_optional_groups(self, requested_group_ids: list[str]) -> None:
+        desired_path = self._resolve_desired_state_path()
+        desired_path.parent.mkdir(parents=True, exist_ok=True)
+        lock = FileLock(str(desired_path.with_suffix(f"{desired_path.suffix}.lock")), timeout=10)
+        with lock:
+            payload = self._load_json_object(desired_path)
+            runtime = payload.get("runtime")
+            if not isinstance(runtime, dict):
+                runtime = {}
+            optional_groups = runtime.get("optional_docker_groups")
+            if not isinstance(optional_groups, dict):
+                optional_groups = {}
+            optional_groups["requested"] = requested_group_ids
+            runtime["optional_docker_groups"] = optional_groups
+            payload["runtime"] = runtime
+            payload["optional_groups_requested"] = requested_group_ids
+            atomic_write(
+                desired_path,
+                json.dumps(payload, indent=2, sort_keys=True) + "\n",
+                mode=0o644,
+            )
+
+    def _resolve_desired_state_path(self) -> Path:
+        configured = os.getenv("SYNTHIA_DESIRED_STATE_PATH", "").strip()
+        if configured:
+            return Path(configured)
+        mounted = self._base_dir / "SynthiaAddons" / "services" / "mqtt" / "desired.json"
+        if mounted.exists():
+            return mounted
+        return self._base_dir / "runtime" / "desired.json"
+
+    def _resolve_runtime_state_path(self) -> Path:
+        configured = os.getenv("SYNTHIA_RUNTIME_STATE_PATH", "").strip()
+        if configured:
+            return Path(configured)
+        mounted = self._base_dir / "SynthiaAddons" / "services" / "mqtt" / "runtime.json"
+        if mounted.exists():
+            return mounted
+        return self._base_dir / "runtime" / "runtime.json"
+
+    @staticmethod
+    def _load_json_object(path: Path) -> dict[str, Any]:
+        if not path.exists():
+            return {}
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+        if not isinstance(data, dict):
+            return {}
+        return data
 
     @staticmethod
     def _default_install_session_state() -> dict[str, Any]:

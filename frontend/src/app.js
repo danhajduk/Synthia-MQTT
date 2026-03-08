@@ -274,6 +274,7 @@ function updateSetupStatus(install, health) {
   setText("status-health", health.status);
   setText("status-deployment-mode", install.deployment_mode || "base_only");
   setText("status-optional-pending", String(Boolean(install.optional_groups_pending_reconcile)));
+  setText("status-optional-reconcile-state", install.optional_groups_reconcile_state || "idle");
   setText("status-error", install.last_error || "none");
 }
 
@@ -293,6 +294,7 @@ function updateDashboardStatus(install, health) {
   setText("dash-status-health", health.status);
   setText("dash-status-deployment-mode", install.deployment_mode || "base_only");
   setText("dash-status-optional-pending", String(Boolean(install.optional_groups_pending_reconcile)));
+  setText("dash-status-optional-reconcile-state", install.optional_groups_reconcile_state || "idle");
   setText("dash-status-error", install.last_error || "none");
 }
 
@@ -313,7 +315,15 @@ function renderOptionalGroups(install) {
   const supported = Array.isArray(install.optional_groups_supported) ? install.optional_groups_supported : [];
   const requested = normalizeOptionalGroupIds(install.optional_groups_requested);
   const active = new Set(normalizeOptionalGroupIds(install.optional_groups_active));
+  const starting = new Set(normalizeOptionalGroupIds(install.optional_groups_starting));
   const failed = new Set(normalizeOptionalGroupIds(install.optional_groups_failed));
+  const pending = Boolean(install.optional_groups_pending_reconcile);
+  const requestedList = requested.length ? requested.join(", ") : "none";
+  const activeList = active.size ? Array.from(active).join(", ") : "none";
+  const failedList = failed.size ? Array.from(failed).join(", ") : "none";
+  const summary = `Requested: ${requestedList} | Active: ${activeList} | Failed: ${failedList} | Pending: ${pending}`;
+  setText("optional-groups-summary", summary);
+  setText("dash-optional-groups-summary", summary);
   state.optionalGroups.requested = requested;
 
   const containers = [$("setup-optional-groups"), $("dashboard-optional-groups")];
@@ -342,10 +352,12 @@ function renderOptionalGroups(install) {
       details.className = "optional-group-details";
       const status = failed.has(group.id)
         ? "failed"
+        : starting.has(group.id)
+          ? "starting"
         : active.has(group.id)
           ? "active"
-          : requested.includes(group.id)
-            ? "waiting for reconcile"
+        : requested.includes(group.id)
+          ? "waiting for reconcile"
             : "base-only";
       details.innerHTML = `
         <strong>${group.name}</strong>
@@ -376,11 +388,11 @@ function selectedOptionalGroupIds() {
 async function saveOptionalGroups() {
   const requested_group_ids = selectedOptionalGroupIds();
   const response = await api("/api/install/optional-groups", "POST", { requested_group_ids });
-  const pending = response.pending_reconcile ? " pending reconcile." : " reconcile not pending.";
-  setResult("optional-groups-result", `Optional groups saved: ${response.requested_group_ids.join(", ") || "none"};${pending}`);
+  const pending = response.pending_reconcile ? "pending reconcile" : "reconcile complete";
+  setResult("optional-groups-result", `Optional groups saved: ${response.requested_group_ids.join(", ") || "none"} (${pending}).`);
   setResult(
     "dash-optional-groups-result",
-    `Optional groups saved: ${response.requested_group_ids.join(", ") || "none"};${pending}`
+    `Optional groups saved: ${response.requested_group_ids.join(", ") || "none"} (${pending}).`
   );
   await loadStatusSnapshot();
 }

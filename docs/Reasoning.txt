@@ -166,3 +166,30 @@ What and why:
 Added `POST /api/install/optional-groups` endpoint with supported-group filtering, and implemented setup/dashboard UI sections that render supported groups, current state, and save requested selection.
 
 ###########
+
+Task #088 :
+
+Reasoning: Optional-group requests must be written as deployment intent, not local compose edits, with corruption-safe updates under concurrent API/UI writes.
+
+What and why:
+Updated config store optional-group save flow to write requested IDs into desired-state JSON (`runtime.optional_docker_groups.requested`) using file lock + atomic replace, while preserving existing fields in desired.json.
+
+###########
+
+Task #089 :
+
+Reasoning: UI/API must reflect actual supervisor runtime reconciliation, not just saved preferences.
+
+What and why:
+Added runtime-state feedback reader for optional groups from runtime.json and wired install status to expose requested/active/starting/failed/pending fields using runtime feedback with desired-state fallback.
+
+###########
+
+Task #090 :
+
+Reasoning: Operators need explicit reconcile-progress visibility after enabling/disabling groups so delayed supervisor behavior is clear.
+
+What and why:
+Added optional-group reconcile-state model (`idle|waiting_for_reconcile|starting|active|failed|mixed`) to install status and expanded setup/dashboard UI to show pending/reconcile summary and per-group starting/waiting/active/failed status.
+
+###########

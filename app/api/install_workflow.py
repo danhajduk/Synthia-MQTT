@@ -67,6 +67,25 @@ def _setup_guidance(setup_state: str, optional_groups_pending: bool = False) -> 
     return "Setup is in error state. Review last_error and re-run setup."
 
 
+def _optional_reconcile_state(
+    requested: list[str],
+    active: list[str],
+    starting: list[str],
+    failed: list[str],
+) -> str:
+    if not requested:
+        return "idle"
+    if failed and not active:
+        return "failed"
+    if starting:
+        return "starting"
+    if sorted(requested) == sorted(active):
+        return "active"
+    if failed and active:
+        return "mixed"
+    return "waiting_for_reconcile"
+
+
 def _direct_access_summary(mode: str, external_direct_access_mode: str) -> str:
     if mode == "embedded":
         return "Embedded broker supports managed direct MQTT credentials."
@@ -124,21 +143,43 @@ def build_install_workflow_router(
             install_state["mode"] == "external" and external_direct_access_mode == "manual_direct_access"
         )
         optional_groups_requested = [
+            str(group_id) for group_id in config_store.get_desired_optional_groups() if str(group_id) in supported_optional_group_ids
+        ]
+        runtime_optional_groups = config_store.get_runtime_optional_groups_feedback()
+        runtime_requested = [
             str(group_id)
-            for group_id in install_state.get("optional_groups_requested", [])
+            for group_id in runtime_optional_groups.get("requested", [])
             if str(group_id) in supported_optional_group_ids
         ]
+        if runtime_requested:
+            optional_groups_requested = runtime_requested
         optional_groups_active = [
             str(group_id)
-            for group_id in install_state.get("optional_groups_active", [])
+            for group_id in runtime_optional_groups.get("active", [])
+            if str(group_id) in supported_optional_group_ids
+        ]
+        optional_groups_starting = [
+            str(group_id)
+            for group_id in runtime_optional_groups.get("starting", [])
             if str(group_id) in supported_optional_group_ids
         ]
         optional_groups_failed = [
             str(group_id)
-            for group_id in install_state.get("optional_groups_failed", [])
+            for group_id in runtime_optional_groups.get("failed", [])
             if str(group_id) in supported_optional_group_ids
         ]
-        optional_groups_pending_reconcile = sorted(optional_groups_requested) != sorted(optional_groups_active)
+        pending_from_runtime = runtime_optional_groups.get("pending_reconcile")
+        optional_groups_pending_reconcile = (
+            bool(pending_from_runtime)
+            if isinstance(pending_from_runtime, bool)
+            else sorted(optional_groups_requested) != sorted(optional_groups_active)
+        )
+        optional_groups_reconcile_state = _optional_reconcile_state(
+            requested=optional_groups_requested,
+            active=optional_groups_active,
+            starting=optional_groups_starting,
+            failed=optional_groups_failed,
+        )
         deployment_mode = "expanded" if optional_groups_active else "base_only"
 
         return InstallStatusResponse(
@@ -159,9 +200,11 @@ def build_install_workflow_router(
             optional_groups_supported=supported_optional_groups,
             optional_groups_requested=optional_groups_requested,
             optional_groups_active=optional_groups_active,
+            optional_groups_starting=optional_groups_starting,
             optional_groups_failed=optional_groups_failed,
             optional_groups_pending_reconcile=optional_groups_pending_reconcile,
             deployment_mode=deployment_mode,
+            optional_groups_reconcile_state=optional_groups_reconcile_state,
         )
 
     @router.post("/optional-groups", response_model=OptionalGroupSelectionResponse)
@@ -174,11 +217,13 @@ def build_install_workflow_router(
             supported_group_ids=supported_optional_group_ids,
         )
         requested = [str(group_id) for group_id in updated.get("optional_groups_requested", []) if str(group_id)]
-        active = [str(group_id) for group_id in updated.get("optional_groups_active", []) if str(group_id)]
+        runtime_feedback = config_store.get_runtime_optional_groups_feedback()
+        active = [str(group_id) for group_id in runtime_feedback.get("active", []) if str(group_id)]
+        pending_from_runtime = runtime_feedback.get("pending_reconcile")
         return OptionalGroupSelectionResponse(
             ok=True,
             requested_group_ids=requested,
-            pending_reconcile=sorted(requested) != sorted(active),
+            pending_reconcile=bool(pending_from_runtime) if isinstance(pending_from_runtime, bool) else sorted(requested) != sorted(active),
         )
 
     @router.post("/mode", response_model=InstallModeUpdateResponse)

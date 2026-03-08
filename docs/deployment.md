@@ -89,3 +89,26 @@ Verified values:
 - `permissions`: `network.egress`, `mqtt.publish`, `mqtt.subscribe`
 - `runtime_defaults`: `bind_localhost=false`, `ports=[{host:18080,container:8080,proto:tcp}]`
 - `optional_docker_groups`: supports addon-declared optional compose groups without hardcoded supervisor behavior
+
+## Optional group desired/runtime state IO
+
+Addon optional docker-group requests are persisted into desired state (no compose edits):
+
+- desired path resolution:
+  - `SYNTHIA_DESIRED_STATE_PATH` (if set)
+  - `./SynthiaAddons/services/mqtt/desired.json` (if present)
+  - fallback `./runtime/desired.json`
+- write mode:
+  - file lock (`*.lock`) + atomic replace write
+  - unrelated JSON fields preserved
+  - requested IDs stored under `runtime.optional_docker_groups.requested`
+
+Runtime feedback path resolution:
+
+- `SYNTHIA_RUNTIME_STATE_PATH` (if set)
+- `./SynthiaAddons/services/mqtt/runtime.json` (if present)
+- fallback `./runtime/runtime.json`
+
+Runtime feedback consumed by install status/UI:
+
+- requested, active, starting, failed, and pending reconcile state.

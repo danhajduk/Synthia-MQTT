@@ -32,6 +32,7 @@
             <div><span>Addon Health</span><strong id="status-health">-</strong></div>
             <div><span>Deployment Mode</span><strong id="status-deployment-mode">-</strong></div>
             <div><span>Optional Groups Pending</span><strong id="status-optional-pending">-</strong></div>
+            <div><span>Optional Reconcile State</span><strong id="status-optional-reconcile-state">-</strong></div>
             <div><span>Last Error</span><strong id="status-error">-</strong></div>
           </div>
           <div class="actions">
@@ -210,6 +211,7 @@
         <section class="panel">
           <h2>Optional Docker Groups</h2>
           <p>Select optional compose groups to request. Base service runs without these groups.</p>
+          <p id="optional-groups-summary" class="result">Requested: none | Active: none | Failed: none</p>
           <div id="setup-optional-groups" class="optional-groups-grid"></div>
           <div class="actions">
             <button id="save-optional-groups" type="button">Save Optional Groups</button>
@@ -242,6 +244,7 @@
             <div><span>Addon health</span><strong id="dash-status-health">-</strong></div>
             <div><span>Deployment Mode</span><strong id="dash-status-deployment-mode">-</strong></div>
             <div><span>Optional Groups Pending</span><strong id="dash-status-optional-pending">-</strong></div>
+            <div><span>Optional Reconcile State</span><strong id="dash-status-optional-reconcile-state">-</strong></div>
             <div><span>Last error</span><strong id="dash-status-error">-</strong></div>
           </div>
           <div class="actions">
@@ -252,6 +255,7 @@
 
         <section class="panel">
           <h2>Optional Docker Groups</h2>
+          <p id="dash-optional-groups-summary" class="result">Requested: none | Active: none | Failed: none</p>
           <div id="dashboard-optional-groups" class="optional-groups-grid"></div>
           <div class="actions">
             <button id="dash-save-optional-groups" type="button">Save Optional Groups</button>

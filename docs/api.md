@@ -82,13 +82,27 @@ External apply validation behavior:
 - `optional_groups_supported`: manifest-declared optional docker groups (`id`, `name`, `description`, `compose_file`)
 - `optional_groups_requested`: requested optional group IDs
 - `optional_groups_active`: active optional group IDs
+- `optional_groups_starting`: starting optional group IDs
 - `optional_groups_failed`: failed optional group IDs
 - `optional_groups_pending_reconcile`: `true` while requested and active sets differ
+- `optional_groups_reconcile_state`: `idle | waiting_for_reconcile | starting | active | failed | mixed`
 
 Fresh installs report `setup_state=unconfigured` until mode/config is applied.
 
 `POST /api/install/optional-groups` persists requested optional group IDs for delayed supervisor reconciliation.
 Unknown IDs are filtered out; compose files are not edited by addon runtime.
+Requested optional groups are written to desired state atomically with locking at:
+
+- `runtime.optional_docker_groups.requested`
+- compatibility mirror: top-level `optional_groups_requested`
+
+Runtime feedback is read from `runtime.json` fields:
+
+- `runtime.optional_docker_groups.requested`
+- `runtime.optional_docker_groups.active`
+- `runtime.optional_docker_groups.starting`
+- `runtime.optional_docker_groups.failed`
+- `runtime.optional_docker_groups.pending_reconcile`
 
 ## Broker admin route
 

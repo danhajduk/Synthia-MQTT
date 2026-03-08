@@ -82,6 +82,13 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn('runtime["cpu"]', text)
         self.assertIn('runtime["memory"]', text)
 
+    def test_optional_group_desired_write_uses_atomic_locking(self) -> None:
+        config_store = Path(__file__).resolve().parents[1] / "app" / "services" / "config_store.py"
+        text = config_store.read_text(encoding="utf-8")
+        self.assertIn("FileLock", text)
+        self.assertIn("atomic_write(", text)
+        self.assertIn("_write_desired_optional_groups", text)
+
 
 if __name__ == "__main__":
     unittest.main()

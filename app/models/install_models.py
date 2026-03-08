@@ -23,9 +23,18 @@ class InstallStatusResponse(BaseModel):
     optional_groups_supported: list[OptionalDockerGroup] = Field(default_factory=list)
     optional_groups_requested: list[str] = Field(default_factory=list)
     optional_groups_active: list[str] = Field(default_factory=list)
+    optional_groups_starting: list[str] = Field(default_factory=list)
     optional_groups_failed: list[str] = Field(default_factory=list)
     optional_groups_pending_reconcile: bool = False
     deployment_mode: Literal["base_only", "expanded"] = "base_only"
+    optional_groups_reconcile_state: Literal[
+        "idle",
+        "waiting_for_reconcile",
+        "starting",
+        "active",
+        "failed",
+        "mixed",
+    ] = "idle"
 
 
 class ExternalConnectionConfig(BaseModel):

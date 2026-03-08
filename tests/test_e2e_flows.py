@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -38,6 +39,7 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.tmp_path = Path(self._tmp.name)
         runtime_dir = self.tmp_path / "runtime"
         runtime_dir.mkdir(parents=True, exist_ok=True)
+        self.runtime_dir = runtime_dir
 
         self.config_store = ConfigStore(config_path=runtime_dir / "config.json")
         self.config_store._base_dir = self.tmp_path  # type: ignore[attr-defined]
@@ -104,6 +106,14 @@ class MqttAddonE2ETest(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_setup_state_transitions_and_external_flow(self) -> None:
+        desired_seed = {
+            "ssap_version": "1.0",
+            "addon_id": "mqtt",
+            "runtime": {"project_name": "synthia-addon-mqtt"},
+            "preserve_me": {"a": 1},
+        }
+        (self.runtime_dir / "desired.json").write_text(json.dumps(desired_seed), encoding="utf-8")
+
         status = self.client.get("/api/install/status")
         self.assertEqual(status.status_code, 200)
         self.assertEqual(status.json()["setup_state"], "unconfigured")
@@ -117,6 +127,9 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(optional_groups.status_code, 200)
         self.assertEqual(optional_groups.json()["requested_group_ids"], ["mqtt_tools"])
         self.assertTrue(optional_groups.json()["pending_reconcile"])
+        desired = json.loads((self.runtime_dir / "desired.json").read_text(encoding="utf-8"))
+        self.assertEqual(desired["runtime"]["optional_docker_groups"]["requested"], ["mqtt_tools"])
+        self.assertEqual(desired["preserve_me"], {"a": 1})
 
         mode = self.client.post(
             "/api/install/mode",
@@ -144,6 +157,31 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(status_after["external_direct_access_mode"], "gateway_only")
         self.assertEqual(status_after["setup_state"], "ready")
         self.assertEqual(status_after["optional_groups_requested"], ["mqtt_tools"])
+
+    def test_runtime_optional_group_feedback_is_exposed_in_status(self) -> None:
+        runtime_payload = {
+            "runtime": {
+                "optional_docker_groups": {
+                    "requested": ["mqtt_tools"],
+                    "active": [],
+                    "starting": ["mqtt_tools"],
+                    "failed": [],
+                    "pending_reconcile": True,
+                }
+            }
+        }
+        (self.runtime_dir / "runtime.json").write_text(json.dumps(runtime_payload), encoding="utf-8")
+
+        self.client.post("/api/install/optional-groups", json={"requested_group_ids": ["mqtt_tools"]})
+        status = self.client.get("/api/install/status")
+        self.assertEqual(status.status_code, 200)
+        payload = status.json()
+        self.assertEqual(payload["optional_groups_requested"], ["mqtt_tools"])
+        self.assertEqual(payload["optional_groups_starting"], ["mqtt_tools"])
+        self.assertEqual(payload["optional_groups_active"], [])
+        self.assertEqual(payload["optional_groups_failed"], [])
+        self.assertTrue(payload["optional_groups_pending_reconcile"])
+        self.assertEqual(payload["optional_groups_reconcile_state"], "starting")
 
     def test_embedded_flow_registration_and_acl_realization(self) -> None:
         apply_embedded = self.client.post(
