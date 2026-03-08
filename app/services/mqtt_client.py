@@ -9,6 +9,7 @@ from typing import Any
 import paho.mqtt.client as mqtt
 
 from app.services.health import HealthService
+from app.services.policy_cache import PolicyCache
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class MqttClientService:
         api_version: str,
         mode: str = "standalone_service",
         announce_base_url: str = "http://mqtt-addon:8080",
+        policy_cache: PolicyCache | None = None,
     ) -> None:
         self._config = config
         self._health_service = health_service
@@ -33,6 +35,7 @@ class MqttClientService:
         self._api_version = api_version
         self._mode = mode
         self._announce_base_url = announce_base_url
+        self._policy_cache = policy_cache
 
         client_id = str(self._config["mqtt_client_id"])
         self._client = mqtt.Client(client_id=client_id)
@@ -58,6 +61,7 @@ class MqttClientService:
 
         self._client.on_connect = self._on_connect
         self._client.on_disconnect = self._on_disconnect
+        self._client.on_message = self._on_message
 
         self._stop_event = threading.Event()
         self._health_thread: threading.Thread | None = None
@@ -106,6 +110,7 @@ class MqttClientService:
         if rc == 0:
             self._health_service.set_mqtt_connected(True)
             logger.info("mqtt_connected")
+            self._subscribe_policy_topics(client)
             self._publish_announce()
             self._publish_health()
         else:
@@ -122,6 +127,16 @@ class MqttClientService:
             logger.warning("mqtt_disconnected", extra={"rc": rc})
         else:
             logger.info("mqtt_disconnected_clean")
+
+    def _on_message(self, _client: mqtt.Client, _userdata: Any, message: mqtt.MQTTMessage) -> None:
+        if self._policy_cache is None or not self._policy_cache.enforcement_enabled():
+            return
+
+        try:
+            payload_text = message.payload.decode("utf-8", errors="replace")
+            self._policy_cache.ingest(message.topic, payload_text)
+        except Exception as exc:  # pragma: no cover
+            logger.warning("policy_message_parse_failed", extra={"error": str(exc)})
 
     def _publish_announce(self) -> None:
         payload = {
@@ -146,6 +161,19 @@ class MqttClientService:
         while not self._stop_event.is_set():
             self._publish_health()
             self._stop_event.wait(15)
+
+    def _subscribe_policy_topics(self, client: mqtt.Client) -> None:
+        if self._policy_cache is None or not self._policy_cache.enforcement_enabled():
+            return
+        base_topic = str(self._config.get("mqtt_base_topic", "synthia"))
+        qos = int(self._config.get("mqtt_qos", 1))
+
+        grants_topic = f"{base_topic}/policy/grants/+"
+        revocations_topic = f"{base_topic}/policy/revocations/+"
+
+        client.subscribe(grants_topic, qos=qos)
+        client.subscribe(revocations_topic, qos=qos)
+        logger.info("policy_topics_subscribed", extra={"grants_topic": grants_topic, "revocations_topic": revocations_topic})
 
     @staticmethod
     def _offline_payload() -> dict[str, str]:

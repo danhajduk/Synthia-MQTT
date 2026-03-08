@@ -1,13 +1,15 @@
 import os
 import time
 from pathlib import Path
+from typing import Callable
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from filelock import Timeout
 
 from app.services.config_store import ConfigStore
 from app.services.broker_manager import BrokerManager, wait_for_port
 from app.services.lock import broker_lock
+from app.services.token_auth import ServiceTokenClaims
 
 
 def restart_broker_flow() -> dict[str, bool | int | str | None]:
@@ -54,11 +56,16 @@ def restart_broker_flow() -> dict[str, bool | int | str | None]:
         }
 
 
-def build_broker_admin_router(config_store: ConfigStore) -> APIRouter:
+def build_broker_admin_router(
+    config_store: ConfigStore,
+    require_broker_admin_scope: Callable[[], ServiceTokenClaims],
+) -> APIRouter:
     router = APIRouter(prefix="/api/broker", tags=["broker"])
 
     @router.post("/restart")
-    def restart_broker() -> dict[str, bool | int | str | None]:
+    def restart_broker(
+        _claims: ServiceTokenClaims = Depends(require_broker_admin_scope),
+    ) -> dict[str, bool | int | str | None]:
         result = restart_broker_flow()
         if bool(result.get("ok")):
             config_store.update_install_session_state(mode="embedded", verified=True, last_error=None)

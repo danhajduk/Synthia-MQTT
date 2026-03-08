@@ -12,6 +12,7 @@ Compared docs:
 
 - Total findings: 4
 - Highest-risk mismatch: bootstrap/deployment layout assumptions differ from standalone spec examples.
+- Golden standard: `/home/dan/Projects/Synthia/docs` is treated as source-of-truth for alignment.
 
 ## Finding 1: API metadata version drift
 
@@ -34,13 +35,14 @@ Why this is a mismatch:
 
 - Operational examples can lead to stale registration payload expectations.
 
-Recommended fix:
+Recommended fix (local alignment):
 
-- Update version examples in Core docs to neutral placeholders or current release values.
+- Keep Core docs unchanged (golden).
+- Ensure local integration scripts/docs do not hardcode stale version examples.
 
 ## Finding 2: Standalone artifact layout examples differ from current bootstrap flow
 
-Type: Stale documentation
+Type: Stale implementation behavior vs golden specification
 
 Affected files:
 
@@ -60,9 +62,9 @@ Why this is a mismatch:
 
 - Current addon installer behavior is artifact-retaining with targeted compose extraction only.
 
-Recommended fix:
+Recommended fix (local alignment):
 
-- Add an explicit note in standalone docs that installer layouts may be artifact-retained and compose-only extraction.
+- Update local bootstrap/install flow to satisfy the golden SSAP layout expectation.
 
 ## Finding 3: Core API doc backend path example does not map to this addon repo
 
@@ -85,13 +87,13 @@ Why this is a mismatch:
 
 - Correct for Core repo, but ambiguous when used as addon implementation reference.
 
-Recommended fix:
+Recommended fix (local alignment):
 
-- Add a scope note in Core API docs clarifying that addon repos may use their own app entrypoint path.
+- Add local docs note mapping addon entrypoint path to Core contract expectations.
 
 ## Finding 4: Registry contract minimal endpoints vs addon extended endpoints
 
-Type: Missing documentation
+Type: Missing documentation in golden reference for optional endpoints
 
 Affected files:
 
@@ -110,6 +112,6 @@ Why this is a mismatch:
 
 - Current addon capability surface is broader than reference doc and may be missed by operators/integrators.
 
-Recommended fix:
+Recommended fix (local alignment):
 
-- Add an "optional standardized endpoints" section in Core docs that includes version and permissions endpoints.
+- Keep optional endpoints implemented and verify they remain backward-compatible with minimal required contract.

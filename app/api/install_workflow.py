@@ -3,7 +3,7 @@ from pathlib import Path
 from shlex import quote
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.addon_contract import MANIFEST_METADATA
 from app.models.install_models import (
@@ -19,6 +19,7 @@ from app.services.config_store import ConfigStore
 from app.services.core_registry import register_addon_endpoint, verify_addon_endpoint
 from app.services.health import HealthService
 from app.services.mqtt_client import test_external_connection
+from app.services.token_auth import ServiceTokenClaims
 
 
 def _diagnostic_code_from_reason(ok: bool, reason: str | None) -> str:
@@ -51,6 +52,9 @@ def build_install_workflow_router(
     config_store: ConfigStore,
     health_service: HealthService,
     reload_mqtt_service: Callable[[], None],
+    require_install_apply_scope: Callable[[], ServiceTokenClaims],
+    require_core_register_scope: Callable[[], ServiceTokenClaims],
+    require_install_reset_scope: Callable[[], ServiceTokenClaims],
 ) -> APIRouter:
     router = APIRouter(prefix="/api/install", tags=["install"])
     repo_root = Path(__file__).resolve().parents[2]
@@ -91,7 +95,10 @@ def build_install_workflow_router(
         return InstallTestExternalResponse(ok=ok, diagnostic_code=diagnostic_code, reason=reason)
 
     @router.post("/apply", response_model=InstallApplyResponse)
-    def apply_install(payload: InstallApplyRequest) -> InstallApplyResponse:
+    def apply_install(
+        payload: InstallApplyRequest,
+        _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
+    ) -> InstallApplyResponse:
         try:
             config_store.apply_install_config(payload)
         except ValueError as exc:
@@ -147,7 +154,10 @@ def build_install_workflow_router(
         )
 
     @router.post("/register-core", response_model=CoreRegistryResponse)
-    def register_core(payload: CoreRegistryRequest) -> CoreRegistryResponse:
+    def register_core(
+        payload: CoreRegistryRequest,
+        _claims: ServiceTokenClaims = Depends(require_core_register_scope),
+    ) -> CoreRegistryResponse:
         core_base_url = _normalize_http_url(payload.core_base_url or os.getenv("CORE_BASE_URL", ""))
         addon_base_url = _normalize_http_url(payload.base_url)
         addon_id = payload.addon_id.strip()
@@ -186,7 +196,9 @@ def build_install_workflow_router(
         raise HTTPException(status_code=502, detail=reason or "Core registry request failed")
 
     @router.post("/reset")
-    def reset_install_state() -> dict[str, bool | str]:
+    def reset_install_state(
+        _claims: ServiceTokenClaims = Depends(require_install_reset_scope),
+    ) -> dict[str, bool | str]:
         config_store.reset_install_session_state(mode="external")
         return {"ok": True, "mode": "external"}
 

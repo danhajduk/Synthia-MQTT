@@ -5,10 +5,11 @@ set -euo pipefail
 # Synthia MQTT artifact bootstrap
 #
 # Creates:
-#   ./SynthiaAddons/Synthia-MQTT/
-#   ./SynthiaAddons/Synthia-MQTT/versions/<version>/addon.tgz
-#   ./SynthiaAddons/Synthia-MQTT/desired.json
-#   ./SynthiaAddons/services/mqtt -> ./SynthiaAddons/Synthia-MQTT
+#   ./SynthiaAddons/services/mqtt/
+#   ./SynthiaAddons/services/mqtt/versions/<version>/addon.tgz
+#   ./SynthiaAddons/services/mqtt/desired.json
+#   ./SynthiaAddons/services/mqtt/runtime.json
+#   ./SynthiaAddons/Synthia-MQTT -> ./SynthiaAddons/services/mqtt (compatibility)
 #
 # Usage:
 #   ./bootstrap-artifact.sh
@@ -21,8 +22,10 @@ set -euo pipefail
 GITHUB_REPO="${GITHUB_REPO:-danhajduk/Synthia-MQTT}"
 ADDON_ID="mqtt"
 ADDON_NAME="Synthia MQTT"
-INSTALL_ROOT="${INSTALL_ROOT:-./SynthiaAddons/Synthia-MQTT}"
-SERVICES_ROOT="${SERVICES_ROOT:-./SynthiaAddons/services}"
+ADDONS_ROOT="${ADDONS_ROOT:-./SynthiaAddons}"
+SERVICES_ROOT="${SERVICES_ROOT:-${ADDONS_ROOT}/services}"
+INSTALL_ROOT="${INSTALL_ROOT:-${SERVICES_ROOT}/${ADDON_ID}}"
+LEGACY_ROOT="${LEGACY_ROOT:-${ADDONS_ROOT}/Synthia-MQTT}"
 CATALOG_ID="${CATALOG_ID:-official}"
 CHANNEL="${CHANNEL:-stable}"
 MODE="${MODE:-standalone_service}"
@@ -38,8 +41,9 @@ Usage: $0 [options]
 Options:
   --version <latest|tag>   Version to install (default: latest)
   --core-url <url>         Core URL to place into desired.json
-  --install-root <path>    Install root (default: ./SynthiaAddons/Synthia-MQTT)
+  --install-root <path>    Install root (default: ./SynthiaAddons/services/mqtt)
   --services-root <path>   Services root (default: ./SynthiaAddons/services)
+  --legacy-root <path>     Legacy compatibility root symlink (default: ./SynthiaAddons/Synthia-MQTT)
   -h, --help               Show this help
 
 Examples:
@@ -98,6 +102,11 @@ parse_args() {
         shift
         [[ $# -gt 0 ]] || die "--services-root requires a value"
         SERVICES_ROOT="$1"
+        ;;
+      --legacy-root)
+        shift
+        [[ $# -gt 0 ]] || die "--legacy-root requires a value"
+        LEGACY_ROOT="$1"
         ;;
       -h|--help)
         usage
@@ -304,6 +313,29 @@ write_desired_json() {
 EOF
 }
 
+write_runtime_json() {
+  local file_path="$1"
+  local version="$2"
+  local compose_file="$3"
+
+  cat > "$file_path" <<EOF
+{
+  "ssap_version": "1.0",
+  "addon_id": "${ADDON_ID}",
+  "active_version": "${version}",
+  "state": "installed",
+  "last_action": {
+    "type": "bootstrap_install",
+    "ok": true
+  },
+  "docker": {
+    "project_name": "${PROJECT_NAME}",
+    "compose_file": "${compose_file}"
+  }
+}
+EOF
+}
+
 main() {
   parse_args "$@"
 
@@ -326,8 +358,9 @@ main() {
   local artifact_file="${version_dir}/addon.tgz"
   local compose_file="${version_dir}/docker-compose.yml"
   local desired_file="${INSTALL_ROOT}/desired.json"
+  local runtime_file="${INSTALL_ROOT}/runtime.json"
   local current_link="${INSTALL_ROOT}/current"
-  local services_link="${SERVICES_ROOT}/${ADDON_ID}"
+  local compatibility_link="${LEGACY_ROOT}"
 
   echo "[bootstrap] release tag: ${tag_name}"
   echo "[bootstrap] version: ${version}"
@@ -361,20 +394,25 @@ main() {
   echo "[bootstrap] writing desired.json -> ${desired_file}"
   write_desired_json "${desired_file}" "${version}" "${asset_url}" "${artifact_sha}" "${signature_value}"
 
+  echo "[bootstrap] writing runtime.json -> ${runtime_file}"
+  write_runtime_json "${runtime_file}" "${version}" "${compose_file}"
+
   echo "[bootstrap] updating current symlink -> versions/${version}"
   ln -sfn "versions/${version}" "${current_link}"
 
-  echo "[bootstrap] updating service symlink -> ${services_link}"
-  ln -sfn "$(realpath "${INSTALL_ROOT}")" "${services_link}"
+  echo "[bootstrap] updating compatibility symlink -> ${compatibility_link}"
+  mkdir -p "$(dirname "${compatibility_link}")"
+  ln -sfn "$(realpath "${INSTALL_ROOT}")" "${compatibility_link}"
 
   echo
   echo "[bootstrap] done"
-  echo "[bootstrap] install root: $(realpath "${INSTALL_ROOT}")"
+  echo "[bootstrap] service root: $(realpath "${INSTALL_ROOT}")"
   echo "[bootstrap] artifact: $(realpath "${artifact_file}")"
   echo "[bootstrap] desired.json: $(realpath "${desired_file}")"
+  echo "[bootstrap] runtime.json: $(realpath "${runtime_file}")"
   echo "[bootstrap] docker-compose.yml: $(realpath "${compose_file}")"
   echo "[bootstrap] current -> $(readlink "${current_link}")"
-  echo "[bootstrap] service link: ${services_link} -> $(readlink "${services_link}")"
+  echo "[bootstrap] compatibility link: ${compatibility_link} -> $(readlink "${compatibility_link}")"
 }
 
 main "$@"

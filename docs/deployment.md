@@ -23,12 +23,20 @@ Script: `scripts/bootstrap-install.sh`
 Current behavior:
 
 - Resolves latest or specific tag from GitHub releases.
-- Downloads `addon.tgz` into `SynthiaAddons/Synthia-MQTT/versions/<version>/addon.tgz`.
+- Downloads `addon.tgz` into `SynthiaAddons/services/mqtt/versions/<version>/addon.tgz`.
 - Extracts `docker/docker-compose.yml` from artifact to `versions/<version>/docker-compose.yml`.
-- Writes `desired.json` with `ssap_version: 1.0` and release metadata.
+- Writes `desired.json` and `runtime.json` in canonical service root.
 - Updates symlinks:
-  - `SynthiaAddons/Synthia-MQTT/current -> versions/<version>`
-  - `SynthiaAddons/services/mqtt -> <install_root>`
+  - `SynthiaAddons/services/mqtt/current -> versions/<version>`
+  - `SynthiaAddons/Synthia-MQTT -> SynthiaAddons/services/mqtt` (compatibility link)
+
+Validation helper:
+
+- `scripts/validate-bootstrap.sh` now checks SSAP layout invariants:
+  - canonical service root path
+  - presence of `desired.json` + `runtime.json`
+  - `current` symlink + version artifact files
+  - legacy compatibility symlink target
 
 ## Manifest and artifact
 

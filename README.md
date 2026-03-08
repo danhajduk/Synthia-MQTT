@@ -61,6 +61,35 @@ open http://localhost:18080/ui
 - `POST /api/mqtt/publish`
 - `POST /api/ha/discovery/sensor`
 
+## Optional Service-Token Auth
+
+Privileged write endpoints can enforce service-token JWT validation.
+
+Environment variables:
+
+- `SYNTHIA_AUTH_REQUIRED` (`true|false`, default `false`)
+- `SYNTHIA_JWT_SIGNING_KEY` (required when auth is enabled)
+- `SYNTHIA_TOKEN_AUDIENCE` (optional, defaults to addon id `mqtt`)
+
+## Optional Policy Enforcement
+
+MQTT operation gates can enforce retained policy grants/revocations.
+
+Environment variable:
+
+- `SYNTHIA_POLICY_ENFORCEMENT` (`true|false`, default `false`)
+
+## Telemetry Reporting
+
+Usage reporting to Core is buffered and best-effort (`POST /api/telemetry/usage`).
+
+Environment variables:
+
+- `SYNTHIA_TELEMETRY_ENABLED` (`true|false`, default `true`)
+- `SYNTHIA_TELEMETRY_MAX_QUEUE` (default `500`)
+- `SYNTHIA_TELEMETRY_FLUSH_INTERVAL_S` (default `15`)
+- `SYNTHIA_TELEMETRY_TIMEOUT_S` (default `3`)
+
 ## Documentation Index
 
 - `docs/core.md`

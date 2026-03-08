@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.addon_models import (
     AddonConfigEffective,
@@ -13,6 +13,7 @@ from app.models.addon_models import (
 )
 from app.services.config_store import ConfigStore
 from app.services.health import HealthService
+from app.services.token_auth import ServiceTokenClaims
 
 MANIFEST_PATH = Path(__file__).resolve().parents[2] / "manifest.json"
 SSAP_API_VERSION = "1.0"
@@ -51,8 +52,8 @@ META = AddonMeta(
 
 CAPABILITIES = [
     "mqtt.publish",
-    "mqtt.ha_discovery.publish",
-    "mqtt.ha_state.publish",
+    "mqtt.ha.discovery.publish",
+    "mqtt.ha.state.publish",
 ]
 
 
@@ -60,6 +61,7 @@ def build_addon_contract_router(
     config_store: ConfigStore,
     health_service: HealthService,
     apply_runtime_config: Callable[[], None],
+    require_config_write_scope: Callable[[], ServiceTokenClaims],
 ) -> APIRouter:
     router = APIRouter(prefix="/api/addon", tags=["addon"])
 
@@ -80,7 +82,10 @@ def build_addon_contract_router(
         return AddonConfigEffective(**config_store.get_effective_config(mask_secrets=True))
 
     @router.post("/config", response_model=AddonConfigEffective)
-    def update_config(config_update: AddonConfigUpdate) -> AddonConfigEffective:
+    def update_config(
+        config_update: AddonConfigUpdate,
+        _claims: ServiceTokenClaims = Depends(require_config_write_scope),
+    ) -> AddonConfigEffective:
         try:
             config_store.update_config(config_update)
             apply_runtime_config()

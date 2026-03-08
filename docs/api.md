@@ -24,6 +24,12 @@ Last Verified: 2026-03-07 (US/Pacific)
 
 `/api/addon/config/effective` masks `mqtt_password`.
 
+Current capability values:
+
+- `mqtt.publish`
+- `mqtt.ha.discovery.publish`
+- `mqtt.ha.state.publish`
+
 ## Install workflow routes
 
 - `GET /api/install/status`
@@ -51,3 +57,53 @@ Uses Docker SDK if available and updates install session verification state.
 HA sensor discovery publishes retained payload to:
 
 - `homeassistant/sensor/{unique_id}/config`
+
+## Service-token auth for privileged operations
+
+When `SYNTHIA_AUTH_REQUIRED=true`, privileged write operations require `Authorization: Bearer <jwt>` and scope checks:
+
+- `POST /api/addon/config` -> scope `addon.config.write`
+- `POST /api/mqtt/publish` -> scope `mqtt.publish`
+- `POST /api/ha/discovery/sensor` -> scope `mqtt.publish`
+- `POST /api/broker/restart` -> scope `broker.admin`
+- `POST /api/install/apply` -> scope `install.apply`
+- `POST /api/install/register-core` -> scope `core.register`
+- `POST /api/install/reset` -> scope `install.reset`
+
+JWT validation rules (when enabled):
+
+- algorithm: `HS256`
+- required claims: `sub`, `aud`, `jti`, `exp`, and scope claim (`scp` or `scopes`)
+- expected audience: `SYNTHIA_TOKEN_AUDIENCE` (default addon id `mqtt`)
+- signing key env: `SYNTHIA_JWT_SIGNING_KEY`
+
+## Policy topic enforcement for MQTT operations
+
+When `SYNTHIA_POLICY_ENFORCEMENT=true`, the addon subscribes to retained policy topics:
+
+- `<mqtt_base_topic>/policy/grants/+`
+- `<mqtt_base_topic>/policy/revocations/+`
+
+Runtime behavior:
+
+- MQTT publish/discovery requests are allowed only when the token subject has an active local grant for this service.
+- Revocations are enforced from cached retained messages (`jti`, `grant_id`, or consumer addon id).
+- Policy enforcement returns HTTP `403` on denied operations.
+
+## Telemetry usage reporting
+
+Addon runtime sends buffered best-effort usage events to Core endpoint:
+
+- `POST /api/telemetry/usage`
+
+Source operations currently reported:
+
+- successful `POST /api/mqtt/publish`
+- successful `POST /api/ha/discovery/sensor`
+
+Reporting behavior:
+
+- events are queued in memory and persisted to `runtime/telemetry_queue.jsonl`
+- periodic flush retries are background-driven
+- failed deliveries stay buffered for future retries
+- runtime continues operating when Core is offline (no request-path failure on telemetry post failure)
