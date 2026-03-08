@@ -15,5 +15,10 @@ services:
       MQTT_USERNAME: ${MQTT_USERNAME:-}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-}
       ANNOUNCE_BASE_URL: ${ANNOUNCE_BASE_URL:-http://10.0.0.100:18080}
+    volumes:
+      - ../../desired.json:/state/desired.json
+      - ../../runtime.json:/state/runtime.json
+      - ./docker-compose.yml:/orchestrator/docker-compose.yml
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "18080:8080"
