@@ -138,11 +138,11 @@ Completed Tasks
 62. Task 62: Add end-to-end tests for setup, registration, and publish flows - Completed on 03/07/2026 22:05
 63. Task 63: Fix container startup packaging regression (manifest missing in image) - Completed on 03/07/2026 22:08
 64. Task 64: Fix health snapshot model contract for runtime safety - Completed on 03/07/2026 22:09
+65. Task 65: Add regression guards for startup packaging and health snapshot behavior - Completed on 03/07/2026 22:10
 
 ##################################
 Tasks in Progress
 ##################################
-65. Task 65: Add regression guards for startup packaging and health snapshot behavior
 
 ##################################
 Pending Tasks

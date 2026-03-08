@@ -223,6 +223,9 @@ for marker, text in required_markers:
 print("static contract wiring checks passed")
 PY
 
+echo "[validate] regression guard tests"
+python3 -m unittest tests/test_regression_guards.py
+
 create_token() {
   local subject="$1"
   local scope="$2"

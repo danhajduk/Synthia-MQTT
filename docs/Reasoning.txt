@@ -1,8 +1,8 @@
-Task #064 :
+Task #065 :
 
-Reasoning: Health service incorrectly instantiated the external `AddonHealth` contract model internally, creating schema-coupling risk and runtime validation failures.
+Reasoning: Two recent regressions (manifest packaging omission and health snapshot contract coupling) needed automated local guards to prevent reintroduction.
 
 What and why:
-Introduced internal `HealthSnapshot` dataclass in `app/services/health.py` and switched `HealthService.snapshot()` to return it. API layers continue mapping that snapshot to `AddonHealth` response contracts.
+Added `tests/test_regression_guards.py` with checks for Dockerfile manifest copy and health snapshot shape, and wired these tests into `scripts/validate-service-flow.sh` so local validation catches these regressions early.
 
 ###########

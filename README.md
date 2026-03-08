@@ -157,6 +157,10 @@ Service-flow validation now includes this alignment check before API/MQTT checks
 ./scripts/validate-service-flow.sh
 ```
 
+Validation now also runs regression guards:
+
+- `tests/test_regression_guards.py` (Dockerfile manifest packaging + health snapshot contract shape)
+
 End-to-end API flow tests:
 
 ```bash
