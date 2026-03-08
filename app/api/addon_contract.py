@@ -78,7 +78,10 @@ def build_addon_contract_router(
         if setup_state not in {"unconfigured", "configuring", "ready", "error", "degraded"}:
             setup_state = "error"
         broker_mode = "embedded" if install_state.get("mode") == "embedded" else "external"
-        direct_mqtt_supported = broker_mode == "embedded"
+        external_direct_access_mode = str(install_state.get("external_direct_access_mode") or "gateway_only")
+        direct_mqtt_supported = broker_mode == "embedded" or (
+            broker_mode == "external" and external_direct_access_mode == "manual_direct_access"
+        )
 
         broker_reachable = base_health.mqtt_connected
         broker_health = "healthy" if broker_reachable else "unreachable"

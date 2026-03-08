@@ -1,8 +1,8 @@
-Task #060 :
+Task #061 :
 
-Reasoning: Existing telemetry was Core-facing and not operator-facing; dashboard lacked local MQTT usage trend visibility.
+Reasoning: External broker mode needed explicit direct-access governance rules so operators are not misled into assuming managed broker-side provisioning exists.
 
 What and why:
-Added runtime MQTT usage metrics endpoint (`GET /api/mqtt/metrics`) with publish/deny/reconnect counts, active registration count, per-addon usage summaries, and broker mode summary. Added dashboard Usage Metrics panel wired to the new endpoint.
+Added explicit external direct-access model (`gateway_only` vs `manual_direct_access`) to install mode/apply/status APIs and setup UI. Registration now enforces mode-specific behavior: gateway-only rejects direct registrations; manual-direct mode allows recording manual credential mapping (`manual_direct_mqtt`) without fake broker credential provisioning.
 
 ###########

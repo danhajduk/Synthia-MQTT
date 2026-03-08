@@ -139,6 +139,7 @@ label {
 }
 
 input,
+select,
 textarea,
 button,
 pre {
@@ -146,6 +147,7 @@ pre {
 }
 
 input,
+select,
 textarea {
   border: 1px solid var(--line);
   border-radius: 8px;

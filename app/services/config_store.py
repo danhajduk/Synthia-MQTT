@@ -77,6 +77,9 @@ class ConfigStore:
         }
         base_topic = overrides.get("base_topic", overrides.get("mqtt_base_topic", os.getenv("MQTT_BASE_TOPIC", "synthia")))
         ha_discovery_prefix = overrides.get("ha_discovery_prefix", os.getenv("HA_DISCOVERY_PREFIX", "homeassistant"))
+        external_direct_access_mode = overrides.get("external_direct_access_mode", "gateway_only")
+        if external_direct_access_mode not in {"gateway_only", "manual_direct_access"}:
+            external_direct_access_mode = "gateway_only"
         qos_default = int(overrides.get("qos_default", overrides.get("mqtt_qos", int(os.getenv("MQTT_QOS", "1")))))
 
         external["password"] = self._mask_secret(external.get("password"))
@@ -88,6 +91,7 @@ class ConfigStore:
             "embedded": embedded,
             "base_topic": base_topic,
             "ha_discovery_prefix": ha_discovery_prefix,
+            "external_direct_access_mode": external_direct_access_mode,
             "qos_default": qos_default,
         }
 
@@ -105,6 +109,10 @@ class ConfigStore:
             state["external_test_signature"] = raw.get(
                 "external_test_signature",
                 state["external_test_signature"],
+            )
+            state["external_direct_access_mode"] = raw.get(
+                "external_direct_access_mode",
+                state["external_direct_access_mode"],
             )
 
         install_config = self.get_install_state()
@@ -125,20 +133,25 @@ class ConfigStore:
             "last_error",
             "external_test_ok",
             "external_test_signature",
+            "external_direct_access_mode",
         ):
             if key in updates:
                 state[key] = updates[key]
         self._save_install_session_state(state)
         return state
 
-    def set_selected_mode(self, mode: str) -> dict[str, Any]:
+    def set_selected_mode(self, mode: str, external_direct_access_mode: str = "gateway_only") -> dict[str, Any]:
         if mode not in {"external", "embedded"}:
             raise ValueError("Unsupported install mode")
+        if external_direct_access_mode not in {"gateway_only", "manual_direct_access"}:
+            external_direct_access_mode = "gateway_only"
         overrides = self._load_overrides()
         overrides["mode"] = mode
+        overrides["external_direct_access_mode"] = external_direct_access_mode
         self._save_overrides(overrides)
         return self.update_install_session_state(
             mode=mode,
+            external_direct_access_mode=external_direct_access_mode,
             setup_state="configuring",
             configured=False,
             verified=False,
@@ -168,6 +181,8 @@ class ConfigStore:
             overrides["base_topic"] = data["base_topic"]
         if "ha_discovery_prefix" in data:
             overrides["ha_discovery_prefix"] = data["ha_discovery_prefix"]
+        if "external_direct_access_mode" in data:
+            overrides["external_direct_access_mode"] = data["external_direct_access_mode"]
         if "qos_default" in data:
             overrides["qos_default"] = data["qos_default"]
 
@@ -253,6 +268,7 @@ class ConfigStore:
             "last_error": None,
             "external_test_ok": False,
             "external_test_signature": None,
+            "external_direct_access_mode": "gateway_only",
         }
 
     @staticmethod

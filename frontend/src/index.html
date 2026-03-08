@@ -16,11 +16,13 @@
       <section id="setup-view" class="hidden">
         <section class="panel banner">
           <h2>Install Status</h2>
-          <div class="status-grid">
-            <div><span>Setup State</span><strong id="status-setup-state">-</strong></div>
-            <div><span>Setup Guidance</span><strong id="status-setup-guidance">-</strong></div>
-            <div><span>Mode</span><strong id="status-mode">-</strong></div>
-            <div><span>Configured</span><strong id="status-configured">-</strong></div>
+            <div class="status-grid">
+              <div><span>Setup State</span><strong id="status-setup-state">-</strong></div>
+              <div><span>Setup Guidance</span><strong id="status-setup-guidance">-</strong></div>
+              <div><span>Mode</span><strong id="status-mode">-</strong></div>
+              <div><span>External Direct Access</span><strong id="status-external-direct-mode">-</strong></div>
+              <div><span>Direct Access Summary</span><strong id="status-direct-summary">-</strong></div>
+              <div><span>Configured</span><strong id="status-configured">-</strong></div>
             <div><span>Verified</span><strong id="status-verified">-</strong></div>
             <div><span>Registered</span><strong id="status-registered">-</strong></div>
             <div><span>Direct MQTT Supported</span><strong id="status-direct-mqtt">-</strong></div>
@@ -72,10 +74,20 @@
                 <label class="check"><input id="external-tls" type="checkbox" /> TLS</label>
                 <label>Username <input id="external-user" type="text" /></label>
                 <label>Password <input id="external-pass" type="password" /></label>
+                <label>
+                  External direct access mode
+                  <select id="external-direct-access-mode">
+                    <option value="gateway_only">Gateway only (recommended)</option>
+                    <option value="manual_direct_access">Manual direct access mapping</option>
+                  </select>
+                </label>
                 <label>Base topic <input id="external-base-topic" type="text" value="synthia" /></label>
                 <label>HA prefix <input id="external-ha-prefix" type="text" value="homeassistant" /></label>
                 <label>Default QoS <input id="external-qos" type="number" min="0" max="2" value="1" /></label>
               </div>
+              <p class="result" id="external-direct-mode-note">
+                Gateway-only mode: addon direct MQTT credentials are not provisioned for external broker mode.
+              </p>
             </div>
             <div id="embedded-form" class="hidden">
               <div class="form-grid">
@@ -206,6 +218,8 @@
             <div><span>Setup State</span><strong id="dash-status-setup-state">-</strong></div>
             <div><span>Setup Guidance</span><strong id="dash-status-setup-guidance">-</strong></div>
             <div><span>Mode</span><strong id="dash-status-mode">-</strong></div>
+            <div><span>External Direct Access</span><strong id="dash-status-external-direct-mode">-</strong></div>
+            <div><span>Direct Access Summary</span><strong id="dash-status-direct-summary">-</strong></div>
             <div><span>Configured</span><strong id="dash-status-configured">-</strong></div>
             <div><span>Verified</span><strong id="dash-status-verified">-</strong></div>
             <div><span>Registered</span><strong id="dash-status-registered">-</strong></div>

@@ -5,6 +5,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 class InstallStatusResponse(BaseModel):
     mode: Literal["external", "embedded"]
+    external_direct_access_mode: Literal["gateway_only", "manual_direct_access"]
+    direct_access_summary: str
     setup_state: Literal["unconfigured", "configuring", "ready", "error", "degraded"]
     setup_guidance: str
     configured: bool
@@ -53,6 +55,7 @@ class InstallApplyRequest(BaseModel):
     embedded: EmbeddedBrokerConfig | None = None
     base_topic: str | None = None
     ha_discovery_prefix: str | None = None
+    external_direct_access_mode: Literal["gateway_only", "manual_direct_access"] = "gateway_only"
     qos_default: int | None = Field(default=None, ge=0, le=2)
     allow_unvalidated: bool = False
 
@@ -76,12 +79,14 @@ class InstallModeUpdateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     mode: Literal["external", "embedded"]
+    external_direct_access_mode: Literal["gateway_only", "manual_direct_access"] = "gateway_only"
 
 
 class InstallModeUpdateResponse(BaseModel):
     ok: bool
     mode: Literal["external", "embedded"]
     direct_mqtt_supported: bool
+    external_direct_access_mode: Literal["gateway_only", "manual_direct_access"]
 
 
 class CoreRegistryRequest(BaseModel):

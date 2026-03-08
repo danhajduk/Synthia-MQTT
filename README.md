@@ -76,16 +76,21 @@ open http://localhost:18080/ui
 
 - `setup_state`: `unconfigured | configuring | ready | error | degraded`
 - `setup_guidance`: next-action hint for operators
+- `external_direct_access_mode`: `gateway_only | manual_direct_access`
+- `direct_access_summary`: explicit direct-access capability note for selected mode
 
 Fresh installs remain `unconfigured` until broker mode/config is applied.
 `POST /api/mqtt/publish` and `POST /api/ha/discovery/sensor` return `409` until setup reaches `ready` (or `degraded`).
 
 For external broker mode, `POST /api/install/apply` requires a prior successful
 `POST /api/install/test-external` for the same config unless `allow_unvalidated=true`.
+`POST /api/install/mode` and `POST /api/install/apply` also accept `external_direct_access_mode`.
 
 `POST /api/mqtt/registrations` supports `gateway_only`, `direct_mqtt`, and `both` access modes.
 `GET /api/mqtt/registrations` returns registration inspection details and setup capability summary for operators.
 Direct modes provision stable long-term broker credentials and support rotation with `reprovision=true`.
+In external `gateway_only` mode, `direct_mqtt` and `both` registrations are rejected.
+In external `manual_direct_access` mode, registrations can record `manual_direct_mqtt` mapping (`username`, optional `credential_ref`) and operators manage broker-side credentials.
 Registration applies ACL/topic realization with publish/subscribe separation and reserved namespace restrictions.
 Registrations also include HA mode grants (`none`, `gateway_managed`, `direct_allowed`) enforced by HA gateway helper endpoints.
 Publish APIs now enforce topic validation (ownership, reserved namespace restrictions, lifecycle topic pattern checks)

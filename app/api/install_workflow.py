@@ -63,6 +63,14 @@ def _setup_guidance(setup_state: str) -> str:
     return "Setup is in error state. Review last_error and re-run setup."
 
 
+def _direct_access_summary(mode: str, external_direct_access_mode: str) -> str:
+    if mode == "embedded":
+        return "Embedded broker supports managed direct MQTT credentials."
+    if external_direct_access_mode == "manual_direct_access":
+        return "External broker direct access is manual-only: operator must provision broker users and record mapping."
+    return "External broker is gateway-only: direct MQTT credentials are not provisioned."
+
+
 def _external_signature(payload: ExternalConnectionConfig) -> str:
     return "|".join(
         [
@@ -95,6 +103,9 @@ def build_install_workflow_router(
         broker_manager = BrokerManager()
         docker_sock_available = broker_manager.docker_socket_available()
         broker_running = broker_manager.broker_running() if install_state["mode"] == "embedded" else False
+        external_direct_access_mode = str(install_state.get("external_direct_access_mode") or "gateway_only")
+        if external_direct_access_mode not in {"gateway_only", "manual_direct_access"}:
+            external_direct_access_mode = "gateway_only"
 
         if not bool(install_state["configured"]) and setup_state != "configuring":
             setup_state = "unconfigured"
@@ -103,10 +114,14 @@ def build_install_workflow_router(
         elif setup_state not in {"unconfigured", "configuring", "ready", "error", "degraded"}:
             setup_state = "error"
 
-        direct_mqtt_supported = install_state["mode"] == "embedded"
+        direct_mqtt_supported = install_state["mode"] == "embedded" or (
+            install_state["mode"] == "external" and external_direct_access_mode == "manual_direct_access"
+        )
 
         return InstallStatusResponse(
             mode=install_state["mode"],
+            external_direct_access_mode=external_direct_access_mode,
+            direct_access_summary=_direct_access_summary(install_state["mode"], external_direct_access_mode),
             setup_state=setup_state,
             setup_guidance=_setup_guidance(setup_state),
             configured=bool(install_state["configured"]),
@@ -125,11 +140,17 @@ def build_install_workflow_router(
         payload: InstallModeUpdateRequest,
         _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
     ) -> InstallModeUpdateResponse:
-        config_store.set_selected_mode(payload.mode)
+        updated = config_store.set_selected_mode(
+            payload.mode,
+            external_direct_access_mode=payload.external_direct_access_mode,
+        )
         return InstallModeUpdateResponse(
             ok=True,
             mode=payload.mode,
-            direct_mqtt_supported=payload.mode == "embedded",
+            direct_mqtt_supported=payload.mode == "embedded" or (
+                payload.mode == "external" and updated.get("external_direct_access_mode") == "manual_direct_access"
+            ),
+            external_direct_access_mode=str(updated.get("external_direct_access_mode") or "gateway_only"),
         )
 
     @router.post("/test-external", response_model=InstallTestExternalResponse)
@@ -163,6 +184,7 @@ def build_install_workflow_router(
             setup_state="configuring",
             configured=False,
             verified=False,
+            external_direct_access_mode=payload.external_direct_access_mode,
             last_error=None,
         )
         if payload.mode == "external" and not payload.allow_unvalidated:
@@ -206,6 +228,7 @@ def build_install_workflow_router(
                 setup_state="ready",
                 configured=True,
                 verified=True,
+                external_direct_access_mode=payload.external_direct_access_mode,
                 last_error=None,
             )
             return InstallApplyResponse(ok=True)
@@ -238,6 +261,7 @@ def build_install_workflow_router(
                 setup_state="ready",
                 configured=True,
                 verified=True,
+                external_direct_access_mode=payload.external_direct_access_mode,
                 last_error=None,
             )
             return InstallApplyResponse(ok=True)

@@ -37,9 +37,30 @@ def build_mqtt_registration_router(
     ) -> MqttRegistrationResponse:
         install_state = config_store.get_install_session_state()
         broker_mode = "embedded" if install_state.get("mode") == "embedded" else "external"
+        external_direct_access_mode = str(install_state.get("external_direct_access_mode") or "gateway_only")
         try:
-            record = store.upsert(payload, broker_mode=broker_mode)
+            if broker_mode == "external" and external_direct_access_mode == "gateway_only" and payload.access_mode in {
+                "direct_mqtt",
+                "both",
+            }:
+                raise ValueError("External gateway_only mode does not allow direct MQTT registration")
+            record = store.upsert(
+                payload,
+                broker_mode=broker_mode,
+                external_direct_access_mode=external_direct_access_mode,
+            )
         except TopicPermissionError as exc:
+            trace_store.append(
+                PublishTraceLogRequest(
+                    operation="mqtt.registration.upsert",
+                    outcome="denied",
+                    addon_id=payload.addon_id.strip(),
+                    caller_sub=_claims.sub,
+                    detail=str(exc),
+                )
+            )
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except ValueError as exc:
             trace_store.append(
                 PublishTraceLogRequest(
                     operation="mqtt.registration.upsert",
@@ -67,6 +88,7 @@ def build_mqtt_registration_router(
     ) -> MqttRegistrationInspectionResponse:
         install_state = config_store.get_install_session_state()
         broker_mode = "embedded" if install_state.get("mode") == "embedded" else "external"
+        external_direct_access_mode = str(install_state.get("external_direct_access_mode") or "gateway_only")
         health_snapshot = health_service.snapshot()
         reachable = bool(health_snapshot.mqtt_connected)
         if install_state.get("setup_state") == "unconfigured":
@@ -78,7 +100,7 @@ def build_mqtt_registration_router(
             setup_state=str(install_state.get("setup_state") or "unconfigured"),
             broker_mode=broker_mode,
             broker_reachable=reachable,
-            direct_mqtt_supported=(broker_mode == "embedded"),
+            direct_mqtt_supported=(broker_mode == "embedded" or external_direct_access_mode == "manual_direct_access"),
             broker_profile="embedded-managed" if broker_mode == "embedded" else "external-manual",
         )
         records = [
@@ -90,6 +112,7 @@ def build_mqtt_registration_router(
                 subscribe_scopes=record.permissions.subscribe,
                 broker_profile=store.broker_profile_for(record.addon_id),
                 health=reg_health,
+                manual_direct_mqtt=record.manual_direct_mqtt,
                 direct_mqtt_username=record.direct_mqtt.username if record.direct_mqtt is not None else None,
                 updated_at=record.updated_at,
             )

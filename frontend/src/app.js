@@ -15,6 +15,7 @@ const state = {
     tls: false,
     username: "",
     hasPassword: false,
+    directAccessMode: "gateway_only",
     baseTopic: "synthia",
     haPrefix: "homeassistant",
     qos: 1,
@@ -109,12 +110,17 @@ function fillFieldsFromState() {
   document.querySelectorAll('input[name="mode"]').forEach((radio) => {
     radio.checked = radio.value === state.mode;
   });
+  $("external-direct-access-mode").addEventListener("change", () => {
+    snapshotFieldsToState();
+    syncModeUI();
+  });
 
   $("external-host").value = state.external.host;
   $("external-port").value = String(state.external.port);
   $("external-tls").checked = Boolean(state.external.tls);
   $("external-user").value = state.external.username;
   $("external-pass").value = "";
+  $("external-direct-access-mode").value = state.external.directAccessMode || "gateway_only";
   $("external-base-topic").value = state.external.baseTopic;
   $("external-ha-prefix").value = state.external.haPrefix;
   $("external-qos").value = String(state.external.qos);
@@ -143,6 +149,7 @@ function snapshotFieldsToState() {
   state.external.tls = $("external-tls").checked;
   state.external.username = $("external-user").value.trim();
   state.external.hasPassword = Boolean($("external-pass").value);
+  state.external.directAccessMode = $("external-direct-access-mode").value || "gateway_only";
   state.external.baseTopic = $("external-base-topic").value.trim() || "synthia";
   state.external.haPrefix = $("external-ha-prefix").value.trim() || "homeassistant";
   state.external.qos = Number($("external-qos").value);
@@ -187,6 +194,12 @@ function syncModeUI() {
     registerToggle.disabled = false;
   }
   setResult("mode-support", mode === "embedded" ? "Direct MQTT expected: yes" : "Direct MQTT expected: no (gateway mode)");
+  if (mode === "external") {
+    $("external-direct-mode-note").textContent =
+      state.external.directAccessMode === "manual_direct_access"
+        ? "Manual direct mode: operator must provision broker-side users and record manual mapping per registration."
+        : "Gateway-only mode: addon direct MQTT credentials are not provisioned for external broker mode.";
+  }
   snapshotFieldsToState();
   saveState();
 }
@@ -237,6 +250,8 @@ function updateSetupStatus(install, health) {
   setText("status-setup-state", install.setup_state);
   setText("status-setup-guidance", install.setup_guidance);
   setText("status-mode", install.mode);
+  setText("status-external-direct-mode", install.external_direct_access_mode);
+  setText("status-direct-summary", install.direct_access_summary);
   setText("status-configured", String(install.configured));
   setText("status-verified", String(install.verified));
   setText("status-registered", String(install.registered_to_core));
@@ -252,6 +267,8 @@ function updateDashboardStatus(install, health) {
   setText("dash-status-setup-state", install.setup_state);
   setText("dash-status-setup-guidance", install.setup_guidance);
   setText("dash-status-mode", install.mode);
+  setText("dash-status-external-direct-mode", install.external_direct_access_mode);
+  setText("dash-status-direct-summary", install.direct_access_summary);
   setText("dash-status-configured", String(install.configured));
   setText("dash-status-verified", String(install.verified));
   setText("dash-status-registered", String(install.registered_to_core));
@@ -301,10 +318,13 @@ async function runTestStep() {
 
 async function saveModeSelection() {
   snapshotFieldsToState();
-  const result = await api("/api/install/mode", "POST", { mode: state.mode });
+  const result = await api("/api/install/mode", "POST", {
+    mode: state.mode,
+    external_direct_access_mode: state.external.directAccessMode,
+  });
   setResult(
     "mode-save-result",
-    `Mode saved: ${result.mode}. Direct MQTT expected: ${result.direct_mqtt_supported ? "yes" : "no"}.`
+    `Mode saved: ${result.mode}. External direct mode: ${result.external_direct_access_mode}. Direct MQTT expected: ${result.direct_mqtt_supported ? "yes" : "no"}.`
   );
   await loadStatusSnapshot();
 }
@@ -318,8 +338,9 @@ function buildApplyPayload() {
         port: state.external.port,
         tls: state.external.tls,
         username: state.external.username || null,
-        password: $("external-pass").value || null,
-      },
+      password: $("external-pass").value || null,
+    },
+      external_direct_access_mode: state.external.directAccessMode,
       base_topic: state.external.baseTopic,
       ha_discovery_prefix: state.external.haPrefix,
       qos_default: state.external.qos,
@@ -447,6 +468,7 @@ function resetStateDefaults() {
       tls: false,
       username: "",
       hasPassword: false,
+      directAccessMode: "gateway_only",
       baseTopic: "synthia",
       haPrefix: "homeassistant",
       qos: 1,

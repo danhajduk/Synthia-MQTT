@@ -22,20 +22,41 @@ class RegistrationStore:
         self._seed_path = base_dir / "runtime" / "mqtt_credential_seed"
         self._base_dir = base_dir
 
-    def upsert(self, request: MqttRegistrationRequest, broker_mode: str = "external") -> MqttRegistrationRecord:
+    def upsert(
+        self,
+        request: MqttRegistrationRequest,
+        broker_mode: str = "external",
+        external_direct_access_mode: str = "gateway_only",
+    ) -> MqttRegistrationRecord:
         data = self._load_all()
         addon_id = request.addon_id.strip()
         existing = data.get(addon_id, {})
         realized = realize_topic_permissions(addon_id, request.publish_topics, request.subscribe_topics)
+        if external_direct_access_mode not in {"gateway_only", "manual_direct_access"}:
+            external_direct_access_mode = "gateway_only"
 
         direct_credentials: DirectMqttCredentials | None = None
+        manual_direct_mapping: dict[str, str] | None = None
         credential_meta = existing.get("credential_meta") if isinstance(existing, dict) else None
         if request.access_mode in {"direct_mqtt", "both"}:
-            direct_credentials, credential_meta = self._issue_direct_credentials(
-                addon_id=addon_id,
-                reprovision=request.reprovision,
-                existing_meta=credential_meta if isinstance(credential_meta, dict) else None,
-            )
+            if broker_mode == "embedded":
+                direct_credentials, credential_meta = self._issue_direct_credentials(
+                    addon_id=addon_id,
+                    reprovision=request.reprovision,
+                    existing_meta=credential_meta if isinstance(credential_meta, dict) else None,
+                )
+            else:
+                manual_raw = request.manual_direct_mqtt or {}
+                username = str(manual_raw.get("username", "")).strip()
+                credential_ref = str(manual_raw.get("credential_ref", "")).strip()
+                if not username:
+                    raise ValueError(
+                        "External direct access mode requires manual_direct_mqtt.username for direct_mqtt/both registrations"
+                    )
+                manual_direct_mapping = {"username": username}
+                if credential_ref:
+                    manual_direct_mapping["credential_ref"] = credential_ref
+                credential_meta = None
         else:
             credential_meta = None
 
@@ -51,6 +72,7 @@ class RegistrationStore:
             ),
             ha_mode=request.ha_mode,
             capabilities=request.capabilities,
+            manual_direct_mqtt=manual_direct_mapping,
             direct_mqtt=direct_credentials,
             updated_at=datetime.now(timezone.utc),
         )
@@ -58,6 +80,7 @@ class RegistrationStore:
         if credential_meta is not None:
             payload["credential_meta"] = credential_meta
         payload["acl_mode"] = "embedded-generated" if broker_mode == "embedded" else "external-manual"
+        payload["external_direct_access_mode"] = external_direct_access_mode
         data[record.addon_id] = payload
         self._save_all(data)
         if broker_mode == "embedded":

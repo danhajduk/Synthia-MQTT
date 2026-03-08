@@ -13,6 +13,7 @@ class MqttRegistrationRequest(BaseModel):
     subscribe_topics: list[str] = Field(default_factory=list)
     capabilities: dict[str, object] = Field(default_factory=dict)
     ha_mode: Literal["none", "gateway_managed", "direct_allowed"] = "none"
+    manual_direct_mqtt: dict[str, str] | None = None
     reprovision: bool = False
 
 
@@ -35,6 +36,7 @@ class MqttRegistrationRecord(BaseModel):
     permissions: RegistrationPermissions
     ha_mode: Literal["none", "gateway_managed", "direct_allowed"]
     capabilities: dict[str, object]
+    manual_direct_mqtt: dict[str, str] | None = None
     direct_mqtt: DirectMqttCredentials | None = None
     updated_at: datetime
 
@@ -60,6 +62,7 @@ class RegistrationInspectionRecord(BaseModel):
     subscribe_scopes: list[str]
     broker_profile: str
     health: Literal["healthy", "degraded", "unreachable", "unknown"]
+    manual_direct_mqtt: dict[str, str] | None = None
     direct_mqtt_username: str | None = None
     updated_at: datetime
 

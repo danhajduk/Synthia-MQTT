@@ -64,6 +64,9 @@ External apply validation behavior:
 - `POST /api/install/test-external` records the last successful external connection test signature.
 - `POST /api/install/apply` for `mode=external` requires a matching successful test first.
 - override is supported with request flag `allow_unvalidated=true`.
+- `POST /api/install/mode` and `POST /api/install/apply` accept `external_direct_access_mode`:
+  - `gateway_only`
+  - `manual_direct_access`
 
 `GET /api/install/status` now reports first-run setup readiness fields:
 
@@ -72,6 +75,8 @@ External apply validation behavior:
 - `direct_mqtt_supported`: expected direct MQTT support for selected mode
 - `docker_sock_available`: whether Docker socket is available to manage embedded broker
 - `broker_running`: current embedded broker container running status (embedded mode)
+- `external_direct_access_mode`: `gateway_only | manual_direct_access`
+- `direct_access_summary`: explicit capability limits for selected mode
 
 Fresh installs report `setup_state=unconfigured` until mode/config is applied.
 
@@ -172,6 +177,10 @@ MQTT registration endpoint:
   - `direct_allowed`
 - request flag `reprovision=true` rotates direct MQTT credential version for `direct_mqtt`/`both` registrations.
 - direct modes return stable broker credentials (`username`, `password`) derived from persisted local credential metadata.
+- external direct-access behavior:
+  - external `gateway_only` rejects `direct_mqtt` and `both` registration requests
+  - external `manual_direct_access` allows manual mapping via `manual_direct_mqtt` (`username`, optional `credential_ref`)
+  - manual mapping records identity linkage only; addon does not provision external broker-side users/passwords
 - registration now realizes effective ACL permissions:
   - separate `permissions.publish` and `permissions.subscribe`
   - publish to reserved namespaces is rejected
