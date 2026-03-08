@@ -1,5 +1,5 @@
-.card,
-.panel {
+:root.core-theme-fallback .card,
+:root.core-theme-fallback .panel {
   background: hsl(var(--color-panel, var(--local-color-panel)));
   border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: var(--radius-md, var(--local-radius-md));
@@ -7,8 +7,8 @@
   padding: 14px;
 }
 
-.btn,
-button {
+:root.core-theme-fallback .btn,
+:root.core-theme-fallback button {
   border: 0;
   border-radius: var(--radius-sm, var(--local-radius-sm));
   padding: 8px 12px;
@@ -17,12 +17,12 @@ button {
   cursor: pointer;
 }
 
-.btn-primary,
-button:not(.secondary) {
+:root.core-theme-fallback .btn-primary,
+:root.core-theme-fallback button:not(.secondary) {
   background: hsl(var(--color-primary, var(--local-color-primary)));
 }
 
-.pill {
+:root.core-theme-fallback .pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -31,31 +31,29 @@ button:not(.secondary) {
   border-radius: 999px;
   color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
   background: color-mix(in srgb, hsl(var(--color-panel, var(--local-color-panel))) 78%, white);
-}
-
-.home-mini {
+:root.core-theme-fallback .home-mini {
   border: 2px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: var(--radius-md, var(--local-radius-md));
   background: hsl(var(--color-panel, var(--local-color-panel)));
   padding: 10px;
 }
 
-.home-mini.warn {
+:root.core-theme-fallback .home-mini.warn {
   border-color: hsl(var(--color-warning, var(--local-color-warning)));
 }
 
-.home-mini.bad {
+:root.core-theme-fallback .home-mini.bad {
   border-color: hsl(var(--color-danger, var(--local-color-danger)));
 }
 
-.home-mini-title {
+:root.core-theme-fallback .home-mini-title {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
 }
 
-.home-mini-value {
+:root.core-theme-fallback .home-mini-value {
   margin-top: 4px;
   font-size: 18px;
   font-weight: 700;

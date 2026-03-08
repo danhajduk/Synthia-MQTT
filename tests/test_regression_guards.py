@@ -142,6 +142,8 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn(".home-mini", css_text)
         self.assertIn(".home-mini-title", css_text)
         self.assertIn(".home-mini-value", css_text)
+        self.assertIn(":root.core-theme-fallback .home-mini", css_text)
+        self.assertIn(":root.core-theme-fallback .card", css_text)
 
 
 if __name__ == "__main__":
