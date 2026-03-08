@@ -7,7 +7,6 @@ from typing import Any
 from app.models.addon_models import AddonConfigUpdate
 from app.models.install_models import InstallApplyRequest
 from app.services.broker_manager import (
-    enable_embedded_broker_stack,
     write_embedded_broker_files,
     write_embedded_compose_override,
 )
@@ -298,9 +297,7 @@ class ConfigStore:
 
         write_embedded_broker_files(broker_dir=broker_dir, embedded_config=embedded)
         write_embedded_compose_override(override_file=override_file, broker_dir=broker_dir, port=port)
-
-        ok, reason = enable_embedded_broker_stack(repo_root=self._base_dir, override_file=override_file)
-        return ok, reason
+        return True, None
 
     def _load_overrides(self) -> dict[str, Any]:
         if not self._config_path.exists():

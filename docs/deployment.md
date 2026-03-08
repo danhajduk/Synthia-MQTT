@@ -28,7 +28,7 @@ Verified UI access path:
 Notes:
 
 - This compose file does not define `mosquitto`.
-- Embedded mode relies on runtime override generation and host Docker compose execution path.
+- Embedded mode writes runtime broker artifacts and desired-state intent; compose reconciliation is supervisor-driven.
 - Managed embedded broker container name is `synthia-addon-mqtt-mosquitto`.
 
 ## Bootstrap installer

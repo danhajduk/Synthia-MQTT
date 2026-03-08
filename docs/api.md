@@ -59,7 +59,7 @@ Current capability values:
 Implemented install modes:
 
 - `external`: stores broker host/port/tls/credentials and reloads MQTT client
-- `embedded`: writes broker files under `runtime/broker/` and attempts `docker compose up` for `mosquitto` + `mqtt-addon`
+- `embedded`: writes broker files and compose override under `runtime/broker/`; supervisor/Core reconcile is expected to apply compose changes from desired/runtime state
 
 External apply validation behavior:
 
