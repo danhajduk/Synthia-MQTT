@@ -56,3 +56,14 @@ What and why:
 Ran `./scripts/rebuild.sh` successfully, refreshed `docs/mismatch-report.md` release-gate metadata to current date/time, then reran `./scripts/release-addon.sh 0.2.0` successfully. Artifact was re-uploaded to `v0.2.0` and `release-output.json` regenerated with SHA256 `5d3054237e39c7087872e86981f916711d32654f3c1d8f844207db8aabf4a150`.
 
 ###########
+
+Task #077 :
+
+Error context: Runtime directory was omitted from staging paths used by release/sign packaging flows, causing incomplete Docker build context in packaged artifacts.
+
+Reasoning: Staging path definitions must include `runtime/` (and Docker files) consistently across manifest metadata and packaging scripts to guarantee extracted artifacts can rebuild images.
+
+What and why:
+Added `docker` and `runtime` to `manifest.json` paths, added `runtime` to default `PACKAGE_PATHS` in `scripts/release-addon.sh`, and expanded fallback staging paths in `scripts/sign-addon.sh` to include `docker` and `runtime`. Added regression guards to assert manifest and release-script coverage, and updated deployment docs to document staging inputs.
+
+###########

@@ -195,7 +195,7 @@ while IFS= read -r p; do
   [[ -n "$p" ]] && PATHS+=("${p#./}")
 done < <(json_list_get '.paths' || true)
 if [[ ${#PATHS[@]} -eq 0 ]]; then
-  PATHS=(app frontend requirements.txt)
+  PATHS=(docker app frontend runtime requirements.txt)
 fi
 
 FILES=( "$MANIFEST" )

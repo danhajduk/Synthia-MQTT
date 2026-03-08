@@ -17,7 +17,7 @@ CHANNEL="${CHANNEL:-stable}"
 OUTPUT_JSON="${OUTPUT_JSON:-release-output.json}"
 
 # What gets packaged (compose-bundle profile)
-PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json docker app frontend requirements.txt}"
+PACKAGE_PATHS="${PACKAGE_PATHS:-manifest.json docker app frontend runtime requirements.txt}"
 
 ########################################
 # VALIDATION

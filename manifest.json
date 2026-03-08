@@ -18,8 +18,10 @@
   ],
   "paths": [
     "manifest.json",
+    "docker",
     "frontend",
     "app",
+    "runtime",
     "requirements.txt"
   ],
   "entrypoints": {

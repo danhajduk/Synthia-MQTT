@@ -150,6 +150,7 @@ Completed Tasks
 74. Task 74: Fix UI route serving in container mode so `/ui` resolves to setup/dashboard shell instead of `{"detail":"Not Found"}` - Completed on 03/08/2026 09:35
 75. Task 75: Add regression checks for container UI availability and `/ui` route response, then update docs with verified access path - Completed on 03/08/2026 09:35
 76. Task 76: Rebuild and republish release 0.2.0 - Completed on 03/08/2026 09:38
+77. Task 77: Include runtime directory in release/sign staging inputs for Docker build context parity - Completed on 03/08/2026 09:47
 
 ##################################
 Tasks in Progress

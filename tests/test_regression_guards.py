@@ -1,4 +1,5 @@
 import unittest
+import json
 from pathlib import Path
 
 from app.services.health import HealthService
@@ -33,6 +34,19 @@ class RegressionGuardsTest(unittest.TestCase):
         text = main_file.read_text(encoding="utf-8")
         self.assertIn('app.mount("/ui", StaticFiles(directory=ui_dist, html=True), name="ui")', text)
         self.assertIn('@app.get("/ui", include_in_schema=False)', text)
+
+    def test_manifest_paths_include_runtime_and_docker(self) -> None:
+        manifest_file = Path(__file__).resolve().parents[1] / "manifest.json"
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+        paths = manifest.get("paths") or []
+        self.assertIn("docker", paths)
+        self.assertIn("runtime", paths)
+
+    def test_release_script_packages_runtime(self) -> None:
+        release_script = Path(__file__).resolve().parents[1] / "scripts" / "release-addon.sh"
+        text = release_script.read_text(encoding="utf-8")
+        self.assertIn("PACKAGE_PATHS", text)
+        self.assertIn("runtime", text)
 
 
 if __name__ == "__main__":

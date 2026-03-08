@@ -62,6 +62,8 @@ Validation helper:
 Release gate:
 
 - `scripts/release-addon.sh` runs `scripts/check-doc-alignment.sh --release-gate` before packaging/upload.
+- release staging paths include Docker build context dependencies:
+  - `manifest.json`, `docker/`, `app/`, `frontend/`, `runtime/`, `requirements.txt`
 - Release-gate mode requires:
   - `docs/mismatch-report.md` `Last Verified` date matches current date
   - `docs/mismatch-report.md` `Audit Run` date matches current date
