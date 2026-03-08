@@ -1,4 +1,5 @@
-Task #39 :
-Reasoning: Re-audit mismatches against `/home/dan/Projects/Synthia/docs` using code-verified behavior and current golden documentation to keep only active drift findings.
-What and why: Rechecked `/home/dan/Projects/Synthia/docs/{addons.md,standalone-addon.md,api.md,Policies/Synthia_Addon_API_and_MQTT_Standard.md}` against local implementation and docs. Updated `docs/mismatch-report.md` to 3 active findings, removed the stale endpoint-coverage mismatch now covered by policy docs, and retained active layout/version/ownership-boundary mismatches.
+Task #40.1 :
+Error context: Local scripts/docs included pinned addon version examples that drift from `manifest.json` and require manual edits each release.
+Reasoning: Derive displayed/used versions from `manifest.json` and replace fixed version examples with dynamic placeholders to keep operator guidance aligned automatically.
+What and why: Updated FastAPI app metadata version to `ADDON_VERSION.version`, replaced hardcoded bootstrap version examples in `README.md` and `scripts/bootstrap-install.sh`, and updated deployment/manifest docs to instruct version sourcing from `manifest.json`.
 ###########

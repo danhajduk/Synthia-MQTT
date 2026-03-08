@@ -46,6 +46,6 @@ Verified values:
 
 - `schema_version`: `1.1`
 - `id`: `mqtt`
-- `version`: `0.1.9`
+- `version`: sourced from `manifest.json` (`python3 -c 'import json;print(json.load(open("manifest.json","r",encoding="utf-8"))["version"])'`)
 - `package_profile`: `standalone_service`
 - `permissions`: `network.egress`, `mqtt.publish`, `mqtt.subscribe`

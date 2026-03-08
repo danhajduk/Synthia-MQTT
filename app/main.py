@@ -19,7 +19,7 @@ from app.services.policy_cache import PolicyCache
 from app.services.telemetry_reporter import TelemetryReporter
 from app.services.token_auth import ServiceTokenValidator
 
-app = FastAPI(title="Synthia MQTT Addon", version="0.1.0")
+app = FastAPI(title="Synthia MQTT Addon", version=ADDON_VERSION.version)
 
 logging.basicConfig(
     level=logging.INFO,

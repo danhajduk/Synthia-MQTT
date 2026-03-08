@@ -96,6 +96,7 @@ Completed Tasks
 38.5 Task 38.5: Align bootstrap output with canonical SSAP layout expectations (services/<addon_id> primary path + desired/runtime artifacts + compatibility links) - Completed on 03/07/2026 16:42
 38.6 Task 38.6: Add contract validation checks covering auth, policy topics, telemetry, capability naming, and SSAP layout invariants - Completed on 03/07/2026 16:46
 39. Task 39: recheck with the /home/dan/Projects/Synthia/docs for mismatches - Completed on 03/07/2026 17:05
+40.1 Task 40.1: Eliminate hardcoded addon version usage in local scripts/docs by sourcing version from manifest.json - Completed on 03/07/2026 17:23
 
 ##################################
 Tasks in Progress
@@ -104,7 +105,6 @@ Tasks in Progress
 ##################################
 Pending Tasks
 ##################################
-40.1 Task 40.1: Eliminate hardcoded addon version usage in local scripts/docs by sourcing version from manifest.json
 40.2 Task 40.2: Update bootstrap installer to generate SSAP-aligned extracted build-context layout under versions/<version>/extracted
 40.3 Task 40.3: Add local documentation note clarifying addon entrypoint path mapping vs Core repo path examples
 40.4 Task 40.4: Extend local validation tooling to assert extracted layout and version-source invariants

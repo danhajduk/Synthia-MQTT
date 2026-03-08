@@ -14,8 +14,8 @@ set -euo pipefail
 # Usage:
 #   ./bootstrap-artifact.sh
 #   ./bootstrap-artifact.sh --version latest
-#   ./bootstrap-artifact.sh --version v0.1.7
-#   ./bootstrap-artifact.sh --version 0.1.7
+#   ./bootstrap-artifact.sh --version <tag>
+#   ./bootstrap-artifact.sh --version v<major.minor.patch>
 #   ./bootstrap-artifact.sh --core-url http://10.0.0.100:9001
 # ------------------------------------------------------------
 
@@ -49,8 +49,8 @@ Options:
 Examples:
   $0
   $0 --version latest
-  $0 --version v0.1.7
-  $0 --version 0.1.7 --core-url http://10.0.0.100:9001
+  $0 --version v<major.minor.patch>
+  $0 --version <major.minor.patch> --core-url http://10.0.0.100:9001
 EOF
 }
 
