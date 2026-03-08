@@ -1,0 +1,111 @@
+Workflow skill: $synthia-workflow 
+(/home/dan/.codex/skills/synthia-workflow/SKILL.md)
+
+You can edit below the Task List header 
+#######################################################
+Task List
+#######################################################
+
+##################################
+Completed Tasks
+##################################
+01. Task 01: Keep service layout in addon artifact - Completed on 03/01/2026 05:49
+02. Task 02: Set catalog release package_profile to standalone_service - Completed on 03/01/2026 05:50
+03. Task 03: Do not use embedded install path for that artifact - Completed on 03/01/2026 05:51
+04. Task 04: Deploy service externally (container/systemd/host process) - Completed on 03/01/2026 05:52
+05. Task 05: Register service endpoint in Core via POST /api/admin/addons/registry with addon_id and base_url - Completed on 03/01/2026 05:53
+06. Task 06: Validate service health/announce flow and proxy behavior - Completed on 03/01/2026 05:55
+07.1 Task 07.1: Upgrade manifest.json to Synthia Addon Standard v1.1 canonical fields - Completed on 03/01/2026 09:10
+07.2 Task 07.2: Update release and signing scripts for Synthia Addon Standard v1.1 manifest contract - Completed on 03/01/2026 09:12
+07.3 Task 07.3: Update repository documentation for Synthia Addon Standard alignment - Completed on 03/01/2026 09:12
+07. Task 07: Implement Synthia Addon Standard in addon repository - Completed on 03/01/2026 09:12
+08.1 Task 08.1: Add GET /api/addon/version endpoint returning canonical runtime version metadata - Completed on 03/01/2026 18:47
+08.2 Task 08.2: Add GET /api/addon/permissions endpoint returning canonical manifest permissions - Completed on 03/01/2026 18:48
+08.3 Task 08.3: Enforce version consistency across announce payload and version endpoint - Completed on 03/01/2026 18:49
+08. Task 08: Align addon API contract with SSAP v1.0 standalone_service requirements - Completed on 03/01/2026 18:49
+09.1 Task 09.1: Add desired.json and runtime.json schemas/examples for standalone_service deployment - Completed on 03/01/2026 18:50
+09.2 Task 09.2: Add docker-compose generation and ownership boundaries documentation - Completed on 03/01/2026 18:50
+09.3 Task 09.3: Document required SynthiaAddons directory layout and activation flow - Completed on 03/01/2026 18:51
+09. Task 09: Add SSAP desired/runtime state integration artifacts - Completed on 03/01/2026 18:51
+10.1 Task 10.1: Extend validate-service-flow script to verify API endpoints - Completed on 03/01/2026 18:52
+10.2 Task 10.2: Add MQTT retained topic and payload compliance checks - Completed on 03/01/2026 18:53
+10.3 Task 10.3: Add contract checks for permission vocabulary and package_profile consistency - Completed on 03/01/2026 18:54
+10. Task 10: Expand validation tooling for SSAP compliance checks - Completed on 03/01/2026 18:54
+11.1 Task 11.1: Update README with required endpoints and lifecycle notes - Completed on 03/01/2026 18:55
+11.2 Task 11.2: Add release checklist for artifact/hash/signature compliance - Completed on 03/01/2026 18:56
+11.3 Task 11.3: Add operator responsibility split documentation - Completed on 03/01/2026 18:56
+11. Task 11: Update documentation and release guidance for SSAP + SAS alignment - Completed on 03/01/2026 18:56
+12. Task 12: Add bootstrap installer script for latest release download and interactive setup - Completed on 03/05/2026 11:33
+13.1 Task 13.1: Discover/document current bootstrap flow and v2 deltas - Completed on 03/05/2026 12:04
+13.2 Task 13.2: Implement latest/tag release resolver with checksum behavior - Completed on 03/05/2026 12:08
+13.3 Task 13.3: Add deterministic install idempotency and force re-install flag - Completed on 03/05/2026 12:10
+13.4 Task 13.4: Start docker compose in addon-only mode with bind/port options - Completed on 03/05/2026 12:13
+13.5 Task 13.5: Add readiness wait loop and auto-open setup UI controls - Completed on 03/05/2026 12:16
+13.6 Task 13.6: Add bootstrap validation helper script and README quick-start updates - Completed on 03/05/2026 12:18
+13. Task 13: MQTT Addon Bootstrap v2 (latest release + addon-only docker + auto-open setup UI) - Completed on 03/05/2026 12:18
+14.1 Task 14.1: Persist install session state model under runtime and expose via install status - Completed on 03/05/2026 12:20
+14.2 Task 14.2: Add external broker diagnostic test response and apply state synchronization - Completed on 03/05/2026 12:22
+14.3 Task 14.3: Implement embedded broker runtime enablement and restart state integration - Completed on 03/05/2026 12:25
+14.4 Task 14.4: Enhance core registration endpoint with preferred/fallback routes and state updates - Completed on 03/05/2026 12:27
+14.5 Task 14.5: Implement setup wizard pages with state persistence and reset flow - Completed on 03/05/2026 12:34
+14.6 Task 14.6: Gate /ui to setup vs dashboard based on install configured state - Completed on 03/05/2026 12:40
+14. Task 14: MQTT Addon Setup Wizard v1 (embedded broker vs external broker + Core registration) - Completed on 03/05/2026 13:12
+13.7 Task 13.7: Enable non-interactive bootstrap validation mode and port-safe defaults - Completed on 03/05/2026 13:12
+15.1 Task 15.1: Default bootstrap install directory to current workdir SynthiaAddons/Synthia-MQTT - Completed on 03/05/2026 13:20
+15.2 Task 15.2: Use full host IP in bootstrap UI link output (avoid localhost default) - Completed on 03/05/2026 13:23
+15.3 Task 15.3: Add default dashboard placeholder page if dashboard is missing - Completed on 03/05/2026 13:24
+15. Task 15: Bootstrap install path + UI URL + default dashboard placeholder - Completed on 03/05/2026 13:24
+16.1 Task 16.1: Ensure release packaging includes frontend assets - Completed on 03/05/2026 14:06
+16.2 Task 16.2: Bump addon version to 0.1.6 and generate new signed package artifacts - Completed on 03/05/2026 14:06
+16. Task 16: Include frontend in release package and cut 0.1.6 artifact - Completed on 03/05/2026 14:06
+17.1 Task 17.1: Return absolute host operator-action command and clearer docker-missing warning in install apply - Completed on 03/05/2026 14:18
+17.2 Task 17.2: Add setup wizard operator-action UI hint for host terminal and addon root path - Completed on 03/05/2026 14:19
+17. Task 17: Improve embedded apply operator-action guidance in setup wizard - Completed on 03/05/2026 14:19
+18.1 Task 18.1: Normalize Core URLs and add Core 422 registry payload fallback compatibility - Completed on 03/05/2026 14:39
+18.2 Task 18.2: Bump version to 0.1.7 and publish refreshed release artifact - Completed on 03/05/2026 14:39
+18. Task 18: Core registry compatibility patch and new release upload - Completed on 03/05/2026 14:39
+19.1 Task 19.1: Align register-core payload/auth with Core registry register contract - Completed on 03/05/2026 15:40
+19.2 Task 19.2: Add optional Core verify call after successful register-core - Completed on 03/05/2026 15:40
+19.3 Task 19.3: Update API docs for Core register/verify flow and auth header compatibility - Completed on 03/05/2026 15:40
+19.4 Task 19.4: Bump version to 0.1.8 and publish patched release artifact - Completed on 03/05/2026 15:42
+19. Task 19: Complete Core registration compatibility with required contract fields - Completed on 03/05/2026 15:42
+20.1 Task 20.1: Sync service documentation to addons.md Core registration contract - Completed on 03/05/2026 15:45
+20.2 Task 20.2: Create and upload 0.1.7a build artifacts - Completed on 03/05/2026 15:46
+20. Task 20: Addons contract compliance review and 0.1.7a release sync - Completed on 03/05/2026 15:46
+21. Task 21: Bootstrap installer creates services symlink and desired.json - Completed on 03/05/2026 16:55
+22. Task 22: Enforce full SSAP v1.0 required desired.json fields in bootstrap output - Completed on 03/05/2026 16:57
+23. Task 23: Bump to 0.1.7b and publish release artifact - Completed on 03/05/2026 16:59
+24. Task 24: Update bootstrap install layout (no extract + source-linked extracted + runtime.json) - Completed on 03/05/2026 17:03
+25. Task 25: Build as 0.1.7c and publish release artifact - Completed on 03/05/2026 17:04
+26. Task 26: Document all changes - Completed on 03/05/2026 17:05
+27. Task 27: Fix bootstrap MAIN_ADDON_ROOT auto-detection when script is run outside repo - Completed on 03/05/2026 17:28
+28. Task 28: Fix bootstrap MAIN_ADDON_ROOT detection for launcher script outside repo root - Completed on 03/05/2026 17:32
+29. Task 29: Add docker/Dockerfile so release artifact includes it - Completed on 03/05/2026 17:44
+30. Task 30: Update bootstrap install flow to new SynthiaAddons layout requirements - Completed on 03/05/2026 17:57
+31. Task 31: Publish as 0.1.7d - Completed on 03/05/2026 17:58
+32. Task 32: Recreate addon artifact extraction layout with root Dockerfile mapping - Completed on 03/05/2026 20:25
+33. Task 33: Create and publish release 0.1.8 - Completed on 03/05/2026 20:31
+34. Task 34: Create and publish 0.1.9 with bootstrap docker-compose in versions path - Completed on 03/05/2026 21:12
+35. Task 35: Add root docker-compose.yml to extracted artifact layout - Completed on 03/05/2026 21:19
+36. Task 36: Create current addon docs in ./docs, archive outdated docs, and report mismatches vs /home/dan/Projects/Synthia/docs - Completed on 03/07/2026 16:13
+37. Task 37: Cross-repo docs update attempt reverted (golden docs in /home/dan/Projects/Synthia/docs must remain unchanged) - Completed on 03/07/2026 16:26
+38.1 Task 38.1: Add local service-token JWT validation for privileged addon operations and align auth behavior with SSAP standalone addon requirements - Completed on 03/07/2026 16:30
+38.2 Task 38.2: Implement policy-topic handling (retained grants/revocations) and enforce runtime policy cache for MQTT operation gates - Completed on 03/07/2026 16:33
+38.3 Task 38.3: Add telemetry usage reporting path to Core (buffered best-effort POST /api/telemetry/usage) with failure-safe behavior when Core is offline - Completed on 03/07/2026 16:36
+38.4 Task 38.4: Normalize capability naming to documented convention and align announce + /api/addon/capabilities + validation tooling outputs - Completed on 03/07/2026 16:39
+38.5 Task 38.5: Align bootstrap output with canonical SSAP layout expectations (services/<addon_id> primary path + desired/runtime artifacts + compatibility links) - Completed on 03/07/2026 16:42
+38.6 Task 38.6: Add contract validation checks covering auth, policy topics, telemetry, capability naming, and SSAP layout invariants - Completed on 03/07/2026 16:46
+39. Task 39: recheck with the /home/dan/Projects/Synthia/docs for mismatches - Completed on 03/07/2026 17:05
+
+##################################
+Tasks in Progress
+##################################
+
+##################################
+Pending Tasks
+##################################
+40.1 Task 40.1: Eliminate hardcoded addon version usage in local scripts/docs by sourcing version from manifest.json
+40.2 Task 40.2: Update bootstrap installer to generate SSAP-aligned extracted build-context layout under versions/<version>/extracted
+40.3 Task 40.3: Add local documentation note clarifying addon entrypoint path mapping vs Core repo path examples
+40.4 Task 40.4: Extend local validation tooling to assert extracted layout and version-source invariants
+40. Task 40: Mitigate remaining mismatch-report findings in code and local documentation
