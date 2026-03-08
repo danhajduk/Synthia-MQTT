@@ -76,3 +76,12 @@ What and why:
 Ran `./scripts/rebuild.sh` and `./scripts/release-addon.sh 0.2.0` successfully; release gate passed and artifact upload for `v0.2.0` was refreshed. New release-output SHA256 is `4d8708b1ebb5ccd87ac0ca72961f53854525564222830f199f7e27d3b2f980e1`.
 
 ###########
+
+Task #079 :
+
+Reasoning: Golden compatibility audit was requested. Findings must be converted into explicit implementation/documentation tasks when local-fixable drift is detected.
+
+What and why:
+Re-ran local-vs-golden audit evidence and identified one new local-fixable mismatch: bootstrap-generated `desired.json` omits runtime port intent fields while runtime compose currently publishes host ports. Updated `docs/mismatch-report.md` (audit timestamp, counts, and new Finding 3) and added pending tasks 79-81 in `docs/New_tasks.txt` to fix code, validation, and docs.
+
+###########
