@@ -98,16 +98,16 @@ Fresh installs report `setup_state=unconfigured` until mode/config is applied.
 Unknown IDs are filtered out; compose files are not edited by addon runtime.
 Requested optional groups are written to desired state atomically with locking at:
 
-- `runtime.optional_docker_groups.requested`
-- compatibility mirror: top-level `optional_groups_requested`
+- `enabled_docker_groups`
+- compatibility mirrors: `optional_groups_requested` and `runtime.optional_docker_groups.requested`
 
 Runtime feedback is read from `runtime.json` fields:
 
-- `runtime.optional_docker_groups.requested`
-- `runtime.optional_docker_groups.active`
-- `runtime.optional_docker_groups.starting`
-- `runtime.optional_docker_groups.failed`
-- `runtime.optional_docker_groups.pending_reconcile`
+- `requested_docker_groups`
+- `active_docker_groups`
+- `starting_docker_groups`
+- `failed_docker_groups`
+- compatibility fallback: `runtime.optional_docker_groups.*`
 
 `POST /api/install/optional-groups/reset` clears requested optional group IDs (base-only reset) and returns current pending-reconcile flag.
 

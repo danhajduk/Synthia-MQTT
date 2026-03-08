@@ -36,7 +36,9 @@ def _load_manifest_metadata(manifest: dict[str, object]) -> dict[str, str]:
 
 
 def _load_optional_docker_groups(manifest: dict[str, object]) -> list[OptionalDockerGroup]:
-    raw_groups = manifest.get("optional_docker_groups")
+    raw_groups = manifest.get("docker_groups")
+    if not isinstance(raw_groups, list):
+        raw_groups = manifest.get("optional_docker_groups")
     if not isinstance(raw_groups, list):
         return []
     groups: list[OptionalDockerGroup] = []

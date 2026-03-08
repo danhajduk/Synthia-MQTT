@@ -2,12 +2,35 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SSAP runtime.json",
   "type": "object",
-  "required": ["ssap_version", "addon_id", "state"],
+  "required": ["addon_id", "state"],
   "properties": {
     "ssap_version": { "const": "1.0" },
     "addon_id": { "type": "string" },
     "active_version": { "type": "string" },
     "state": { "enum": ["running", "stopped", "degraded", "error"] },
+    "requested_docker_groups": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "active_docker_groups": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "failed_docker_groups": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "compose_files_in_use": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "last_applied_desired_revision": { "type": ["string", "null"] },
+    "last_applied_compose_digest": { "type": ["string", "null"] },
+    "last_force_rebuild_revision": { "type": ["string", "null"] },
     "last_action": {
       "type": "object",
       "properties": {

@@ -130,7 +130,9 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(optional_groups.json()["requested_group_ids"], ["mqtt_tools"])
         self.assertTrue(optional_groups.json()["pending_reconcile"])
         desired = json.loads((self.runtime_dir / "desired.json").read_text(encoding="utf-8"))
-        self.assertEqual(desired["runtime"]["optional_docker_groups"]["requested"], ["mqtt_tools"])
+        self.assertEqual(desired["enabled_docker_groups"], ["mqtt_tools"])
+        self.assertTrue(str(desired.get("desired_revision", "")).strip())
+        self.assertIn("force_rebuild", desired)
         self.assertEqual(desired["preserve_me"], {"a": 1})
         asset_dir = self.runtime_dir / "optional_groups" / "mqtt_tools"
         self.assertTrue(asset_dir.exists())
@@ -184,15 +186,15 @@ class MqttAddonE2ETest(unittest.TestCase):
 
     def test_runtime_optional_group_feedback_is_exposed_in_status(self) -> None:
         runtime_payload = {
+            "requested_docker_groups": ["mqtt_tools"],
+            "active_docker_groups": [],
+            "starting_docker_groups": ["mqtt_tools"],
+            "failed_docker_groups": [],
             "runtime": {
                 "optional_docker_groups": {
-                    "requested": ["mqtt_tools"],
-                    "active": [],
-                    "starting": ["mqtt_tools"],
-                    "failed": [],
                     "pending_reconcile": True,
                 }
-            }
+            },
         }
         (self.runtime_dir / "runtime.json").write_text(json.dumps(runtime_payload), encoding="utf-8")
 
@@ -213,7 +215,7 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(reset.status_code, 200)
         self.assertEqual(reset.json()["requested_group_ids"], [])
         desired = json.loads((self.runtime_dir / "desired.json").read_text(encoding="utf-8"))
-        self.assertEqual(desired["runtime"]["optional_docker_groups"]["requested"], [])
+        self.assertEqual(desired["enabled_docker_groups"], [])
         self.assertFalse((self.runtime_dir / "optional_groups" / "mqtt_tools").exists())
 
     def test_optional_groups_multi_group_dependency_and_failure_reporting(self) -> None:
@@ -236,15 +238,11 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(many.json()["requested_group_ids"], ["mqtt_tools", "mqtt_observer", "mqtt_replay"])
 
         runtime_payload = {
-            "runtime": {
-                "optional_docker_groups": {
-                    "requested": ["mqtt_tools", "mqtt_observer", "mqtt_replay"],
-                    "active": ["mqtt_tools", "mqtt_replay"],
-                    "starting": [],
-                    "failed": ["mqtt_observer"],
-                    "pending_reconcile": True,
-                }
-            }
+            "requested_docker_groups": ["mqtt_tools", "mqtt_observer", "mqtt_replay"],
+            "active_docker_groups": ["mqtt_tools", "mqtt_replay"],
+            "starting_docker_groups": [],
+            "failed_docker_groups": ["mqtt_observer"],
+            "runtime": {"optional_docker_groups": {"pending_reconcile": True}},
         }
         (self.runtime_dir / "runtime.json").write_text(json.dumps(runtime_payload), encoding="utf-8")
         status = self.client.get("/api/install/status")

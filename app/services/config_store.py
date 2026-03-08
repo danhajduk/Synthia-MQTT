@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any
 
@@ -172,6 +173,9 @@ class ConfigStore:
 
     def get_desired_optional_groups(self) -> list[str]:
         desired = self._state_store.read_desired()
+        enabled = self._normalize_string_list(desired.get("enabled_docker_groups"))
+        if enabled:
+            return enabled
         runtime = desired.get("runtime")
         if isinstance(runtime, dict):
             optional_groups = runtime.get("optional_docker_groups")
@@ -183,10 +187,14 @@ class ConfigStore:
 
     def get_runtime_optional_groups_feedback(self) -> dict[str, list[str] | bool | None]:
         runtime_state = self._state_store.read_runtime()
-        requested = self._normalize_string_list(runtime_state.get("optional_groups_requested"))
-        active = self._normalize_string_list(runtime_state.get("optional_groups_active"))
-        starting = self._normalize_string_list(runtime_state.get("optional_groups_starting"))
-        failed = self._normalize_string_list(runtime_state.get("optional_groups_failed"))
+        requested = self._normalize_string_list(runtime_state.get("requested_docker_groups"))
+        active = self._normalize_string_list(runtime_state.get("active_docker_groups"))
+        starting = self._normalize_string_list(runtime_state.get("starting_docker_groups"))
+        failed = self._normalize_string_list(runtime_state.get("failed_docker_groups"))
+        requested = requested or self._normalize_string_list(runtime_state.get("optional_groups_requested"))
+        active = active or self._normalize_string_list(runtime_state.get("optional_groups_active"))
+        starting = starting or self._normalize_string_list(runtime_state.get("optional_groups_starting"))
+        failed = failed or self._normalize_string_list(runtime_state.get("optional_groups_failed"))
         pending: bool | None = None
 
         runtime = runtime_state.get("runtime")
@@ -336,7 +344,10 @@ class ConfigStore:
             optional_groups["requested"] = requested_group_ids
             runtime["optional_docker_groups"] = optional_groups
             payload["runtime"] = runtime
+            payload["enabled_docker_groups"] = requested_group_ids
             payload["optional_groups_requested"] = requested_group_ids
+            payload["desired_revision"] = str(time.time_ns())
+            payload["force_rebuild"] = bool(payload.get("force_rebuild", False))
             return payload
 
         self._state_store.update_desired(_mutate)

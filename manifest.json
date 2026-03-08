@@ -38,6 +38,39 @@
       }
     ]
   },
+  "docker_groups": [
+    {
+      "id": "mqtt_tools",
+      "name": "MQTT Tools",
+      "description": "Optional MQTT CLI helper container for diagnostics and manual inspection.",
+      "compose_file": "docker/docker-compose.mqtt-tools.yml",
+      "depends_on": [],
+      "setup_required": false,
+      "default_enabled": false
+    },
+    {
+      "id": "mqtt_observer",
+      "name": "MQTT Observer",
+      "description": "Optional observer sidecar for broker diagnostics and event snapshots.",
+      "compose_file": "docker/docker-compose.mqtt-observer.yml",
+      "depends_on": [
+        "mqtt_tools"
+      ],
+      "setup_required": true,
+      "default_enabled": false
+    },
+    {
+      "id": "mqtt_replay",
+      "name": "MQTT Replay",
+      "description": "Optional replay worker for retained message analysis and troubleshooting.",
+      "compose_file": "docker/docker-compose.mqtt-replay.yml",
+      "depends_on": [
+        "mqtt_tools"
+      ],
+      "setup_required": false,
+      "default_enabled": false
+    }
+  ],
   "optional_docker_groups": [
     {
       "id": "mqtt_tools",

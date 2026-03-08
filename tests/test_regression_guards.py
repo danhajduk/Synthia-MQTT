@@ -45,7 +45,7 @@ class RegressionGuardsTest(unittest.TestCase):
     def test_manifest_declares_optional_docker_groups(self) -> None:
         manifest_file = Path(__file__).resolve().parents[1] / "manifest.json"
         manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
-        groups = manifest.get("optional_docker_groups") or []
+        groups = manifest.get("docker_groups") or []
         self.assertTrue(isinstance(groups, list))
         self.assertGreaterEqual(len(groups), 2)
         first = groups[0]

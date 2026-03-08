@@ -118,7 +118,7 @@ Platform topic publishes also enforce envelope schema (`type`, `source_addon_id`
 
 Optional docker groups can be requested from setup/dashboard UI and are persisted through `POST /api/install/optional-groups`
 as desired deployment shape, while base startup remains fully functional with zero optional groups enabled.
-Optional group requests are written atomically to desired state (`runtime.optional_docker_groups.requested`) and runtime feedback is read from `runtime.json` to distinguish requested vs active/starting/failed groups.
+Optional group requests are written atomically to desired state (`enabled_docker_groups`) and runtime feedback is read from `runtime.json` (`requested_docker_groups`, `active_docker_groups`, `failed_docker_groups`) to distinguish requested vs actual running groups.
 `POST /api/install/optional-groups/reset` resets requested optional groups to base-only deployment intent.
 
 Dependency handling and readiness behavior:
@@ -219,4 +219,4 @@ Release-gate checks include:
 - `version`: sourced from `manifest.json` (`python3 -c 'import json;print(json.load(open("manifest.json","r",encoding="utf-8"))["version"])'`)
 - `package_profile`: `standalone_service`
 - permissions: `network.egress`, `mqtt.publish`, `mqtt.subscribe`
-- `optional_docker_groups`: manifest-declared optional compose groups (id/name/description/compose_file and optional dependency/setup/default flags)
+- `docker_groups`: manifest-declared optional compose groups (id/name/description/compose_file and optional dependency/setup/default flags)

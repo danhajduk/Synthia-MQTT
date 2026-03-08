@@ -7,6 +7,9 @@
     "addon_id",
     "mode",
     "desired_state",
+    "desired_revision",
+    "force_rebuild",
+    "enabled_docker_groups",
     "channel",
     "pinned_version",
     "install_source",
@@ -18,6 +21,13 @@
     "addon_id": { "type": "string" },
     "mode": { "const": "standalone_service" },
     "desired_state": { "enum": ["running", "stopped"] },
+    "desired_revision": { "type": "string", "minLength": 1 },
+    "force_rebuild": { "type": "boolean" },
+    "enabled_docker_groups": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
     "channel": { "enum": ["stable", "beta", "nightly"] },
     "pinned_version": { "type": ["string", "null"] },
     "install_source": {

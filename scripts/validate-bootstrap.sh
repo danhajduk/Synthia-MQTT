@@ -64,10 +64,22 @@ if desired.get("addon_id") != "mqtt":
     raise SystemExit("desired.json addon_id mismatch")
 if desired.get("ssap_version") != "1.0":
     raise SystemExit("desired.json ssap_version mismatch")
+if not str(desired.get("desired_revision", "")).strip():
+    raise SystemExit("desired.json desired_revision is required")
+if not isinstance(desired.get("force_rebuild"), bool):
+    raise SystemExit("desired.json force_rebuild must be boolean")
+if not isinstance(desired.get("enabled_docker_groups"), list):
+    raise SystemExit("desired.json enabled_docker_groups must be an array")
 if runtime.get("addon_id") != "mqtt":
     raise SystemExit("runtime.json addon_id mismatch")
 if runtime.get("ssap_version") != "1.0":
     raise SystemExit("runtime.json ssap_version mismatch")
+if not isinstance(runtime.get("requested_docker_groups"), list):
+    raise SystemExit("runtime.json requested_docker_groups must be an array")
+if not isinstance(runtime.get("active_docker_groups"), list):
+    raise SystemExit("runtime.json active_docker_groups must be an array")
+if not isinstance(runtime.get("failed_docker_groups"), list):
+    raise SystemExit("runtime.json failed_docker_groups must be an array")
 
 current_version = current_target.name
 if desired.get("pinned_version") != current_version:

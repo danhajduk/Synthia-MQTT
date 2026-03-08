@@ -3,6 +3,13 @@
   "addon_id": "mqtt",
   "active_version": "0.1.2",
   "state": "running",
+  "requested_docker_groups": ["mqtt_tools"],
+  "active_docker_groups": ["mqtt_tools"],
+  "failed_docker_groups": [],
+  "compose_files_in_use": ["../SynthiaAddons/services/mqtt/versions/0.1.2/docker-compose.yml"],
+  "last_applied_desired_revision": "1741464210123456789",
+  "last_applied_compose_digest": "sha256:example",
+  "last_force_rebuild_revision": null,
   "last_action": {
     "type": "start",
     "at": "2026-03-01T01:10:00Z",

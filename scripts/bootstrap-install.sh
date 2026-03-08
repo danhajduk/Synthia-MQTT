@@ -338,6 +338,7 @@ write_desired_json() {
 import json
 import os
 import sys
+import time
 
 file_path, version, artifact_url, artifact_sha, signature_value = sys.argv[1:6]
 
@@ -368,6 +369,9 @@ payload = {
     "addon_id": os.getenv("ADDON_ID", "mqtt"),
     "mode": os.getenv("MODE", "standalone_service"),
     "desired_state": os.getenv("DESIRED_STATE", "running"),
+    "desired_revision": str(time.time_ns()),
+    "force_rebuild": False,
+    "enabled_docker_groups": [],
     "channel": os.getenv("CHANNEL", "stable"),
     "pinned_version": version,
     "install_source": {
@@ -407,6 +411,15 @@ write_runtime_json() {
   "addon_id": "${ADDON_ID}",
   "active_version": "${version}",
   "state": "installed",
+  "requested_docker_groups": [],
+  "active_docker_groups": [],
+  "failed_docker_groups": [],
+  "compose_files_in_use": [
+    "${compose_file}"
+  ],
+  "last_applied_desired_revision": null,
+  "last_applied_compose_digest": null,
+  "last_force_rebuild_revision": null,
   "last_action": {
     "type": "bootstrap_install",
     "ok": true

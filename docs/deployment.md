@@ -88,7 +88,7 @@ Verified values:
 - `package_profile`: `standalone_service`
 - `permissions`: `network.egress`, `mqtt.publish`, `mqtt.subscribe`
 - `runtime_defaults`: `bind_localhost=false`, `ports=[{host:18080,container:8080,proto:tcp}]`
-- `optional_docker_groups`: supports addon-declared optional compose groups without hardcoded supervisor behavior
+- `docker_groups`: supports addon-declared optional compose groups without hardcoded supervisor behavior
 
 ## Optional group desired/runtime state IO
 
@@ -101,7 +101,7 @@ Addon optional docker-group requests are persisted into desired state (no compos
 - write mode:
   - file lock (`*.lock`) + atomic replace write
   - unrelated JSON fields preserved
-  - requested IDs stored under `runtime.optional_docker_groups.requested`
+  - requested IDs stored under top-level `enabled_docker_groups`
   - reusable path/IO helper is centralized in `app/services/mounted_state_store.py`
 
 Runtime feedback path resolution:
@@ -124,7 +124,7 @@ Optional docker-group pattern (addon-side):
 - base-only startup:
   - addon setup/apply can complete with zero optional groups requested.
 - desired-state writes:
-  - addon writes intent only (`runtime.optional_docker_groups.requested`), never edits compose files.
+  - addon writes intent only (`enabled_docker_groups`), never edits compose files.
 - runtime-state feedback:
   - addon reads runtime reconcile feedback (`requested/active/starting/failed/pending_reconcile`) from runtime state.
 - readiness:

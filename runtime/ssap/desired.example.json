@@ -3,6 +3,9 @@
   "addon_id": "mqtt",
   "mode": "standalone_service",
   "desired_state": "running",
+  "desired_revision": "1741464210123456789",
+  "force_rebuild": false,
+  "enabled_docker_groups": [],
   "channel": "stable",
   "pinned_version": null,
   "install_source": {
