@@ -2,13 +2,13 @@ import json
 import logging
 import threading
 import time
-from datetime import datetime, timezone
 from threading import Event
 from typing import Any
 
 import paho.mqtt.client as mqtt
 
 from app.services.health import HealthService
+from app.services.lifecycle_topics import LifecycleTopicHelper
 from app.services.policy_cache import PolicyCache
 
 logger = logging.getLogger(__name__)
@@ -48,13 +48,18 @@ class MqttClientService:
         if bool(self._config.get("mqtt_tls")):
             self._client.tls_set()
 
-        self._health_topic = f"{self._config['mqtt_base_topic']}/addons/mqtt/health"
-        self._announce_topic = f"{self._config['mqtt_base_topic']}/addons/mqtt/announce"
+        self._lifecycle = LifecycleTopicHelper(
+            mqtt_base_topic=str(self._config.get("mqtt_base_topic", "synthia")),
+            addon_id=self._addon_id,
+            qos_default=int(self._config.get("mqtt_qos", 1)),
+        )
+        self._health_topic = self._lifecycle.health_topic
+        self._announce_topic = self._lifecycle.announce_topic
         self._qos = int(self._config.get("mqtt_qos", 1))
 
         self._client.will_set(
             topic=self._health_topic,
-            payload=json.dumps(self._offline_payload()),
+            payload=json.dumps(self._lifecycle.offline_payload()),
             qos=self._qos,
             retain=True,
         )
@@ -139,22 +144,17 @@ class MqttClientService:
             logger.warning("policy_message_parse_failed", extra={"error": str(exc)})
 
     def _publish_announce(self) -> None:
-        payload = {
-            "id": self._addon_id,
-            "addon_id": self._addon_id,
-            "base_url": self._announce_base_url,
-            "version": self._addon_version,
-            "api_version": self._api_version,
-            "mode": self._mode,
-            "capabilities": self._capabilities,
-        }
+        payload = self._lifecycle.announce_payload(
+            base_url=self._announce_base_url,
+            version=self._addon_version,
+            api_version=self._api_version,
+            mode=self._mode,
+            capabilities=self._capabilities,
+        )
         self.publish(self._announce_topic, payload, retain=True, qos=self._qos)
 
     def _publish_health(self) -> None:
-        payload = {
-            "status": "healthy" if self._health_service.snapshot().mqtt_connected else "degraded",
-            "last_seen": datetime.now(timezone.utc).isoformat(),
-        }
+        payload = self._lifecycle.health_payload(self._health_service.snapshot().mqtt_connected)
         self.publish(self._health_topic, payload, retain=True, qos=self._qos)
 
     def _publish_health_forever(self) -> None:
@@ -174,14 +174,6 @@ class MqttClientService:
         client.subscribe(grants_topic, qos=qos)
         client.subscribe(revocations_topic, qos=qos)
         logger.info("policy_topics_subscribed", extra={"grants_topic": grants_topic, "revocations_topic": revocations_topic})
-
-    @staticmethod
-    def _offline_payload() -> dict[str, str]:
-        return {
-            "status": "offline",
-            "last_seen": datetime.now(timezone.utc).isoformat(),
-        }
-
 
 def test_external_connection(
     host: str,

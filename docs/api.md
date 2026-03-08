@@ -92,6 +92,14 @@ HA sensor discovery publishes retained payload to:
 
 - `homeassistant/sensor/{unique_id}/config`
 
+Lifecycle topic helpers:
+
+- runtime now uses a shared lifecycle helper for:
+  - `synthia/addons/<addon_id>/announce`
+  - `synthia/addons/<addon_id>/health`
+- default behavior: retained + QoS 1
+- health heartbeat is periodic and announce/health are republished on reconnect
+
 Gateway publish endpoint:
 
 - `POST /api/mqtt/gateway/publish`

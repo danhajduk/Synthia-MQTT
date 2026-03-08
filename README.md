@@ -82,6 +82,10 @@ For external broker mode, `POST /api/install/apply` requires a prior successful
 Direct modes provision stable long-term broker credentials and support rotation with `reprovision=true`.
 Registration applies ACL/topic realization with publish/subscribe separation and reserved namespace restrictions.
 
+Lifecycle announce/health publishing uses shared helper logic for
+`synthia/addons/<addon_id>/announce` and `synthia/addons/<addon_id>/health`
+with retained + QoS 1 defaults and reconnect republish behavior.
+
 ## Optional Service-Token Auth
 
 Privileged write endpoints can enforce service-token JWT validation.
