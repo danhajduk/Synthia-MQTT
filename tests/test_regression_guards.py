@@ -16,6 +16,8 @@ class RegressionGuardsTest(unittest.TestCase):
         compose_file = Path(__file__).resolve().parents[1] / "docker" / "docker-compose.yml"
         text = compose_file.read_text(encoding="utf-8")
         self.assertIn('- "18080:8080"', text)
+        self.assertIn("env_file:", text)
+        self.assertIn("./runtime.env", text)
 
     def test_health_snapshot_contract(self) -> None:
         snapshot = HealthService().snapshot()
@@ -48,6 +50,7 @@ class RegressionGuardsTest(unittest.TestCase):
         groups = manifest.get("docker_groups") or []
         self.assertTrue(isinstance(groups, list))
         self.assertGreaterEqual(len(groups), 2)
+        self.assertTrue(any(str(group.get("id")) == "broker" for group in groups))
         first = groups[0]
         self.assertIn("id", first)
         self.assertIn("name", first)
@@ -55,11 +58,19 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("compose_file", first)
         self.assertIn("depends_on", first)
 
+    def test_broker_group_compose_exists(self) -> None:
+        group_compose = Path(__file__).resolve().parents[1] / "docker" / "docker-compose.group-broker.yml"
+        text = group_compose.read_text(encoding="utf-8")
+        self.assertIn("mosquitto:", text)
+        self.assertIn("depends_on:", text)
+        self.assertIn("mqtt-addon:", text)
+
     def test_release_script_packages_runtime(self) -> None:
         release_script = Path(__file__).resolve().parents[1] / "scripts" / "release-addon.sh"
         text = release_script.read_text(encoding="utf-8")
         self.assertIn("PACKAGE_PATHS", text)
         self.assertIn("runtime", text)
+        self.assertIn("docker-compose.group-", text)
 
     def test_bootstrap_writes_runtime_port_intent(self) -> None:
         bootstrap_script = Path(__file__).resolve().parents[1] / "scripts" / "bootstrap-install.sh"

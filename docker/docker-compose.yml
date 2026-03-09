@@ -5,16 +5,8 @@ services:
       dockerfile: docker/Dockerfile
     container_name: Synthia-MQTT
     restart: unless-stopped
-    environment:
-      MQTT_HOST: ${MQTT_HOST:-10.0.0.100}
-      MQTT_PORT: ${MQTT_PORT:-1883}
-      MQTT_CLIENT_ID: ${MQTT_CLIENT_ID:-synthia-addon-mqtt}
-      MQTT_BASE_TOPIC: ${MQTT_BASE_TOPIC:-synthia}
-      MQTT_QOS: ${MQTT_QOS:-1}
-      MQTT_TLS: ${MQTT_TLS:-false}
-      MQTT_USERNAME: ${MQTT_USERNAME:-}
-      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
-      ANNOUNCE_BASE_URL: ${ANNOUNCE_BASE_URL:-http://10.0.0.100:18080}
+    env_file:
+      - ./runtime.env
     volumes:
       - ../../desired.json:/state/desired.json
       - ../../runtime.json:/state/runtime.json

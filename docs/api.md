@@ -60,6 +60,7 @@ Implemented install modes:
 
 - `external`: stores broker host/port/tls/credentials and reloads MQTT client
 - `embedded`: writes broker files and compose override under `runtime/broker/`; supervisor/Core reconcile is expected to apply compose changes from desired/runtime state
+  - on successful embedded apply, addon now ensures `enabled_docker_groups` includes `broker` in desired state intent
 
 External apply validation behavior:
 

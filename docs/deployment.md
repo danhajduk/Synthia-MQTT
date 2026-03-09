@@ -10,9 +10,11 @@ Main compose file: `docker/docker-compose.yml`
 Defined service:
 
 - `mqtt-addon` (builds from `docker/Dockerfile`)
+- container env now sourced from `docker/runtime.env` via compose `env_file`
 - host port mapping `18080:8080` in `docker/docker-compose.yml`
 - optional override mapping `10.0.0.100:18081:8080` in `docker/docker-compose.port-override.yml`
 - optional-group compose metadata includes `docker/docker-compose.mqtt-tools.yml` (manifest-declared; supervisor-driven enablement pattern)
+- embedded broker optional-group compose file is `docker/docker-compose.group-broker.yml` (`id=broker`)
 
 Image packaging note:
 

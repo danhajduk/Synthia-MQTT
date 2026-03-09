@@ -75,6 +75,13 @@ if [[ -f "${STAGE_DIR}/docker/docker-compose.yml" && ! -f "${STAGE_DIR}/docker-c
   cp "${STAGE_DIR}/docker/docker-compose.yml" "${STAGE_DIR}/docker-compose.yml"
 fi
 
+if [[ -d "${STAGE_DIR}/docker" ]]; then
+  while IFS= read -r compose_group; do
+    target_name="$(basename "${compose_group}")"
+    cp "${compose_group}" "${STAGE_DIR}/${target_name}"
+  done < <(find "${STAGE_DIR}/docker" -maxdepth 1 -type f -name 'docker-compose.group-*.yml' | sort)
+fi
+
 tar --sort=name \
   --owner=0 --group=0 --numeric-owner \
   --mtime="UTC 2026-01-01" \

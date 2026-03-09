@@ -390,6 +390,15 @@ payload = {
             "CORE_URL": os.getenv("CORE_URL", "http://127.0.0.1:9001"),
             "SYNTHIA_ADDON_ID": os.getenv("ADDON_ID", "mqtt"),
             "SYNTHIA_SERVICE_TOKEN": "${SYNTHIA_SERVICE_TOKEN}",
+            "MQTT_HOST": os.getenv("MQTT_HOST", "10.0.0.100"),
+            "MQTT_PORT": os.getenv("MQTT_PORT", "1883"),
+            "MQTT_CLIENT_ID": os.getenv("MQTT_CLIENT_ID", "synthia-addon-mqtt"),
+            "MQTT_BASE_TOPIC": os.getenv("MQTT_BASE_TOPIC", "synthia"),
+            "MQTT_QOS": os.getenv("MQTT_QOS", "1"),
+            "MQTT_TLS": os.getenv("MQTT_TLS", "false"),
+            "MQTT_USERNAME": os.getenv("MQTT_USERNAME", ""),
+            "MQTT_PASSWORD": os.getenv("MQTT_PASSWORD", ""),
+            "ANNOUNCE_BASE_URL": os.getenv("ANNOUNCE_BASE_URL", "http://10.0.0.100:18080"),
         }
     },
 }

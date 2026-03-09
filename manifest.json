@@ -40,6 +40,15 @@
   },
   "docker_groups": [
     {
+      "id": "broker",
+      "name": "Embedded Broker",
+      "description": "Managed Mosquitto broker sidecar for embedded mode.",
+      "compose_file": "docker-compose.group-broker.yml",
+      "depends_on": [],
+      "setup_required": true,
+      "default_enabled": false
+    },
+    {
       "id": "mqtt_tools",
       "name": "MQTT Tools",
       "description": "Optional MQTT CLI helper container for diagnostics and manual inspection.",
@@ -72,6 +81,15 @@
     }
   ],
   "optional_docker_groups": [
+    {
+      "id": "broker",
+      "name": "Embedded Broker",
+      "description": "Managed Mosquitto broker sidecar for embedded mode.",
+      "compose_file": "docker-compose.group-broker.yml",
+      "depends_on": [],
+      "setup_required": true,
+      "default_enabled": false
+    },
     {
       "id": "mqtt_tools",
       "name": "MQTT Tools",

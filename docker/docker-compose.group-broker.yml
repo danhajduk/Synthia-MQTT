@@ -1,0 +1,15 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: synthia-addon-mqtt-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ../../runtime/broker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ../../runtime/broker/pwfile:/mosquitto/config/passwordfile:ro
+      - ../../runtime/broker/aclfile:/mosquitto/config/aclfile:ro
+
+  mqtt-addon:
+    depends_on:
+      - mosquitto

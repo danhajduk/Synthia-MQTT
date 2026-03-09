@@ -412,6 +412,23 @@ def build_install_workflow_router(
             raise HTTPException(status_code=500, detail="Failed to apply embedded broker runtime") from exc
 
         if ok:
+            requested_groups = config_store.get_desired_optional_groups()
+            if "broker" not in requested_groups:
+                requested_groups = [*requested_groups, "broker"]
+                try:
+                    config_store.set_requested_optional_groups(
+                        requested_group_ids=requested_groups,
+                        supported_groups=supported_optional_group_map,
+                    )
+                except RuntimeError as exc:
+                    config_store.update_install_session_state(
+                        mode="embedded",
+                        setup_state="error",
+                        configured=False,
+                        verified=False,
+                        last_error=str(exc),
+                    )
+                    raise HTTPException(status_code=409, detail=str(exc)) from exc
             reload_mqtt_service()
             config_store.update_install_session_state(
                 mode="embedded",
