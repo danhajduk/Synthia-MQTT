@@ -31,6 +31,7 @@ Notes:
 
 - This compose file does not define `mosquitto`.
 - Embedded mode writes runtime broker artifacts and desired-state intent; compose reconciliation is supervisor-driven.
+- Embedded broker credential file (`runtime/broker/pwfile`) is generated as hashed Mosquitto password entries (not plaintext) with readable host bind-mount permissions.
 - Managed embedded broker container name is `synthia-addon-mqtt-mosquitto`.
 
 ## Bootstrap installer

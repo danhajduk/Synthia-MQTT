@@ -1,3 +1,5 @@
+import crypt
+import os
 import socket
 import subprocess
 import time
@@ -159,21 +161,33 @@ def write_embedded_broker_files(
             ]
         )
 
-    (broker_dir / "mosquitto.conf").write_text("\n".join(conf_lines) + "\n", encoding="utf-8")
+    mosquitto_conf = broker_dir / "mosquitto.conf"
+    mosquitto_conf.write_text("\n".join(conf_lines) + "\n", encoding="utf-8")
+    os.chmod(mosquitto_conf, 0o644)
 
     if allow_anonymous:
-        (broker_dir / "pwfile").write_text("", encoding="utf-8")
-        (broker_dir / "aclfile").write_text("topic readwrite #\n", encoding="utf-8")
+        pwfile = broker_dir / "pwfile"
+        aclfile = broker_dir / "aclfile"
+        pwfile.write_text("", encoding="utf-8")
+        aclfile.write_text("topic readwrite #\n", encoding="utf-8")
+        os.chmod(pwfile, 0o644)
+        os.chmod(aclfile, 0o644)
         return
 
-    if admin_user and admin_pass:
-        # Store plaintext credentials for operator tooling to convert into passwordfile if needed.
-        (broker_dir / "pwfile").write_text(f"{admin_user}:{admin_pass}\n", encoding="utf-8")
-    else:
-        (broker_dir / "pwfile").write_text("", encoding="utf-8")
+    if not admin_user or not admin_pass:
+        raise ValueError("embedded non-anonymous mode requires admin_user and admin_pass")
+
+    pw_hash = crypt.crypt(str(admin_pass), crypt.mksalt(crypt.METHOD_SHA512))
+    if not pw_hash:
+        raise ValueError("failed to generate embedded broker password hash")
+    pwfile = broker_dir / "pwfile"
+    pwfile.write_text(f"{admin_user}:{pw_hash}\n", encoding="utf-8")
+    os.chmod(pwfile, 0o644)
 
     acl_user = admin_user or "admin"
-    (broker_dir / "aclfile").write_text(f"user {acl_user}\ntopic readwrite #\n", encoding="utf-8")
+    aclfile = broker_dir / "aclfile"
+    aclfile.write_text(f"user {acl_user}\ntopic readwrite #\n", encoding="utf-8")
+    os.chmod(aclfile, 0o644)
 
 
 def wait_for_port(host: str, port: int, timeout_s: float) -> bool:
