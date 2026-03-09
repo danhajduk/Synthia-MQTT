@@ -1,8 +1,8 @@
 # Mismatch Report: Synthia-MQTT vs /home/dan/Projects/Synthia/docs
 
 Status: Active
-Last Verified: 2026-03-08 (US/Pacific)
-Audit Run: 2026-03-08 13:33 US/Pacific
+Last Verified: 2026-03-09 (US/Pacific)
+Audit Run: 2026-03-09 01:07 US/Pacific
 Compared docs:
 
 - `/home/dan/Projects/Synthia/docs/addons.md`
@@ -45,7 +45,7 @@ Affected files:
 
 Code evidence:
 
-- `manifest.json` declares `"version": "0.2.13"`.
+- `manifest.json` declares `"version": "0.2.14"`.
 - `app/api/install_workflow.py` sends `MANIFEST_METADATA["version"]` in register-core payload.
 
 Documentation evidence:

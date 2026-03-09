@@ -211,3 +211,4 @@
 142. Task 142: Create addon UI notes document (`docs/addon-theme-integration.md`) describing how the addon consumes the shared Synthia theme - Completed on 03/09/2026 01:06
 143. Task 143: Document any addon-specific exceptions where custom styling is still required beyond the shared theme - Completed on 03/09/2026 01:06
 144. Task 144: Verify final addon UI visually matches the Core style language when embedded in the main section iframe - Completed on 03/09/2026 01:06
+145. Task 145: publisg new version - Completed on 03/09/2026 01:07
