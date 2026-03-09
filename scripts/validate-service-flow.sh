@@ -18,6 +18,7 @@ EMBEDDED_NETWORK_CHECK="${EMBEDDED_NETWORK_CHECK:-0}"
 EMBEDDED_EXPECTED_NETWORK="${EMBEDDED_EXPECTED_NETWORK:-synthia_net}"
 EMBEDDED_BROKER_CONTAINER="${EMBEDDED_BROKER_CONTAINER:-synthia-addon-mqtt-mosquitto}"
 EMBEDDED_EXPECTED_ALIAS="${EMBEDDED_EXPECTED_ALIAS:-mosquitto}"
+EMBEDDED_STRICT_BROKER_SINGLE_NETWORK="${EMBEDDED_STRICT_BROKER_SINGLE_NETWORK:-1}"
 
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
@@ -74,13 +75,13 @@ if [[ "$EMBEDDED_NETWORK_CHECK" == "1" ]]; then
     exit 1
   fi
   echo "[validate] embedded network alias and topology"
-  python3 - "$SERVICE_BASE_URL" "$EMBEDDED_EXPECTED_NETWORK" "$EMBEDDED_BROKER_CONTAINER" "$EMBEDDED_EXPECTED_ALIAS" <<'PY'
+  python3 - "$SERVICE_BASE_URL" "$EMBEDDED_EXPECTED_NETWORK" "$EMBEDDED_BROKER_CONTAINER" "$EMBEDDED_EXPECTED_ALIAS" "$EMBEDDED_STRICT_BROKER_SINGLE_NETWORK" <<'PY'
 import json
 import subprocess
 import sys
 import urllib.parse
 
-service_base_url, expected_network, broker_container, expected_alias = sys.argv[1:5]
+service_base_url, expected_network, broker_container, expected_alias, strict_single_network = sys.argv[1:6]
 parsed = urllib.parse.urlparse(service_base_url)
 service_port = parsed.port
 if service_port is None:
@@ -128,6 +129,12 @@ if expected_network not in broker_networks:
     raise SystemExit(
         f"embedded-check: broker container missing expected network {expected_network!r}; actual={sorted(broker_networks.keys())}"
     )
+if strict_single_network == "1":
+    broker_network_keys = sorted(broker_networks.keys())
+    if broker_network_keys != [expected_network]:
+        raise SystemExit(
+            f"embedded-check: broker must only be attached to {expected_network!r}; actual={broker_network_keys}"
+        )
 
 broker_net_info = broker_networks.get(expected_network) or {}
 aliases = broker_net_info.get("Aliases") or []

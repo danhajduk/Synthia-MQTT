@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.services.broker_manager import write_embedded_broker_files
+from app.services.broker_manager import write_embedded_broker_files, write_embedded_compose_override
 
 
 class BrokerManagerTest(unittest.TestCase):
@@ -60,6 +60,22 @@ class BrokerManagerTest(unittest.TestCase):
             )
             self.assertEqual((broker_dir / "pwfile").read_text(encoding="utf-8"), "")
             self.assertIn("topic readwrite #", (broker_dir / "aclfile").read_text(encoding="utf-8"))
+
+    def test_embedded_compose_override_uses_single_synthia_network_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broker_dir = Path(tmpdir) / "broker"
+            broker_dir.mkdir(parents=True, exist_ok=True)
+            override_file = Path(tmpdir) / "docker-compose.override.yml"
+            write_embedded_compose_override(
+                override_file=override_file,
+                broker_dir=broker_dir,
+                port=1883,
+            )
+            text = override_file.read_text(encoding="utf-8")
+            self.assertIn("networks:", text)
+            self.assertIn("synthia_net", text)
+            self.assertIn("aliases:", text)
+            self.assertIn("- mosquitto", text)
 
 
 if __name__ == "__main__":

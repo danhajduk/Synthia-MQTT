@@ -72,6 +72,7 @@ Validation helper:
   - addon container is attached to expected network (`EMBEDDED_EXPECTED_NETWORK`, default `synthia_net`)
   - broker container is attached to the same network (`EMBEDDED_BROKER_CONTAINER`, default `synthia-addon-mqtt-mosquitto`)
   - broker has expected DNS alias on that network (`EMBEDDED_EXPECTED_ALIAS`, default `mosquitto`)
+  - strict mode (`EMBEDDED_STRICT_BROKER_SINGLE_NETWORK=1`, default) fails validation if broker is attached to additional networks
 
 Release gate:
 

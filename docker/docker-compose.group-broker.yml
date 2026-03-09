@@ -9,7 +9,17 @@ services:
       - ../../runtime/broker/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ../../runtime/broker/pwfile:/mosquitto/config/passwordfile:ro
       - ../../runtime/broker/aclfile:/mosquitto/config/aclfile:ro
+    networks:
+      synthia_net:
+        aliases:
+          - mosquitto
 
   mqtt-addon:
     depends_on:
       - mosquitto
+    networks:
+      - synthia_net
+
+networks:
+  synthia_net:
+    name: synthia_net

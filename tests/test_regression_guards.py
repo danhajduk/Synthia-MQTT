@@ -64,6 +64,10 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("mosquitto:", text)
         self.assertIn("depends_on:", text)
         self.assertIn("mqtt-addon:", text)
+        self.assertIn("networks:", text)
+        self.assertIn("synthia_net", text)
+        self.assertIn("aliases:", text)
+        self.assertIn("- mosquitto", text)
 
     def test_release_script_packages_runtime(self) -> None:
         release_script = Path(__file__).resolve().parents[1] / "scripts" / "release-addon.sh"
@@ -79,6 +83,8 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("EMBEDDED_EXPECTED_NETWORK", text)
         self.assertIn("EMBEDDED_BROKER_CONTAINER", text)
         self.assertIn("EMBEDDED_EXPECTED_ALIAS", text)
+        self.assertIn("EMBEDDED_STRICT_BROKER_SINGLE_NETWORK", text)
+        self.assertIn("broker must only be attached", text)
         self.assertIn("embedded-check", text)
 
     def test_bootstrap_writes_runtime_port_intent(self) -> None:
