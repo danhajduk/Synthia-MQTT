@@ -1,19 +1,19 @@
 :root.core-theme-fallback .card,
 :root.core-theme-fallback .panel {
   background: hsl(var(--sx-panel-resolved));
-  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
-  border-radius: var(--radius-md, var(--local-radius-md));
-  box-shadow: var(--shadow-sm, var(--local-shadow-sm));
-  padding: 14px;
+  border: 1px solid hsl(var(--sx-border-resolved));
+  border-radius: var(--sx-radius-md-resolved);
+  box-shadow: var(--sx-shadow-sm-resolved);
+  padding: var(--sx-space-6-resolved);
 }
 
 :root.core-theme-fallback .btn,
 :root.core-theme-fallback button {
   border: 0;
-  border-radius: var(--radius-sm, var(--local-radius-sm));
-  padding: 8px 12px;
+  border-radius: var(--sx-radius-sm-resolved);
+  padding: var(--sx-space-3-resolved) var(--sx-space-5-resolved);
   background: hsl(var(--color-primary, var(--local-color-primary)));
-  color: #fff;
+  color: var(--sx-text-on-primary-resolved);
   cursor: pointer;
 }
 
@@ -25,19 +25,19 @@
 :root.core-theme-fallback .pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border: 1px solid hsl(var(--color-border, var(--local-color-border)));
-  border-radius: 999px;
-  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
+  gap: var(--sx-space-2-resolved);
+  padding: var(--sx-space-1-resolved) var(--sx-space-3-resolved);
+  border: 1px solid hsl(var(--sx-border-resolved));
+  border-radius: var(--sx-radius-pill-resolved);
+  color: hsl(var(--sx-text-muted-resolved));
   background: color-mix(in srgb, hsl(var(--sx-panel-resolved)) 78%, hsl(var(--sx-bg-resolved)));
 }
 
 :root.core-theme-fallback .home-mini {
-  border: 2px solid hsl(var(--color-border, var(--local-color-border)));
-  border-radius: var(--radius-md, var(--local-radius-md));
+  border: 2px solid hsl(var(--sx-border-resolved));
+  border-radius: var(--sx-radius-md-resolved);
   background: hsl(var(--sx-panel-resolved));
-  padding: 10px;
+  padding: var(--sx-space-4-resolved);
 }
 
 :root.core-theme-fallback .home-mini.warn {
@@ -52,7 +52,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
+  color: hsl(var(--sx-text-muted-resolved));
 }
 
 :root.core-theme-fallback .home-mini-value {

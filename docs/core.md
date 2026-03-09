@@ -44,6 +44,7 @@ This document set describes the behavior currently implemented in this repositor
   - Shared theme entrypoint is loaded by frontend bootstrap (`frontend/src/app.js` via `ensureSharedThemeEntry()`), not static HTML head markup.
   - Frontend build copies `frontend/src/theme/` to `frontend/dist/theme/` to preserve `/ui/theme/*` path resolution in production artifacts.
   - Theme path verification is automated with `scripts/verify-theme-paths.sh` for both source (`dev`) and build output (`prod`) checks.
+  - UI fallback styling now resolves text, border, spacing, radius, and shadow through `--sx-*` token aliases before local fallback values.
   - UI styles use addon-owned fallback tokens and auto-adopt Core theme tokens/classes when injected into iframe document.
 
 ## Config Persistence

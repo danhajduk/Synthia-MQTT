@@ -191,3 +191,8 @@
 122. Task 122: Verify the addon can resolve shared theme file paths correctly in production build/output - Completed on 03/09/2026 00:53
 123. Task 123: Audit current addon CSS and identify hardcoded colors that should be replaced with shared token variables - Completed on 03/09/2026 00:53
 124. Task 124: Replace addon hardcoded background colors with shared tokens (`--sx-bg`, `--sx-panel`, etc.) - Completed on 03/09/2026 00:53
+125. Task 125: Replace addon hardcoded text colors with shared tokens (`--sx-text`, `--sx-text-muted`, etc.) - Completed on 03/09/2026 00:57
+126. Task 126: Replace addon hardcoded border colors with shared tokens (`--sx-border`, etc.) - Completed on 03/09/2026 00:57
+127. Task 127: Replace addon hardcoded spacing values with shared spacing tokens (`--sx-space-*`) - Completed on 03/09/2026 00:57
+128. Task 128: Replace addon hardcoded border-radius values with shared radius tokens (`--sx-radius-*`) - Completed on 03/09/2026 00:57
+129. Task 129: Replace addon hardcoded box-shadow values with shared shadow tokens (`--sx-shadow-*`) - Completed on 03/09/2026 00:57

@@ -5,23 +5,26 @@ Scope: `frontend/src/styles.css`, `frontend/src/theme/*.css`, `frontend/src/them
 
 ## Findings
 
-1. Background colors were using hardcoded color literals in mixed expressions (`white`, `black`) and direct fallback patterns.
-2. Background token usage was inconsistent between component-layer and page-layer CSS.
-3. One hardcoded text color remains (`#fff` in button fallback) and is tracked for Task 125.
+1. Prior hardcoded background literals (`white`, `black`) existed in mix expressions.
+2. Prior fallback text and border token usage was split between addon-local and core-token names.
+3. Prior spacing/radius/shadow usage mixed hardcoded values with non-`--sx-*` fallback chains.
 
-## Remediation Applied (Tasks 120-124 Batch)
+## Remediation Applied (Tasks 120-129)
 
-1. Added resolved shared background tokens in `frontend/src/theme/tokens.css`:
-   - `--sx-bg-resolved`
-   - `--sx-panel-resolved`
-2. Updated background rendering in:
+1. Added resolved token aliases in `frontend/src/theme/tokens.css` for:
+   - text (`--sx-text-resolved`, `--sx-text-muted-resolved`, `--sx-text-on-primary-resolved`)
+   - borders (`--sx-border-resolved`)
+   - backgrounds (`--sx-bg-resolved`, `--sx-panel-resolved`)
+   - spacing (`--sx-space-*-resolved`)
+   - radii (`--sx-radius-*-resolved`)
+   - shadows (`--sx-shadow-*-resolved`)
+2. Replaced hardcoded background literals and default text/border usages with resolved `--sx-*` tokens across:
    - `frontend/src/theme/base.css`
    - `frontend/src/theme/components.css`
    - `frontend/src/styles.css`
-3. Replaced background hardcoded color literals in `color-mix()` expressions with shared/fallback token chains.
+3. Replaced component radius/shadow usage with resolved `--sx-radius-*` and `--sx-shadow-*` aliases.
+4. Updated spacing declarations in primary UI layout styles to use `--sx-space-*` aliases.
 
-## Remaining Hardcoded Color Tokens
+## Residual Notes
 
-- `frontend/src/theme/components.css`: `color: #fff;`
-
-This remaining hardcoded text color will be handled in the text-color task batch (Task 125).
+- Semantic state accents (`--color-primary`, `--color-warning`, `--color-danger`) remain intentional for status emphasis and are not hardcoded literals.

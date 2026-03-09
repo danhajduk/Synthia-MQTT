@@ -7,7 +7,7 @@
 body {
   margin: 0;
   font-family: var(--font-sans, var(--font-fallback));
-  color: hsl(var(--color-text, var(--local-color-text)));
+  color: hsl(var(--sx-text-resolved));
   background: radial-gradient(
     circle at top right,
     hsl(var(--sx-panel-resolved)),
@@ -18,7 +18,7 @@ body {
 h1,
 h2,
 h3 {
-  color: hsl(var(--color-text, var(--local-color-text)));
+  color: hsl(var(--sx-text-resolved));
 }
 
 a {
@@ -27,5 +27,5 @@ a {
 
 hr {
   border: 0;
-  border-top: 1px solid hsl(var(--color-border, var(--local-color-border)));
+  border-top: 1px solid hsl(var(--sx-border-resolved));
 }

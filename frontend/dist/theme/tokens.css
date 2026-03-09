@@ -15,8 +15,35 @@
   --local-shadow-sm: 0 1px 2px rgb(0 0 0 / 8%);
   --local-shadow-md: 0 8px 20px rgb(0 0 0 / 12%);
 
+  --sx-text-resolved: var(--sx-text, var(--color-text, var(--local-color-text)));
+  --sx-text-muted-resolved: var(--sx-text-muted, var(--color-text-muted, var(--local-color-text-muted)));
+  --sx-border-resolved: var(--sx-border, var(--color-border, var(--local-color-border)));
   --sx-bg-resolved: var(--sx-bg, var(--color-bg, var(--local-color-bg)));
   --sx-panel-resolved: var(--sx-panel, var(--color-panel, var(--local-color-panel)));
+  --sx-text-on-primary-resolved: var(--sx-text-on-primary, #fff);
+
+  --sx-radius-sm-resolved: var(--sx-radius-sm, var(--radius-sm, var(--local-radius-sm)));
+  --sx-radius-md-resolved: var(--sx-radius-md, var(--radius-md, var(--local-radius-md)));
+  --sx-radius-lg-resolved: var(--sx-radius-lg, var(--radius-lg, var(--local-radius-lg)));
+  --sx-radius-pill-resolved: var(--sx-radius-pill, 999px);
+
+  --sx-shadow-sm-resolved: var(--sx-shadow-sm, var(--shadow-sm, var(--local-shadow-sm)));
+  --sx-shadow-md-resolved: var(--sx-shadow-md, var(--shadow-md, var(--local-shadow-md)));
+
+  --sx-space-1-resolved: var(--sx-space-1, 4px);
+  --sx-space-1_5-resolved: var(--sx-space-1_5, 5px);
+  --sx-space-2-resolved: var(--sx-space-2, 6px);
+  --sx-space-2_25-resolved: var(--sx-space-2_25, 9px);
+  --sx-space-3-resolved: var(--sx-space-3, 8px);
+  --sx-space-4-resolved: var(--sx-space-4, 10px);
+  --sx-space-5-resolved: var(--sx-space-5, 12px);
+  --sx-space-6-resolved: var(--sx-space-6, 14px);
+  --sx-space-7-resolved: var(--sx-space-7, 16px);
+  --sx-space-8-resolved: var(--sx-space-8, 20px);
+  --sx-space-9-resolved: var(--sx-space-9, 24px);
+  --sx-space-10-resolved: var(--sx-space-10, 30px);
+  --sx-space-12-resolved: var(--sx-space-12, 48px);
+  --sx-space-14-resolved: var(--sx-space-14, 110px);
 
   --font-fallback: "Segoe UI", Tahoma, sans-serif;
 }
