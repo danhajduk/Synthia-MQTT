@@ -122,11 +122,18 @@ class ConfigStore:
             state["optional_groups_requested"] = self._normalize_string_list(raw.get("optional_groups_requested"))
             state["optional_groups_active"] = self._normalize_string_list(raw.get("optional_groups_active"))
             state["optional_groups_failed"] = self._normalize_string_list(raw.get("optional_groups_failed"))
+        else:
+            reconstructed = self._reconstruct_install_session_from_overrides(self._load_overrides())
+            if reconstructed:
+                state.update(reconstructed)
 
         install_config = self.get_install_state()
         mode = install_config.get("mode")
         if mode in {"external", "embedded"}:
             state["mode"] = mode
+        desired_requested = self.get_desired_optional_groups()
+        if desired_requested and not self._normalize_string_list(state.get("optional_groups_requested")):
+            state["optional_groups_requested"] = desired_requested
 
         return state
 
@@ -422,6 +429,56 @@ class ConfigStore:
                     if child.is_file():
                         child.unlink()
                 existing.rmdir()
+
+    def _reconstruct_install_session_from_overrides(self, overrides: dict[str, Any]) -> dict[str, Any] | None:
+        mode = str(overrides.get("mode") or "").strip()
+        if mode not in {"external", "embedded"}:
+            return None
+
+        external_direct_access_mode = str(overrides.get("external_direct_access_mode") or "gateway_only")
+        if external_direct_access_mode not in {"gateway_only", "manual_direct_access"}:
+            external_direct_access_mode = "gateway_only"
+
+        configured = False
+        if mode == "external":
+            external = overrides.get("external")
+            if isinstance(external, dict):
+                host = str(external.get("host") or "").strip()
+                try:
+                    port = int(external.get("port") or 0)
+                except Exception:
+                    port = 0
+                configured = bool(host) and port > 0
+            if not configured:
+                host = str(overrides.get("mqtt_host") or "").strip()
+                try:
+                    port = int(overrides.get("mqtt_port") or 0)
+                except Exception:
+                    port = 0
+                configured = bool(host) and port > 0
+        else:
+            embedded = overrides.get("embedded")
+            if isinstance(embedded, dict):
+                allow_anonymous = bool(embedded.get("allow_anonymous", False))
+                has_creds = bool(str(embedded.get("admin_user") or "").strip()) and bool(
+                    str(embedded.get("admin_pass") or "").strip()
+                )
+                configured = allow_anonymous or has_creds
+
+        if not configured:
+            return {
+                "mode": mode,
+                "external_direct_access_mode": external_direct_access_mode,
+            }
+
+        return {
+            "mode": mode,
+            "setup_state": "ready",
+            "configured": True,
+            "verified": True,
+            "external_direct_access_mode": external_direct_access_mode,
+            "last_error": None,
+        }
 
     @staticmethod
     def _default_install_session_state() -> dict[str, Any]:

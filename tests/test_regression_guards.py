@@ -114,6 +114,9 @@ class RegressionGuardsTest(unittest.TestCase):
         text = config_store.read_text(encoding="utf-8")
         self.assertIn("MountedStateStore", text)
         self.assertIn("_write_desired_optional_groups", text)
+        self.assertIn("_reconstruct_install_session_from_overrides", text)
+        self.assertIn("enabled_docker_groups", text)
+        self.assertIn('"setup_state": "ready"', text)
 
     def test_mounted_state_store_has_path_abstraction(self) -> None:
         state_store = Path(__file__).resolve().parents[1] / "app" / "services" / "mounted_state_store.py"

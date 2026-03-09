@@ -93,6 +93,11 @@ External apply validation behavior:
 - `readiness_required_groups`: requested optional groups marked `setup_required=true`
 - `readiness_missing_groups`: required groups not currently active
 
+Reboot/restart persistence behavior:
+
+- when transient `runtime/install_state.json` is missing (for example after container recreation), install session state is reconstructed from persisted addon config (`runtime/config.json`) and desired optional-group intent (`enabled_docker_groups`).
+- reconstructed state marks configured setups as `setup_state=ready` and `configured=true`; health checks can still surface `degraded` when broker connectivity is not currently healthy.
+
 Fresh installs report `setup_state=unconfigured` until mode/config is applied.
 
 `POST /api/install/optional-groups` persists requested optional group IDs for delayed supervisor reconciliation.
