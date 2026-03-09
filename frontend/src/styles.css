@@ -25,7 +25,7 @@ html.in-iframe .hero {
 }
 
 :root.core-theme-fallback .banner {
-  border-left: 4px solid hsl(var(--color-primary, var(--local-color-primary)));
+  border-left: 4px solid hsl(var(--sx-primary-resolved));
 }
 
 .panel h2 {
@@ -76,13 +76,16 @@ html.in-iframe .hero {
 }
 
 :root.core-theme-fallback .steps li.active {
-  background: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 14%, hsl(var(--sx-panel-resolved)));
+  background: hsl(var(--sx-panel-resolved));
+  background: color-mix(in srgb, hsl(var(--sx-primary-resolved)) 14%, hsl(var(--sx-panel-resolved)));
   color: hsl(var(--sx-text-resolved));
-  border-color: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 42%, hsl(var(--sx-panel-resolved)));
+  border-color: hsl(var(--sx-primary-resolved));
+  border-color: color-mix(in srgb, hsl(var(--sx-primary-resolved)) 42%, hsl(var(--sx-panel-resolved)));
 }
 
 :root.core-theme-fallback .steps li.done {
-  background: color-mix(in srgb, hsl(var(--color-panel, var(--local-color-panel))) 80%, hsl(var(--color-bg, var(--local-color-bg))));
+  background: hsl(var(--sx-panel-resolved));
+  background: color-mix(in srgb, hsl(var(--sx-panel-resolved)) 80%, hsl(var(--sx-bg-resolved)));
   color: hsl(var(--sx-text-resolved));
 }
 
@@ -181,15 +184,15 @@ pre {
 }
 
 :root.core-theme-fallback .optional-group-card[data-status="failed"] {
-  border-color: hsl(var(--color-danger, var(--local-color-danger)));
+  border-color: hsl(var(--sx-danger-resolved));
 }
 
 :root.core-theme-fallback .optional-group-card[data-status="starting"] {
-  border-color: hsl(var(--color-warning, var(--local-color-warning)));
+  border-color: hsl(var(--sx-warning-resolved));
 }
 
 :root.core-theme-fallback .optional-group-card[data-status="active"] {
-  border-color: hsl(var(--color-primary, var(--local-color-primary)));
+  border-color: hsl(var(--sx-primary-resolved));
 }
 
 .optional-group-card[data-status="waiting-for-reconcile"] {

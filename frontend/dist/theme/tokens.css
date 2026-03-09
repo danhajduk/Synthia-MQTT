@@ -20,6 +20,10 @@
   --sx-border-resolved: var(--sx-border, var(--color-border, var(--local-color-border)));
   --sx-bg-resolved: var(--sx-bg, var(--color-bg, var(--local-color-bg)));
   --sx-panel-resolved: var(--sx-panel, var(--color-panel, var(--local-color-panel)));
+  --sx-primary-resolved: var(--sx-primary, var(--color-primary, var(--local-color-primary)));
+  --sx-success-resolved: var(--sx-success, var(--color-success, var(--local-color-success)));
+  --sx-warning-resolved: var(--sx-warning, var(--color-warning, var(--local-color-warning)));
+  --sx-danger-resolved: var(--sx-danger, var(--color-danger, var(--local-color-danger)));
   --sx-text-on-primary-resolved: var(--sx-text-on-primary, #fff);
 
   --sx-radius-sm-resolved: var(--sx-radius-sm, var(--radius-sm, var(--local-radius-sm)));

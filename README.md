@@ -209,6 +209,12 @@ Iframe theme/layout wiring checks:
 ./scripts/verify-iframe-theme.sh
 ```
 
+Iframe style-language parity checks:
+
+```bash
+./scripts/verify-iframe-style-language.sh
+```
+
 End-to-end API flow tests:
 
 ```bash

@@ -1,3 +1,5 @@
+/* Synthia Core shared theme tokens/components are the visual source-of-truth. */
+/* Addon styles only provide fallback/compat layers for isolated or missing-token contexts. */
 @import "./tokens.css";
 @import "./base.css";
 @import "./components.css";

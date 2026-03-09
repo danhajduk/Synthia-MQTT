@@ -31,7 +31,7 @@ h3 {
 }
 
 a {
-  color: hsl(var(--color-primary, var(--local-color-primary)));
+  color: hsl(var(--sx-primary-resolved));
 }
 
 hr {

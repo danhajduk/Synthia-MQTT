@@ -45,7 +45,9 @@ This document set describes the behavior currently implemented in this repositor
   - Frontend build copies `frontend/src/theme/` to `frontend/dist/theme/` to preserve `/ui/theme/*` path resolution in production artifacts.
   - Theme path verification is automated with `scripts/verify-theme-paths.sh` for both source (`dev`) and build output (`prod`) checks.
   - Iframe integration verification is automated with `scripts/verify-iframe-theme.sh` (iframe class wiring, parent-theme mirroring, and iframe layout CSS rules).
+  - Iframe style-language parity verification is automated with `scripts/verify-iframe-style-language.sh` (shared class mapping + fallback-scope checks).
   - UI fallback styling now resolves text, border, spacing, radius, and shadow through `--sx-*` token aliases before local fallback values.
+  - Fallback token aliases also cover semantic accents (`primary/success/warning/danger`) so UI remains usable when shared semantic tokens are absent.
   - Frontend bootstrap applies shared component classes (`card`, `btn-primary|btn-secondary`, `sx-input`, `sx-status`, `sx-list|sx-list-item`) to align addon UI primitives with Core style patterns.
   - Shared fallback theme layer also includes Core-aligned list and table primitives (`sx-list*`, `sx-table`) for setup/dashboard content containers.
   - Root typography/text-rendering defaults are aligned at `:root` level and iframe mode uses constrained layout/background behavior for embedded rendering.

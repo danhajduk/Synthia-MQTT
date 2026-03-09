@@ -115,6 +115,7 @@ function hasCoreThemeTokens() {
 }
 
 function ensureSharedThemeEntry() {
+  // Synthia Core shared theme remains the visual source-of-truth for embedded addon UI.
   const byDataAttribute = document.querySelector('link[data-synthia-theme-entry="shared-theme"]');
   if (byDataAttribute) {
     return;

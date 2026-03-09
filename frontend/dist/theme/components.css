@@ -12,14 +12,14 @@
   border: 0;
   border-radius: var(--sx-radius-sm-resolved);
   padding: var(--sx-space-3-resolved) var(--sx-space-5-resolved);
-  background: hsl(var(--color-primary, var(--local-color-primary)));
+  background: hsl(var(--sx-primary-resolved));
   color: var(--sx-text-on-primary-resolved);
   cursor: pointer;
 }
 
 :root.core-theme-fallback .btn-primary,
 :root.core-theme-fallback button:not(.secondary) {
-  background: hsl(var(--color-primary, var(--local-color-primary)));
+  background: hsl(var(--sx-primary-resolved));
 }
 
 :root.core-theme-fallback .btn-secondary,
@@ -45,6 +45,7 @@
   border: 1px solid hsl(var(--sx-border-resolved));
   border-radius: var(--sx-radius-pill-resolved);
   color: hsl(var(--sx-text-muted-resolved));
+  background: hsl(var(--sx-panel-resolved));
   background: color-mix(in srgb, hsl(var(--sx-panel-resolved)) 78%, hsl(var(--sx-bg-resolved)));
 }
 
@@ -56,11 +57,11 @@
 }
 
 :root.core-theme-fallback .home-mini.warn {
-  border-color: hsl(var(--color-warning, var(--local-color-warning)));
+  border-color: hsl(var(--sx-warning-resolved));
 }
 
 :root.core-theme-fallback .home-mini.bad {
-  border-color: hsl(var(--color-danger, var(--local-color-danger)));
+  border-color: hsl(var(--sx-danger-resolved));
 }
 
 :root.core-theme-fallback .home-mini-title {
@@ -90,6 +91,7 @@
   border: 1px solid hsl(var(--sx-border-resolved));
   border-radius: var(--sx-radius-sm-resolved);
   padding: var(--sx-space-2-resolved) var(--sx-space-3-resolved);
+  background: hsl(var(--sx-panel-resolved));
   background: color-mix(in srgb, hsl(var(--sx-panel-resolved)) 86%, hsl(var(--sx-bg-resolved)));
 }
 

@@ -206,3 +206,8 @@
 137. Task 137: Verify iframe-contained scrolling, padding, and viewport sizing still behave correctly after theme import - Completed on 03/09/2026 01:03
 138. Task 138: Fix any addon-specific CSS conflicts caused by base shared styles - Completed on 03/09/2026 01:03
 139. Task 139: Ensure addon-only custom styles are layered on top of shared theme styles instead of overriding tokens directly - Completed on 03/09/2026 01:03
+140. Task 140: Add fallback styling rules so the addon remains usable if a shared token is missing - Completed on 03/09/2026 01:06
+141. Task 141: Add inline comments in addon theme entry files explaining that Synthia Core is the source of truth for visual design - Completed on 03/09/2026 01:06
+142. Task 142: Create addon UI notes document (`docs/addon-theme-integration.md`) describing how the addon consumes the shared Synthia theme - Completed on 03/09/2026 01:06
+143. Task 143: Document any addon-specific exceptions where custom styling is still required beyond the shared theme - Completed on 03/09/2026 01:06
+144. Task 144: Verify final addon UI visually matches the Core style language when embedded in the main section iframe - Completed on 03/09/2026 01:06
