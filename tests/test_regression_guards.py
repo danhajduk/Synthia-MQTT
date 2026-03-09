@@ -182,6 +182,16 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn(":root.core-theme-fallback .home-mini", css_text)
         self.assertIn(":root.core-theme-fallback .card", css_text)
 
+    def test_dashboard_has_core_base_url_editor(self) -> None:
+        index_html = Path(__file__).resolve().parents[1] / "frontend" / "src" / "index.html"
+        app_js = Path(__file__).resolve().parents[1] / "frontend" / "src" / "app.js"
+        html_text = index_html.read_text(encoding="utf-8")
+        js_text = app_js.read_text(encoding="utf-8")
+        self.assertIn("dash-core-base-url", html_text)
+        self.assertIn("dash-save-core-base-url", html_text)
+        self.assertIn("/api/install/core-base-url", js_text)
+        self.assertIn("saveCoreBaseUrl", js_text)
+
 
 if __name__ == "__main__":
     unittest.main()

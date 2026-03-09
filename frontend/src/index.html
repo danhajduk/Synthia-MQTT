@@ -252,6 +252,19 @@
         </section>
 
         <section class="panel">
+          <h2>Core Connection</h2>
+          <p>Update Core host:port used for addon registration and telemetry routing.</p>
+          <div class="form-grid">
+            <label>Core base URL <input id="dash-core-base-url" type="text" value="http://localhost:9001" /></label>
+          </div>
+          <div class="actions">
+            <button id="dash-save-core-base-url" type="button">Save Core URL</button>
+            <button id="dash-reload-core-base-url" type="button" class="secondary">Reload Core URL</button>
+          </div>
+          <p id="dash-core-base-url-result" class="result">-</p>
+        </section>
+
+        <section class="panel">
           <h2>Runtime Summary</h2>
           <button id="load-finish" type="button">Load Effective Config + Health</button>
           <pre id="finish-output">{}</pre>

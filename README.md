@@ -128,6 +128,7 @@ Core URL edit behavior:
 - `GET /api/install/core-base-url` returns the effective Core base URL used by install/register flows.
 - `POST /api/install/core-base-url` persists a new Core URL after initial setup and writes desired-state `config.env.CORE_URL` so supervisor reconcile can apply the updated runtime env.
 - `POST /api/install/register-core` now falls back to this persisted Core URL when `core_base_url` is omitted in the request body.
+- Dashboard now includes a `Core Connection` panel to edit and save Core host:port after initial setup.
 
 Dependency handling and readiness behavior:
 

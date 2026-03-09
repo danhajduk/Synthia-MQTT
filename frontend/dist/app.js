@@ -93,6 +93,7 @@ function setGlobalError(message) {
     "publish-result",
     "optional-groups-result",
     "dash-optional-groups-result",
+    "dash-core-base-url-result",
   ].forEach((id) => {
     const element = $(id);
     if (element) {
@@ -267,7 +268,10 @@ function snapshotFieldsToState() {
   state.embedded.baseTopic = $("embedded-base-topic").value.trim() || "synthia";
   state.embedded.haPrefix = $("embedded-ha-prefix").value.trim() || "homeassistant";
   state.embedded.qos = Number($("embedded-qos").value);
-
+  const dashboardCoreBaseUrl = $("dash-core-base-url")?.value?.trim();
+  if (dashboardCoreBaseUrl) {
+    state.core.coreBaseUrl = dashboardCoreBaseUrl;
+  }
 }
 
 function setViewMode(viewMode) {
@@ -515,6 +519,18 @@ async function loadAddonVersion() {
   setText("addon-version", version.version || "-");
 }
 
+async function loadCoreBaseUrl() {
+  const response = await api("/api/install/core-base-url");
+  const coreBaseUrl = String(response.core_base_url || "").trim();
+  if (coreBaseUrl) {
+    state.core.coreBaseUrl = coreBaseUrl;
+  }
+  if ($("dash-core-base-url")) {
+    $("dash-core-base-url").value = state.core.coreBaseUrl || "";
+  }
+  saveState();
+}
+
 async function runTestStep() {
   snapshotFieldsToState();
   if (state.mode === "external") {
@@ -624,15 +640,17 @@ async function runBrokerRestart() {
 
 async function loadDoneSummary() {
   snapshotFieldsToState();
-  const [install, health, effective] = await Promise.all([
+  const [install, health, effective, coreBase] = await Promise.all([
     api("/api/install/status"),
     api("/api/addon/health"),
     api("/api/addon/config/effective"),
+    api("/api/install/core-base-url"),
   ]);
 
   const mode = selectedMode();
-  const host = mode === "external" ? state.external.host : "mosquitto";
+  const host = mode === "external" ? state.external.host : String(effective.mqtt_host || "synthia-addon-mqtt-mosquitto");
   const port = mode === "external" ? state.external.port : state.embedded.port;
+  state.core.coreBaseUrl = String(coreBase.core_base_url || "").trim() || state.core.coreBaseUrl;
   const coreUrl = state.core.coreBaseUrl || "-";
   const addonUrl = state.core.addonBaseUrl || "-";
 
@@ -652,6 +670,22 @@ async function loadDoneSummary() {
     null,
     2
   );
+}
+
+async function saveCoreBaseUrl() {
+  const value = $("dash-core-base-url")?.value?.trim();
+  if (!value) {
+    setResult("dash-core-base-url-result", "Core base URL is required.");
+    return;
+  }
+  const response = await api("/api/install/core-base-url", "POST", { core_base_url: value });
+  state.core.coreBaseUrl = String(response.core_base_url || "").trim();
+  if ($("dash-core-base-url")) {
+    $("dash-core-base-url").value = state.core.coreBaseUrl;
+  }
+  setResult("dash-core-base-url-result", `Core URL saved: ${state.core.coreBaseUrl}`);
+  saveState();
+  await loadDoneSummary();
 }
 
 async function copyFrom(targetId) {
@@ -849,6 +883,8 @@ function bindEvents() {
   $("reset-optional-groups").addEventListener("click", () => run(resetOptionalGroups));
   $("dash-save-optional-groups").addEventListener("click", () => run(saveOptionalGroups));
   $("dash-reset-optional-groups").addEventListener("click", () => run(resetOptionalGroups));
+  $("dash-save-core-base-url").addEventListener("click", () => run(saveCoreBaseUrl));
+  $("dash-reload-core-base-url").addEventListener("click", () => run(loadCoreBaseUrl));
   $("open-setup").addEventListener("click", () => {
     setViewMode("setup");
     setStep(1);
@@ -882,6 +918,7 @@ async function initialize() {
   syncModeUI();
   setStep(state.currentStep);
   await run(loadAddonVersion);
+  await run(loadCoreBaseUrl);
 
   const forceSetup = new URLSearchParams(window.location.search).get("setup") === "1";
   const { install } = await loadStatusSnapshot();
