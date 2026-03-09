@@ -72,6 +72,15 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("runtime", text)
         self.assertIn("docker-compose.group-", text)
 
+    def test_validate_service_flow_embedded_network_checks_exist(self) -> None:
+        validate_script = Path(__file__).resolve().parents[1] / "scripts" / "validate-service-flow.sh"
+        text = validate_script.read_text(encoding="utf-8")
+        self.assertIn("EMBEDDED_NETWORK_CHECK", text)
+        self.assertIn("EMBEDDED_EXPECTED_NETWORK", text)
+        self.assertIn("EMBEDDED_BROKER_CONTAINER", text)
+        self.assertIn("EMBEDDED_EXPECTED_ALIAS", text)
+        self.assertIn("embedded-check", text)
+
     def test_bootstrap_writes_runtime_port_intent(self) -> None:
         bootstrap_script = Path(__file__).resolve().parents[1] / "scripts" / "bootstrap-install.sh"
         text = bootstrap_script.read_text(encoding="utf-8")

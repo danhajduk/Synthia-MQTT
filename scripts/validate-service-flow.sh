@@ -14,6 +14,10 @@ JWT_SIGNING_KEY="${JWT_SIGNING_KEY:-}"
 TOKEN_AUDIENCE="${TOKEN_AUDIENCE:-mqtt}"
 POLICY_ENFORCEMENT="${POLICY_ENFORCEMENT:-0}"
 POLICY_CONSUMER_ADDON_ID="${POLICY_CONSUMER_ADDON_ID:-validator-addon}"
+EMBEDDED_NETWORK_CHECK="${EMBEDDED_NETWORK_CHECK:-0}"
+EMBEDDED_EXPECTED_NETWORK="${EMBEDDED_EXPECTED_NETWORK:-synthia_net}"
+EMBEDDED_BROKER_CONTAINER="${EMBEDDED_BROKER_CONTAINER:-synthia-addon-mqtt-mosquitto}"
+EMBEDDED_EXPECTED_ALIAS="${EMBEDDED_EXPECTED_ALIAS:-mosquitto}"
 
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
@@ -63,6 +67,80 @@ PY
 
 echo "[validate] addon health API"
 curl -fsS "${SERVICE_BASE_URL}/api/addon/health" > "$tmpdir/addon_health.json"
+
+if [[ "$EMBEDDED_NETWORK_CHECK" == "1" ]]; then
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "[validate] ERROR: docker command not found for embedded network check"
+    exit 1
+  fi
+  echo "[validate] embedded network alias and topology"
+  python3 - "$SERVICE_BASE_URL" "$EMBEDDED_EXPECTED_NETWORK" "$EMBEDDED_BROKER_CONTAINER" "$EMBEDDED_EXPECTED_ALIAS" <<'PY'
+import json
+import subprocess
+import sys
+import urllib.parse
+
+service_base_url, expected_network, broker_container, expected_alias = sys.argv[1:5]
+parsed = urllib.parse.urlparse(service_base_url)
+service_port = parsed.port
+if service_port is None:
+    raise SystemExit(f"embedded-check: could not determine service port from SERVICE_BASE_URL={service_base_url!r}")
+
+def run_json(cmd: list[str]) -> object:
+    out = subprocess.check_output(cmd, text=True).strip()
+    if not out:
+        return None
+    return json.loads(out)
+
+def first_nonempty(lines: str) -> str:
+    for line in lines.splitlines():
+        v = line.strip()
+        if v:
+            return v
+    return ""
+
+addon_ps = subprocess.check_output(
+    ["docker", "ps", "--filter", f"publish={service_port}", "--format", "{{.ID}}"],
+    text=True,
+)
+addon_container_id = first_nonempty(addon_ps)
+if not addon_container_id:
+    raise SystemExit(
+        f"embedded-check: no running addon container publishes port {service_port}"
+    )
+
+addon_networks = run_json(
+    ["docker", "inspect", addon_container_id, "--format", "{{json .NetworkSettings.Networks}}"]
+)
+if not isinstance(addon_networks, dict):
+    raise SystemExit("embedded-check: failed to parse addon networks")
+if expected_network not in addon_networks:
+    raise SystemExit(
+        f"embedded-check: addon container missing expected network {expected_network!r}; actual={sorted(addon_networks.keys())}"
+    )
+
+broker_networks = run_json(
+    ["docker", "inspect", broker_container, "--format", "{{json .NetworkSettings.Networks}}"]
+)
+if not isinstance(broker_networks, dict):
+    raise SystemExit("embedded-check: failed to parse broker networks")
+if expected_network not in broker_networks:
+    raise SystemExit(
+        f"embedded-check: broker container missing expected network {expected_network!r}; actual={sorted(broker_networks.keys())}"
+    )
+
+broker_net_info = broker_networks.get(expected_network) or {}
+aliases = broker_net_info.get("Aliases") or []
+if expected_alias not in aliases:
+    raise SystemExit(
+        f"embedded-check: broker missing expected alias {expected_alias!r} on network {expected_network!r}; aliases={aliases}"
+    )
+
+print(
+    f"embedded-check ok: addon={addon_container_id} broker={broker_container} network={expected_network} alias={expected_alias}"
+)
+PY
+fi
 
 echo "[validate] addon version API"
 curl -fsS "${SERVICE_BASE_URL}/api/addon/version" > "$version_file"

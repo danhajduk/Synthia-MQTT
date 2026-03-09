@@ -68,6 +68,10 @@ Validation helper:
   - `docs/api.md` capability list matches `app/api/addon_contract.py` capabilities
   - active docs/scripts avoid stale hardcoded version literals and keep manifest-sourced version usage
   - ownership-boundary mapping note (`backend/app/main.py` -> `app/main.py`) is present and parity-checked with golden `docs/api.md`
+- optional embedded-network guard in `scripts/validate-service-flow.sh` can assert:
+  - addon container is attached to expected network (`EMBEDDED_EXPECTED_NETWORK`, default `synthia_net`)
+  - broker container is attached to the same network (`EMBEDDED_BROKER_CONTAINER`, default `synthia-addon-mqtt-mosquitto`)
+  - broker has expected DNS alias on that network (`EMBEDDED_EXPECTED_ALIAS`, default `mosquitto`)
 
 Release gate:
 
