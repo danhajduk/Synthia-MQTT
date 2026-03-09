@@ -144,6 +144,8 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn("readiness_full", text)
         self.assertIn("readiness_required_groups", text)
         self.assertIn("readiness_missing_groups", text)
+        self.assertIn("CoreBaseUrlUpdateRequest", text)
+        self.assertIn("CoreBaseUrlResponse", text)
 
     def test_theme_structure_matches_golden_layout(self) -> None:
         root = Path(__file__).resolve().parents[1] / "frontend" / "src" / "theme"

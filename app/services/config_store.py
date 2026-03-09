@@ -14,6 +14,7 @@ from app.services.broker_manager import (
 from app.services.mounted_state_store import MountedStateStore
 
 logger = logging.getLogger(__name__)
+DEFAULT_EMBEDDED_BROKER_HOST = os.getenv("SYNTHIA_EMBEDDED_BROKER_HOST", "synthia-addon-mqtt-mosquitto")
 
 
 class ConfigStore:
@@ -26,7 +27,7 @@ class ConfigStore:
 
     def get_effective_config(self, mask_secrets: bool = False) -> dict[str, Any]:
         defaults = {
-            "mqtt_host": os.getenv("MQTT_HOST", "mosquitto"),
+            "mqtt_host": os.getenv("MQTT_HOST", DEFAULT_EMBEDDED_BROKER_HOST),
             "mqtt_port": int(os.getenv("MQTT_PORT", "1883")),
             "mqtt_username": os.getenv("MQTT_USERNAME") or None,
             "mqtt_password": os.getenv("MQTT_PASSWORD") or None,
@@ -50,6 +51,48 @@ class ConfigStore:
         if mask_secrets:
             effective["mqtt_password"] = self._mask_secret(effective.get("mqtt_password"))
         return effective
+
+    def get_core_base_url(self) -> str:
+        overrides = self._load_overrides()
+        raw = str(overrides.get("core_base_url") or "").strip()
+        if raw:
+            return raw
+
+        desired = self._state_store.read_desired()
+        config = desired.get("config")
+        if isinstance(config, dict):
+            env = config.get("env")
+            if isinstance(env, dict):
+                desired_core = str(env.get("CORE_URL") or "").strip()
+                if desired_core:
+                    return desired_core
+
+        return os.getenv("CORE_BASE_URL", "").strip() or os.getenv("CORE_URL", "").strip()
+
+    def set_core_base_url(self, core_base_url: str) -> str:
+        normalized = str(core_base_url or "").strip()
+        if not normalized:
+            raise ValueError("core_base_url is required")
+
+        overrides = self._load_overrides()
+        overrides["core_base_url"] = normalized
+        self._save_overrides(overrides)
+
+        def _mutate(payload: dict[str, Any]) -> dict[str, Any]:
+            config = payload.get("config")
+            if not isinstance(config, dict):
+                config = {}
+            env = config.get("env")
+            if not isinstance(env, dict):
+                env = {}
+            env["CORE_URL"] = normalized
+            config["env"] = env
+            payload["config"] = config
+            payload["desired_revision"] = str(time.time_ns())
+            return payload
+
+        self._state_store.update_desired(_mutate)
+        return normalized
 
     def update_config(self, config_update: AddonConfigUpdate) -> dict[str, Any]:
         overrides = self._load_overrides()
@@ -280,7 +323,7 @@ class ConfigStore:
             overrides["mqtt_password"] = external.get("password")
         else:
             embedded = data["embedded"]
-            overrides["mqtt_host"] = "mosquitto"
+            overrides["mqtt_host"] = DEFAULT_EMBEDDED_BROKER_HOST
             overrides["mqtt_port"] = 1883
             overrides["mqtt_tls"] = False
             overrides["mqtt_username"] = embedded.get("admin_user")
@@ -304,9 +347,15 @@ class ConfigStore:
         port = int(embedded["port"])
         broker_dir = self._base_dir / "runtime" / "broker"
         override_file = self._base_dir / "runtime" / "broker" / "docker-compose.override.yml"
+        addon_service_name = self._resolve_embedded_addon_service_name()
 
         write_embedded_broker_files(broker_dir=broker_dir, embedded_config=embedded)
-        write_embedded_compose_override(override_file=override_file, broker_dir=broker_dir, port=port)
+        write_embedded_compose_override(
+            override_file=override_file,
+            broker_dir=broker_dir,
+            port=port,
+            addon_service_name=addon_service_name,
+        )
         return True, None
 
     def _load_overrides(self) -> dict[str, Any]:
@@ -479,6 +528,34 @@ class ConfigStore:
             "external_direct_access_mode": external_direct_access_mode,
             "last_error": None,
         }
+
+    def _resolve_embedded_addon_service_name(self) -> str:
+        env_override = str(os.getenv("SYNTHIA_ADDON_SERVICE_NAME", "")).strip()
+        if env_override:
+            return env_override
+
+        orchestrator_compose = Path("/orchestrator/docker-compose.yml")
+        if orchestrator_compose.exists():
+            in_services = False
+            try:
+                for line in orchestrator_compose.read_text(encoding="utf-8").splitlines():
+                    raw = line.rstrip()
+                    if not raw or raw.lstrip().startswith("#"):
+                        continue
+                    if raw.strip() == "services:":
+                        in_services = True
+                        continue
+                    if not in_services:
+                        continue
+                    if not raw.startswith("  "):
+                        break
+                    if raw.startswith("  ") and not raw.startswith("    ") and raw.endswith(":"):
+                        name = raw.strip().rstrip(":")
+                        if name:
+                            return name
+            except Exception:
+                pass
+        return "mqtt-addon"
 
     @staticmethod
     def _default_install_session_state() -> dict[str, Any]:

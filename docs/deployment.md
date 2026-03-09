@@ -33,6 +33,7 @@ Notes:
 - Embedded mode writes runtime broker artifacts and desired-state intent; compose reconciliation is supervisor-driven.
 - Embedded broker credential file (`runtime/broker/pwfile`) is generated as hashed Mosquitto password entries (not plaintext) with readable host bind-mount permissions.
 - Managed embedded broker container name is `synthia-addon-mqtt-mosquitto`.
+- Embedded runtime override generation auto-detects the addon service name from `/orchestrator/docker-compose.yml` (or `SYNTHIA_ADDON_SERVICE_NAME`) so broker `depends_on/networks` wiring remains valid across `mqtt` vs `mqtt-addon` base compose variants after reboot/reconcile.
 
 ## Bootstrap installer
 

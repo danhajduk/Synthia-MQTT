@@ -51,6 +51,8 @@ Current capability values:
 - `POST /api/install/apply`
 - `POST /api/install/optional-groups`
 - `POST /api/install/optional-groups/reset`
+- `GET /api/install/core-base-url`
+- `POST /api/install/core-base-url`
 - `POST /api/install/register-core`
 - `POST /api/install/reset`
 
@@ -121,6 +123,19 @@ Dependency and ordering behavior:
 
 - request payload supports zero, one, or many group IDs.
 - declared dependencies (`depends_on`) are auto-included and written in dependency-first order.
+
+Core URL update behavior:
+
+- `GET /api/install/core-base-url` returns persisted effective Core URL.
+- `POST /api/install/core-base-url` persists updated URL to:
+  - local install overrides (`runtime/config.json`)
+  - desired state (`config.env.CORE_URL`) with updated desired revision for supervisor reconcile
+- `POST /api/install/register-core` uses request `core_base_url` when provided; otherwise falls back to persisted core-base-url value.
+
+Embedded broker runtime generation behavior:
+
+- addon now sets embedded MQTT client host to stable container name `synthia-addon-mqtt-mosquitto` (instead of alias-only dependency) to reduce DNS fragility across reconcile/reboot.
+- embedded override writer detects addon service name from mounted `/orchestrator/docker-compose.yml` (or `SYNTHIA_ADDON_SERVICE_NAME`) and binds `depends_on/networks` to that service name, so both `mqtt` and `mqtt-addon` base compose variants are supported.
 
 ## Broker admin route
 

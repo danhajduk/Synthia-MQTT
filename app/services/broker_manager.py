@@ -74,7 +74,12 @@ class BrokerManager:
             return False
 
 
-def write_embedded_compose_override(override_file: Path, broker_dir: Path, port: int) -> None:
+def write_embedded_compose_override(
+    override_file: Path,
+    broker_dir: Path,
+    port: int,
+    addon_service_name: str = "mqtt-addon",
+) -> None:
     override_file.parent.mkdir(parents=True, exist_ok=True)
     override_file.write_text(
         "\n".join(
@@ -95,7 +100,7 @@ def write_embedded_compose_override(override_file: Path, broker_dir: Path, port:
                 "        aliases:",
                 "          - mosquitto",
                 "",
-                "  mqtt-addon:",
+                f"  {addon_service_name}:",
                 "    depends_on:",
                 "      - mosquitto",
                 "    networks:",

@@ -122,6 +122,17 @@ class OptionalGroupSelectionResponse(BaseModel):
     pending_reconcile: bool
 
 
+class CoreBaseUrlUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    core_base_url: str = Field(min_length=1)
+
+
+class CoreBaseUrlResponse(BaseModel):
+    ok: bool
+    core_base_url: str
+
+
 class CoreRegistryRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

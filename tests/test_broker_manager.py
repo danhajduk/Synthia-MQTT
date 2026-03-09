@@ -76,6 +76,22 @@ class BrokerManagerTest(unittest.TestCase):
             self.assertIn("synthia_net", text)
             self.assertIn("aliases:", text)
             self.assertIn("- mosquitto", text)
+            self.assertIn("  mqtt-addon:", text)
+
+    def test_embedded_compose_override_supports_custom_addon_service_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broker_dir = Path(tmpdir) / "broker"
+            broker_dir.mkdir(parents=True, exist_ok=True)
+            override_file = Path(tmpdir) / "docker-compose.override.yml"
+            write_embedded_compose_override(
+                override_file=override_file,
+                broker_dir=broker_dir,
+                port=1883,
+                addon_service_name="mqtt",
+            )
+            text = override_file.read_text(encoding="utf-8")
+            self.assertIn("  mqtt:", text)
+            self.assertNotIn("  mqtt-addon:", text)
 
 
 if __name__ == "__main__":

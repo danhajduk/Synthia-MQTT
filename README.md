@@ -65,6 +65,8 @@ open http://localhost:18080/ui/
 - `POST /api/install/apply`
 - `POST /api/install/optional-groups`
 - `POST /api/install/optional-groups/reset`
+- `GET /api/install/core-base-url`
+- `POST /api/install/core-base-url`
 - `POST /api/install/register-core`
 - `POST /api/install/reset`
 - `POST /api/broker/restart`
@@ -120,6 +122,12 @@ Optional docker groups can be requested from setup/dashboard UI and are persiste
 as desired deployment shape, while base startup remains fully functional with zero optional groups enabled.
 Optional group requests are written atomically to desired state (`enabled_docker_groups`) and runtime feedback is read from `runtime.json` (`requested_docker_groups`, `active_docker_groups`, `failed_docker_groups`) to distinguish requested vs actual running groups.
 `POST /api/install/optional-groups/reset` resets requested optional groups to base-only deployment intent.
+
+Core URL edit behavior:
+
+- `GET /api/install/core-base-url` returns the effective Core base URL used by install/register flows.
+- `POST /api/install/core-base-url` persists a new Core URL after initial setup and writes desired-state `config.env.CORE_URL` so supervisor reconcile can apply the updated runtime env.
+- `POST /api/install/register-core` now falls back to this persisted Core URL when `core_base_url` is omitted in the request body.
 
 Dependency handling and readiness behavior:
 

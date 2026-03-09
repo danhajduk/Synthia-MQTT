@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.addon_contract import MANIFEST_METADATA, MANIFEST_OPTIONAL_DOCKER_GROUPS
 from app.models.install_models import (
+    CoreBaseUrlResponse,
+    CoreBaseUrlUpdateRequest,
     CoreRegistryRequest,
     CoreRegistryResponse,
     ExternalConnectionConfig,
@@ -441,12 +443,35 @@ def build_install_workflow_router(
             return InstallApplyResponse(ok=True)
         return InstallApplyResponse(ok=False, warnings=[reason] if reason else None)
 
+    @router.get("/core-base-url", response_model=CoreBaseUrlResponse)
+    def get_core_base_url() -> CoreBaseUrlResponse:
+        return CoreBaseUrlResponse(
+            ok=True,
+            core_base_url=config_store.get_core_base_url(),
+        )
+
+    @router.post("/core-base-url", response_model=CoreBaseUrlResponse)
+    def set_core_base_url(
+        payload: CoreBaseUrlUpdateRequest,
+        _claims: ServiceTokenClaims = Depends(require_core_register_scope),
+    ) -> CoreBaseUrlResponse:
+        normalized = _normalize_http_url(payload.core_base_url)
+        if not normalized:
+            raise HTTPException(status_code=400, detail="core_base_url is required")
+        try:
+            saved = config_store.set_core_base_url(normalized)
+        except RuntimeError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return CoreBaseUrlResponse(ok=True, core_base_url=saved)
+
     @router.post("/register-core", response_model=CoreRegistryResponse)
     def register_core(
         payload: CoreRegistryRequest,
         _claims: ServiceTokenClaims = Depends(require_core_register_scope),
     ) -> CoreRegistryResponse:
-        core_base_url = _normalize_http_url(payload.core_base_url or os.getenv("CORE_BASE_URL", ""))
+        core_base_url = _normalize_http_url(payload.core_base_url or config_store.get_core_base_url())
         addon_base_url = _normalize_http_url(payload.base_url)
         addon_id = payload.addon_id.strip()
         auth_token = payload.auth_token or os.getenv("CORE_ADMIN_TOKEN")

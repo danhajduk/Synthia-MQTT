@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -257,42 +258,81 @@ class MqttAddonE2ETest(unittest.TestCase):
         self.assertEqual(payload["readiness_missing_groups"], ["mqtt_observer"])
 
     def test_embedded_flow_registration_and_acl_realization(self) -> None:
-        apply_embedded = self.client.post(
+        os.environ["SYNTHIA_ADDON_SERVICE_NAME"] = "mqtt"
+        try:
+            apply_embedded = self.client.post(
+                "/api/install/apply",
+                json={
+                    "mode": "embedded",
+                    "embedded": {
+                        "allow_anonymous": False,
+                        "persistence": True,
+                        "log_type": "stdout",
+                        "port": 1883,
+                        "admin_user": "admin",
+                        "admin_pass": "secret",
+                    },
+                    "base_topic": "synthia",
+                    "qos_default": 1,
+                },
+            )
+            self.assertEqual(apply_embedded.status_code, 200)
+            self.assertTrue(apply_embedded.json()["ok"])
+            override_text = (self.runtime_dir / "broker" / "docker-compose.override.yml").read_text(encoding="utf-8")
+            self.assertIn("  mqtt:", override_text)
+            self.assertNotIn("  mqtt-addon:", override_text)
+            effective_config = self.client.get("/api/addon/config/effective")
+            self.assertEqual(effective_config.status_code, 200)
+            self.assertEqual(effective_config.json()["mqtt_host"], "synthia-addon-mqtt-mosquitto")
+
+            registration = self.client.post(
+                "/api/mqtt/registrations",
+                json={
+                    "addon_id": "vision",
+                    "access_mode": "both",
+                    "publish_topics": ["synthia/addons/vision/event/#", "synthia/addons/vision/state/#"],
+                    "subscribe_topics": ["synthia/system/#", "synthia/addons/vision/command/#"],
+                    "capabilities": {"events": True},
+                    "ha_mode": "gateway_managed",
+                },
+            )
+            self.assertEqual(registration.status_code, 200)
+            payload = registration.json()["registration"]
+            self.assertEqual(payload["addon_id"], "vision")
+            self.assertIsNotNone(payload["direct_mqtt"])
+            self.assertIn("publish", payload["permissions"])
+            self.assertIn("subscribe", payload["permissions"])
+        finally:
+            os.environ.pop("SYNTHIA_ADDON_SERVICE_NAME", None)
+
+    def test_core_base_url_is_editable_after_setup(self) -> None:
+        apply_external = self.client.post(
             "/api/install/apply",
             json={
-                "mode": "embedded",
-                "embedded": {
-                    "allow_anonymous": False,
-                    "persistence": True,
-                    "log_type": "stdout",
-                    "port": 1883,
-                    "admin_user": "admin",
-                    "admin_pass": "secret",
-                },
-                "base_topic": "synthia",
-                "qos_default": 1,
+                "mode": "external",
+                "external": {"host": "broker.local", "port": 1883, "tls": False, "username": None, "password": None},
+                "external_direct_access_mode": "gateway_only",
+                "allow_unvalidated": True,
             },
         )
-        self.assertEqual(apply_embedded.status_code, 200)
-        self.assertTrue(apply_embedded.json()["ok"])
+        self.assertEqual(apply_external.status_code, 200)
 
-        registration = self.client.post(
-            "/api/mqtt/registrations",
-            json={
-                "addon_id": "vision",
-                "access_mode": "both",
-                "publish_topics": ["synthia/addons/vision/event/#", "synthia/addons/vision/state/#"],
-                "subscribe_topics": ["synthia/system/#", "synthia/addons/vision/command/#"],
-                "capabilities": {"events": True},
-                "ha_mode": "gateway_managed",
-            },
+        get_initial = self.client.get("/api/install/core-base-url")
+        self.assertEqual(get_initial.status_code, 200)
+
+        update = self.client.post(
+            "/api/install/core-base-url",
+            json={"core_base_url": "10.0.0.100:9001"},
         )
-        self.assertEqual(registration.status_code, 200)
-        payload = registration.json()["registration"]
-        self.assertEqual(payload["addon_id"], "vision")
-        self.assertIsNotNone(payload["direct_mqtt"])
-        self.assertIn("publish", payload["permissions"])
-        self.assertIn("subscribe", payload["permissions"])
+        self.assertEqual(update.status_code, 200)
+        self.assertEqual(update.json()["core_base_url"], "http://10.0.0.100:9001")
+
+        get_updated = self.client.get("/api/install/core-base-url")
+        self.assertEqual(get_updated.status_code, 200)
+        self.assertEqual(get_updated.json()["core_base_url"], "http://10.0.0.100:9001")
+
+        desired = json.loads((self.runtime_dir / "desired.json").read_text(encoding="utf-8"))
+        self.assertEqual(desired["config"]["env"]["CORE_URL"], "http://10.0.0.100:9001")
 
     def test_gateway_publish_and_reserved_namespace_enforcement(self) -> None:
         self.client.post(
