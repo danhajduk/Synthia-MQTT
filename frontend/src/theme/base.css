@@ -10,8 +10,8 @@ body {
   color: hsl(var(--color-text, var(--local-color-text)));
   background: radial-gradient(
     circle at top right,
-    hsl(var(--color-panel, var(--local-color-panel))),
-    hsl(var(--color-bg, var(--local-color-bg)))
+    hsl(var(--sx-panel-resolved)),
+    hsl(var(--sx-bg-resolved))
   );
 }
 

@@ -42,6 +42,8 @@ This document set describes the behavior currently implemented in this repositor
   - `/ui` is served only when `frontend/dist` exists.
   - UI theme layout mirrors golden structure under `frontend/src/theme/` (`index.css`, `tokens.css`, `base.css`, `components.css`, `themes/light.css`, `themes/dark.css`).
   - Shared theme entrypoint is loaded by frontend bootstrap (`frontend/src/app.js` via `ensureSharedThemeEntry()`), not static HTML head markup.
+  - Frontend build copies `frontend/src/theme/` to `frontend/dist/theme/` to preserve `/ui/theme/*` path resolution in production artifacts.
+  - Theme path verification is automated with `scripts/verify-theme-paths.sh` for both source (`dev`) and build output (`prod`) checks.
   - UI styles use addon-owned fallback tokens and auto-adopt Core theme tokens/classes when injected into iframe document.
 
 ## Config Persistence

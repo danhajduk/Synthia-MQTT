@@ -186,3 +186,8 @@
 117. Task 117: Ensure embedded broker/addon network alias and connectivity survive host reboot without manual docker network connect - Completed on 03/08/2026 23:58
 118. Task 118: after initial setup allow to change the core host:port - Completed on 03/09/2026 00:00
 119. Task 119: Create addon-side theme import entry in the frontend bootstrap file (`addons/<name>/frontend/index.ts` or equivalent) - Completed on 03/09/2026 00:47
+120. Task 120: Import the shared Synthia theme files into the addon frontend (`tokens.css`, `base.css`, `components.css`, `themes/dark.css`) - Completed on 03/09/2026 00:53
+121. Task 121: Verify the addon can resolve shared theme file paths correctly during local development - Completed on 03/09/2026 00:53
+122. Task 122: Verify the addon can resolve shared theme file paths correctly in production build/output - Completed on 03/09/2026 00:53
+123. Task 123: Audit current addon CSS and identify hardcoded colors that should be replaced with shared token variables - Completed on 03/09/2026 00:53
+124. Task 124: Replace addon hardcoded background colors with shared tokens (`--sx-bg`, `--sx-panel`, etc.) - Completed on 03/09/2026 00:53

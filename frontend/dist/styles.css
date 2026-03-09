@@ -79,9 +79,9 @@ html.in-iframe .hero {
 }
 
 .steps li.active {
-  background: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 14%, white);
+  background: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 14%, hsl(var(--sx-panel-resolved)));
   color: hsl(var(--color-text, var(--local-color-text)));
-  border-color: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 42%, white);
+  border-color: color-mix(in srgb, hsl(var(--color-primary, var(--local-color-primary))) 42%, hsl(var(--sx-panel-resolved)));
 }
 
 .steps li.done {
@@ -144,7 +144,7 @@ textarea {
 }
 
 button.secondary {
-  background: color-mix(in srgb, hsl(var(--color-text-muted, var(--local-color-text-muted))) 92%, black);
+  background: color-mix(in srgb, hsl(var(--color-text-muted, var(--local-color-text-muted))) 92%, hsl(var(--sx-bg-resolved)));
 }
 
 .result {
@@ -234,7 +234,7 @@ button.secondary {
   width: 100%;
   min-height: 110px;
   margin-top: 10px;
-  background: hsl(var(--color-bg, var(--local-color-bg)));
+  background: hsl(var(--sx-bg-resolved));
   color: hsl(var(--color-text, var(--local-color-text)));
 }
 

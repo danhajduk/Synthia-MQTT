@@ -1,6 +1,6 @@
 :root.core-theme-fallback .card,
 :root.core-theme-fallback .panel {
-  background: hsl(var(--color-panel, var(--local-color-panel)));
+  background: hsl(var(--sx-panel-resolved));
   border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: var(--radius-md, var(--local-radius-md));
   box-shadow: var(--shadow-sm, var(--local-shadow-sm));
@@ -30,11 +30,13 @@
   border: 1px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: 999px;
   color: hsl(var(--color-text-muted, var(--local-color-text-muted)));
-  background: color-mix(in srgb, hsl(var(--color-panel, var(--local-color-panel))) 78%, white);
+  background: color-mix(in srgb, hsl(var(--sx-panel-resolved)) 78%, hsl(var(--sx-bg-resolved)));
+}
+
 :root.core-theme-fallback .home-mini {
   border: 2px solid hsl(var(--color-border, var(--local-color-border)));
   border-radius: var(--radius-md, var(--local-radius-md));
-  background: hsl(var(--color-panel, var(--local-color-panel)));
+  background: hsl(var(--sx-panel-resolved));
   padding: 10px;
 }
 

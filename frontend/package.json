@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "mkdir -p dist && cp src/index.html src/styles.css src/app.js dist/"
+    "build": "mkdir -p dist && cp src/index.html src/styles.css src/app.js dist/ && rm -rf dist/theme && cp -r src/theme dist/theme"
   }
 }

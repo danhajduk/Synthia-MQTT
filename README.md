@@ -197,6 +197,12 @@ Validation now also runs regression guards:
 
 - `tests/test_regression_guards.py` (Dockerfile manifest packaging + health snapshot contract shape)
 
+Theme path resolution checks (source and production dist):
+
+```bash
+./scripts/verify-theme-paths.sh all
+```
+
 End-to-end API flow tests:
 
 ```bash

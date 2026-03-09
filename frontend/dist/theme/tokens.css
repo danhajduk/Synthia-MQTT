@@ -15,5 +15,8 @@
   --local-shadow-sm: 0 1px 2px rgb(0 0 0 / 8%);
   --local-shadow-md: 0 8px 20px rgb(0 0 0 / 12%);
 
+  --sx-bg-resolved: var(--sx-bg, var(--color-bg, var(--local-color-bg)));
+  --sx-panel-resolved: var(--sx-panel, var(--color-panel, var(--local-color-panel)));
+
   --font-fallback: "Segoe UI", Tahoma, sans-serif;
 }
