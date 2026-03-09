@@ -45,7 +45,7 @@ Affected files:
 
 Code evidence:
 
-- `manifest.json` declares `"version": "0.2.12"`.
+- `manifest.json` declares `"version": "0.2.13"`.
 - `app/api/install_workflow.py` sends `MANIFEST_METADATA["version"]` in register-core payload.
 
 Documentation evidence:
