@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 from pathlib import Path
@@ -11,6 +12,8 @@ from app.services.broker_manager import (
     write_embedded_compose_override,
 )
 from app.services.mounted_state_store import MountedStateStore
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigStore:
@@ -331,6 +334,8 @@ class ConfigStore:
             json.dump(state, file, indent=2, sort_keys=True)
 
     def _write_desired_optional_groups(self, requested_group_ids: list[str]) -> None:
+        logger.info("optional_groups_save_requested groups=%s", ",".join(requested_group_ids) if requested_group_ids else "none")
+
         def _mutate(payload: dict[str, Any]) -> dict[str, Any]:
             runtime = payload.get("runtime")
             if not isinstance(runtime, dict):
@@ -348,6 +353,7 @@ class ConfigStore:
             return payload
 
         self._state_store.update_desired(_mutate)
+        logger.info("optional_groups_save_completed groups=%s", ",".join(requested_group_ids) if requested_group_ids else "none")
 
     def _resolve_requested_optional_groups(
         self,

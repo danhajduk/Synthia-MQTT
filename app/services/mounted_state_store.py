@@ -56,15 +56,7 @@ class MountedStateStore:
     def update_desired(self, mutator: Callable[[dict[str, Any]], dict[str, Any]]) -> dict[str, Any]:
         path, source = self._resolve_desired_path()
         path.parent.mkdir(parents=True, exist_ok=True)
-        logger.info(
-            "desired_state_write_start",
-            extra={
-                "path": str(path),
-                "source": source,
-                "base_dir": str(self._base_dir),
-                "addon_id": self._addon_id,
-            },
-        )
+        logger.info("desired_state_write_start path=%s source=%s addon_id=%s", path, source, self._addon_id)
         try:
             with state_file_lock(path):
                 current = self._load_json_object(path)
@@ -72,16 +64,10 @@ class MountedStateStore:
                 if not isinstance(updated, dict):
                     raise ValueError("desired-state mutator must return an object")
                 atomic_write(path, json.dumps(updated, indent=2, sort_keys=True) + "\n", mode=0o644)
-            logger.info(
-                "desired_state_write_success",
-                extra={"path": str(path), "source": source},
-            )
+            logger.info("desired_state_write_success path=%s source=%s", path, source)
             return updated
         except Exception as exc:
-            logger.error(
-                "desired_state_write_failed",
-                extra={"path": str(path), "source": source, "error": str(exc)},
-            )
+            logger.error("desired_state_write_failed path=%s source=%s error=%s", path, source, exc)
             raise
 
     @staticmethod
