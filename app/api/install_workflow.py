@@ -254,10 +254,13 @@ def build_install_workflow_router(
         payload: OptionalGroupSelectionRequest,
         _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
     ) -> OptionalGroupSelectionResponse:
-        updated = config_store.set_requested_optional_groups(
-            requested_group_ids=payload.requested_group_ids,
-            supported_groups=supported_optional_group_map,
-        )
+        try:
+            updated = config_store.set_requested_optional_groups(
+                requested_group_ids=payload.requested_group_ids,
+                supported_groups=supported_optional_group_map,
+            )
+        except RuntimeError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         requested = [str(group_id) for group_id in updated.get("optional_groups_requested", []) if str(group_id)]
         runtime_feedback = config_store.get_runtime_optional_groups_feedback()
         active = [str(group_id) for group_id in runtime_feedback.get("active", []) if str(group_id)]
@@ -272,10 +275,13 @@ def build_install_workflow_router(
     def reset_optional_groups(
         _claims: ServiceTokenClaims = Depends(require_install_apply_scope),
     ) -> OptionalGroupSelectionResponse:
-        updated = config_store.set_requested_optional_groups(
-            requested_group_ids=[],
-            supported_groups=supported_optional_group_map,
-        )
+        try:
+            updated = config_store.set_requested_optional_groups(
+                requested_group_ids=[],
+                supported_groups=supported_optional_group_map,
+            )
+        except RuntimeError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         requested = [str(group_id) for group_id in updated.get("optional_groups_requested", []) if str(group_id)]
         runtime_feedback = config_store.get_runtime_optional_groups_feedback()
         active = [str(group_id) for group_id in runtime_feedback.get("active", []) if str(group_id)]

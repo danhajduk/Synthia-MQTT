@@ -57,6 +57,17 @@ class MountedStateStore:
         path, source = self._resolve_desired_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         logger.info("desired_state_write_start path=%s source=%s addon_id=%s", path, source, self._addon_id)
+        if source.startswith("fallback:") and Path("/.dockerenv").exists():
+            logger.error(
+                "desired_state_write_blocked_missing_state_mount path=%s source=%s addon_id=%s",
+                path,
+                source,
+                self._addon_id,
+            )
+            raise RuntimeError(
+                "State mount missing: /state/desired.json is not available in container runtime. "
+                "Supervisor-generated compose must mount desired/runtime state files."
+            )
         try:
             with state_file_lock(path):
                 current = self._load_json_object(path)
