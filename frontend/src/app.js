@@ -2,6 +2,7 @@ const $ = (id) => document.getElementById(id);
 const STORAGE_KEY = "mqtt_setup_state_v1";
 const THEME_STORAGE_KEY = "mqtt_ui_theme";
 const MAX_STEP = 5;
+const SHARED_THEME_ENTRY_HREF = "/ui/theme/index.css";
 
 const state = {
   currentStep: 1,
@@ -111,6 +112,25 @@ function hasCoreThemeTokens() {
     "--color-text",
     "--color-primary",
   ].every((token) => rootStyle.getPropertyValue(token).trim().length > 0);
+}
+
+function ensureSharedThemeEntry() {
+  const byDataAttribute = document.querySelector('link[data-synthia-theme-entry="shared-theme"]');
+  if (byDataAttribute) {
+    return;
+  }
+
+  const existing = document.querySelector(`link[rel="stylesheet"][href="${SHARED_THEME_ENTRY_HREF}"]`);
+  if (existing) {
+    existing.setAttribute("data-synthia-theme-entry", "shared-theme");
+    return;
+  }
+
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = SHARED_THEME_ENTRY_HREF;
+  link.setAttribute("data-synthia-theme-entry", "shared-theme");
+  document.head.prepend(link);
 }
 
 function resolveInitialTheme() {
@@ -911,6 +931,7 @@ async function run(action) {
 
 async function initialize() {
   loadSavedState();
+  ensureSharedThemeEntry();
   startThemeDetection();
   applyHomeMiniStatusClasses();
   fillFieldsFromState();

@@ -41,6 +41,7 @@ This document set describes the behavior currently implemented in this repositor
 - UI hosting:
   - `/ui` is served only when `frontend/dist` exists.
   - UI theme layout mirrors golden structure under `frontend/src/theme/` (`index.css`, `tokens.css`, `base.css`, `components.css`, `themes/light.css`, `themes/dark.css`).
+  - Shared theme entrypoint is loaded by frontend bootstrap (`frontend/src/app.js` via `ensureSharedThemeEntry()`), not static HTML head markup.
   - UI styles use addon-owned fallback tokens and auto-adopt Core theme tokens/classes when injected into iframe document.
 
 ## Config Persistence
