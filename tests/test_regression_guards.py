@@ -108,6 +108,9 @@ class RegressionGuardsTest(unittest.TestCase):
         self.assertIn('/state/desired.json', text)
         self.assertIn('/state/runtime.json', text)
         self.assertIn("desired_state_write_blocked_missing_state_mount", text)
+        self.assertIn("desired_state_write_blocked_read_only_state_mount", text)
+        self.assertIn("state_dir_exists", text)
+        self.assertIn("_state_mount_diagnostics", text)
         self.assertIn("state_file_lock", text)
         self.assertIn("atomic_write", text)
 

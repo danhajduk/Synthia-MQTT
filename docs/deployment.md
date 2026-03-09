@@ -118,6 +118,16 @@ Runtime feedback consumed by install status/UI:
 
 - requested, active, starting, failed, and pending reconcile state.
 
+State-write troubleshooting (container runtime):
+
+- if desired-state save fails with `desired_state_write_blocked_missing_state_mount`, addon logs now include mount diagnostics:
+  - `state_dir_exists`
+  - `desired_exists`
+  - `runtime_exists`
+  - `desired_writable`
+  - `runtime_writable`
+- if `/state/desired.json` exists but is mounted read-only, addon fails with `desired_state_write_blocked_read_only_state_mount`.
+
 Pre-reconcile asset preparation:
 
 - selected optional groups get runtime assets prepared under `runtime/optional_groups/<group_id>/`

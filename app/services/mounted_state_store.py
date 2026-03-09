@@ -57,16 +57,33 @@ class MountedStateStore:
         path, source = self._resolve_desired_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         logger.info("desired_state_write_start path=%s source=%s addon_id=%s", path, source, self._addon_id)
+        mount_diag = self._state_mount_diagnostics()
         if source.startswith("fallback:") and Path("/.dockerenv").exists():
             logger.error(
-                "desired_state_write_blocked_missing_state_mount path=%s source=%s addon_id=%s",
+                "desired_state_write_blocked_missing_state_mount path=%s source=%s addon_id=%s state_dir_exists=%s desired_exists=%s runtime_exists=%s desired_writable=%s runtime_writable=%s",
+                path,
+                source,
+                self._addon_id,
+                mount_diag["state_dir_exists"],
+                mount_diag["desired_exists"],
+                mount_diag["runtime_exists"],
+                mount_diag["desired_writable"],
+                mount_diag["runtime_writable"],
+            )
+            raise RuntimeError(
+                "State mount missing: /state/desired.json is not available in container runtime. "
+                "Supervisor-generated compose must mount desired/runtime state files."
+            )
+        if source.startswith("mounted:") and Path("/.dockerenv").exists() and not bool(mount_diag["desired_writable"]):
+            logger.error(
+                "desired_state_write_blocked_read_only_state_mount path=%s source=%s addon_id=%s",
                 path,
                 source,
                 self._addon_id,
             )
             raise RuntimeError(
-                "State mount missing: /state/desired.json is not available in container runtime. "
-                "Supervisor-generated compose must mount desired/runtime state files."
+                "State mount is read-only: /state/desired.json is not writable in container runtime. "
+                "Supervisor-generated compose must mount desired/runtime state files as read-write."
             )
         try:
             with state_file_lock(path):
@@ -92,3 +109,18 @@ class MountedStateStore:
         if not isinstance(data, dict):
             return {}
         return data
+
+    @staticmethod
+    def _state_mount_diagnostics() -> dict[str, bool]:
+        state_dir = Path("/state")
+        desired = state_dir / "desired.json"
+        runtime = state_dir / "runtime.json"
+        desired_writable = os.access(desired, os.W_OK) if desired.exists() else os.access(state_dir, os.W_OK)
+        runtime_writable = os.access(runtime, os.W_OK) if runtime.exists() else os.access(state_dir, os.W_OK)
+        return {
+            "state_dir_exists": state_dir.exists(),
+            "desired_exists": desired.exists(),
+            "runtime_exists": runtime.exists(),
+            "desired_writable": desired_writable,
+            "runtime_writable": runtime_writable,
+        }
