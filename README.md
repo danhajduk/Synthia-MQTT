@@ -203,6 +203,12 @@ Theme path resolution checks (source and production dist):
 ./scripts/verify-theme-paths.sh all
 ```
 
+Iframe theme/layout wiring checks:
+
+```bash
+./scripts/verify-iframe-theme.sh
+```
+
 End-to-end API flow tests:
 
 ```bash

@@ -44,10 +44,12 @@ This document set describes the behavior currently implemented in this repositor
   - Shared theme entrypoint is loaded by frontend bootstrap (`frontend/src/app.js` via `ensureSharedThemeEntry()`), not static HTML head markup.
   - Frontend build copies `frontend/src/theme/` to `frontend/dist/theme/` to preserve `/ui/theme/*` path resolution in production artifacts.
   - Theme path verification is automated with `scripts/verify-theme-paths.sh` for both source (`dev`) and build output (`prod`) checks.
+  - Iframe integration verification is automated with `scripts/verify-iframe-theme.sh` (iframe class wiring, parent-theme mirroring, and iframe layout CSS rules).
   - UI fallback styling now resolves text, border, spacing, radius, and shadow through `--sx-*` token aliases before local fallback values.
   - Frontend bootstrap applies shared component classes (`card`, `btn-primary|btn-secondary`, `sx-input`, `sx-status`, `sx-list|sx-list-item`) to align addon UI primitives with Core style patterns.
   - Shared fallback theme layer also includes Core-aligned list and table primitives (`sx-list*`, `sx-table`) for setup/dashboard content containers.
-  - UI styles use addon-owned fallback tokens and auto-adopt Core theme tokens/classes when injected into iframe document.
+  - Root typography/text-rendering defaults are aligned at `:root` level and iframe mode uses constrained layout/background behavior for embedded rendering.
+  - Addon-only visual overrides are scoped under `:root.core-theme-fallback` so injected Core styles remain source-of-truth when available.
 
 ## Config Persistence
 

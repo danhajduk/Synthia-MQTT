@@ -201,3 +201,8 @@
 132. Task 132: Refactor addon form controls to match Synthia Core input/select/textarea styling - Completed on 03/09/2026 01:00
 133. Task 133: Refactor addon badges, pills, and status indicators to match Synthia Core shared styles - Completed on 03/09/2026 01:00
 134. Task 134: Refactor addon table/list styling to align with Synthia Core shared table patterns - Completed on 03/09/2026 01:00
+135. Task 135: Ensure the addon root layout uses the same base font, text rendering, and background behavior as Synthia Core - Completed on 03/09/2026 01:03
+136. Task 136: Verify the addon renders correctly inside the iframe with the shared theme applied - Completed on 03/09/2026 01:03
+137. Task 137: Verify iframe-contained scrolling, padding, and viewport sizing still behave correctly after theme import - Completed on 03/09/2026 01:03
+138. Task 138: Fix any addon-specific CSS conflicts caused by base shared styles - Completed on 03/09/2026 01:03
+139. Task 139: Ensure addon-only custom styles are layered on top of shared theme styles instead of overriding tokens directly - Completed on 03/09/2026 01:03

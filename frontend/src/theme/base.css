@@ -2,17 +2,26 @@
 :root[data-theme="light"],
 :root[data-theme="dark"] {
   color-scheme: light;
+  font-family: var(--font-sans, var(--font-fallback));
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   margin: 0;
-  font-family: var(--font-sans, var(--font-fallback));
+  font-family: inherit;
   color: hsl(var(--sx-text-resolved));
   background: radial-gradient(
     circle at top right,
     hsl(var(--sx-panel-resolved)),
     hsl(var(--sx-bg-resolved))
   );
+}
+
+html.in-iframe body {
+  min-height: 100vh;
+  background: hsl(var(--sx-bg-resolved));
 }
 
 h1,
