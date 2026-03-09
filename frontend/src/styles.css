@@ -71,9 +71,6 @@ html.in-iframe .hero {
 }
 
 .steps li {
-  border: 1px solid hsl(var(--sx-border-resolved));
-  border-radius: var(--sx-radius-sm-resolved);
-  padding: var(--sx-space-2-resolved) var(--sx-space-3-resolved);
   font-size: 0.85rem;
   color: hsl(var(--sx-text-muted-resolved));
 }
@@ -119,14 +116,6 @@ textarea,
 button,
 pre {
   font: inherit;
-}
-
-input,
-select,
-textarea {
-  border: 1px solid hsl(var(--sx-border-resolved));
-  border-radius: var(--sx-radius-sm-resolved);
-  padding: var(--sx-space-2-resolved) var(--sx-space-2_25-resolved);
 }
 
 .actions {

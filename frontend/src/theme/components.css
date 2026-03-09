@@ -22,6 +22,21 @@
   background: hsl(var(--color-primary, var(--local-color-primary)));
 }
 
+:root.core-theme-fallback .btn-secondary,
+:root.core-theme-fallback button.secondary {
+  background: hsl(var(--sx-panel-resolved));
+  color: hsl(var(--sx-text-resolved));
+  border: 1px solid hsl(var(--sx-border-resolved));
+}
+
+:root.core-theme-fallback .sx-input {
+  border: 1px solid hsl(var(--sx-border-resolved));
+  border-radius: var(--sx-radius-sm-resolved);
+  padding: var(--sx-space-2-resolved) var(--sx-space-2_25-resolved);
+  background: hsl(var(--sx-panel-resolved));
+  color: hsl(var(--sx-text-resolved));
+}
+
 :root.core-theme-fallback .pill {
   display: inline-flex;
   align-items: center;
@@ -56,7 +71,50 @@
 }
 
 :root.core-theme-fallback .home-mini-value {
-  margin-top: 4px;
+  margin-top: var(--sx-space-1-resolved);
   font-size: 18px;
   font-weight: 700;
+}
+
+:root.core-theme-fallback .sx-status {
+  border-color: hsl(var(--sx-border-resolved));
+}
+
+:root.core-theme-fallback .sx-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:root.core-theme-fallback .sx-list-item {
+  border: 1px solid hsl(var(--sx-border-resolved));
+  border-radius: var(--sx-radius-sm-resolved);
+  padding: var(--sx-space-2-resolved) var(--sx-space-3-resolved);
+  background: color-mix(in srgb, hsl(var(--sx-panel-resolved)) 86%, hsl(var(--sx-bg-resolved)));
+}
+
+:root.core-theme-fallback .sx-table,
+:root.core-theme-fallback table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid hsl(var(--sx-border-resolved));
+  border-radius: var(--sx-radius-md-resolved);
+  overflow: hidden;
+  background: hsl(var(--sx-panel-resolved));
+}
+
+:root.core-theme-fallback .sx-table th,
+:root.core-theme-fallback .sx-table td,
+:root.core-theme-fallback table th,
+:root.core-theme-fallback table td {
+  padding: var(--sx-space-3-resolved);
+  border-bottom: 1px solid hsl(var(--sx-border-resolved));
+  text-align: left;
+}
+
+:root.core-theme-fallback .sx-table th,
+:root.core-theme-fallback table th {
+  color: hsl(var(--sx-text-muted-resolved));
+  font-weight: 600;
 }

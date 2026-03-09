@@ -170,13 +170,7 @@ function applyThemeMode(hasCoreTheme) {
   setText("theme-mode", hasCoreTheme ? "Theme: Core CSS tokens detected in iframe" : "Theme: local fallback CSS");
   $("iframe-css-note")?.classList.toggle("hidden", !hasCoreTheme);
 
-  document.querySelectorAll(".panel").forEach((element) => {
-    element.classList.add("card");
-  });
-  document.querySelectorAll("button").forEach((element) => {
-    element.classList.add("btn");
-    element.classList.toggle("btn-primary", !element.classList.contains("secondary"));
-  });
+  applySharedComponentClasses();
 }
 
 function startThemeDetection() {
@@ -210,6 +204,33 @@ function applyHomeMiniStatusClasses() {
     const value = card.querySelector("strong");
     title?.classList.add("home-mini-title");
     value?.classList.add("home-mini-value");
+  });
+}
+
+function applySharedComponentClasses() {
+  document.querySelectorAll(".panel, .summary-grid > div, .optional-group-card").forEach((element) => {
+    element.classList.add("card");
+  });
+
+  document.querySelectorAll("button").forEach((element) => {
+    element.classList.add("btn");
+    element.classList.toggle("btn-secondary", element.classList.contains("secondary"));
+    element.classList.toggle("btn-primary", !element.classList.contains("secondary"));
+  });
+
+  document.querySelectorAll("input, select, textarea").forEach((element) => {
+    element.classList.add("sx-input");
+  });
+
+  document.querySelectorAll(".steps").forEach((element) => {
+    element.classList.add("sx-list");
+  });
+  document.querySelectorAll(".steps > li").forEach((element) => {
+    element.classList.add("sx-list-item");
+  });
+
+  document.querySelectorAll(".result.pill, .status-grid > div").forEach((element) => {
+    element.classList.add("sx-status");
   });
 }
 

@@ -45,6 +45,8 @@ This document set describes the behavior currently implemented in this repositor
   - Frontend build copies `frontend/src/theme/` to `frontend/dist/theme/` to preserve `/ui/theme/*` path resolution in production artifacts.
   - Theme path verification is automated with `scripts/verify-theme-paths.sh` for both source (`dev`) and build output (`prod`) checks.
   - UI fallback styling now resolves text, border, spacing, radius, and shadow through `--sx-*` token aliases before local fallback values.
+  - Frontend bootstrap applies shared component classes (`card`, `btn-primary|btn-secondary`, `sx-input`, `sx-status`, `sx-list|sx-list-item`) to align addon UI primitives with Core style patterns.
+  - Shared fallback theme layer also includes Core-aligned list and table primitives (`sx-list*`, `sx-table`) for setup/dashboard content containers.
   - UI styles use addon-owned fallback tokens and auto-adopt Core theme tokens/classes when injected into iframe document.
 
 ## Config Persistence

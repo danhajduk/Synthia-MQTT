@@ -196,3 +196,8 @@
 127. Task 127: Replace addon hardcoded spacing values with shared spacing tokens (`--sx-space-*`) - Completed on 03/09/2026 00:57
 128. Task 128: Replace addon hardcoded border-radius values with shared radius tokens (`--sx-radius-*`) - Completed on 03/09/2026 00:57
 129. Task 129: Replace addon hardcoded box-shadow values with shared shadow tokens (`--sx-shadow-*`) - Completed on 03/09/2026 00:57
+130. Task 130: Refactor addon cards, panels, and containers to use shared component classes where possible - Completed on 03/09/2026 01:00
+131. Task 131: Refactor addon buttons to match Synthia Core button styling and token usage - Completed on 03/09/2026 01:00
+132. Task 132: Refactor addon form controls to match Synthia Core input/select/textarea styling - Completed on 03/09/2026 01:00
+133. Task 133: Refactor addon badges, pills, and status indicators to match Synthia Core shared styles - Completed on 03/09/2026 01:00
+134. Task 134: Refactor addon table/list styling to align with Synthia Core shared table patterns - Completed on 03/09/2026 01:00
