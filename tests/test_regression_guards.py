@@ -94,6 +94,8 @@ class RegressionGuardsTest(unittest.TestCase):
         text = state_store.read_text(encoding="utf-8")
         self.assertIn("SYNTHIA_DESIRED_STATE_PATH", text)
         self.assertIn("SYNTHIA_RUNTIME_STATE_PATH", text)
+        self.assertIn('/state/desired.json', text)
+        self.assertIn('/state/runtime.json', text)
         self.assertIn("state_file_lock", text)
         self.assertIn("atomic_write", text)
 

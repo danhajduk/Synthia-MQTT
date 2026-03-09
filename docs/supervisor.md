@@ -15,6 +15,7 @@ Addon install/optional-group APIs write deployment intent through desired-state 
 
 - path resolution:
   - `SYNTHIA_DESIRED_STATE_PATH` (if set)
+  - `/state/desired.json` (if `/state` mount exists; container/supervisor mount)
   - `./SynthiaAddons/services/mqtt/desired.json` (if present)
   - fallback `./runtime/desired.json`
 - write behavior:
@@ -31,6 +32,7 @@ Addon status/UI reads runtime feedback:
 
 - path resolution:
   - `SYNTHIA_RUNTIME_STATE_PATH` (if set)
+  - `/state/runtime.json` (if `/state` mount exists; container/supervisor mount)
   - `./SynthiaAddons/services/mqtt/runtime.json` (if present)
   - fallback `./runtime/runtime.json`
 - fields consumed:

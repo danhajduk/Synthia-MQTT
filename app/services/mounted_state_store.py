@@ -16,6 +16,9 @@ class MountedStateStore:
         configured = os.getenv("SYNTHIA_DESIRED_STATE_PATH", "").strip()
         if configured:
             return Path(configured)
+        state_mount = Path("/state/desired.json")
+        if state_mount.exists() or state_mount.parent.exists():
+            return state_mount
         mounted = self._base_dir / "SynthiaAddons" / "services" / self._addon_id / "desired.json"
         if mounted.exists():
             return mounted
@@ -25,6 +28,9 @@ class MountedStateStore:
         configured = os.getenv("SYNTHIA_RUNTIME_STATE_PATH", "").strip()
         if configured:
             return Path(configured)
+        state_mount = Path("/state/runtime.json")
+        if state_mount.exists() or state_mount.parent.exists():
+            return state_mount
         mounted = self._base_dir / "SynthiaAddons" / "services" / self._addon_id / "runtime.json"
         if mounted.exists():
             return mounted

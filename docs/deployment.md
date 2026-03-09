@@ -96,6 +96,7 @@ Addon optional docker-group requests are persisted into desired state (no compos
 
 - desired path resolution:
   - `SYNTHIA_DESIRED_STATE_PATH` (if set)
+  - `/state/desired.json` (if `/state` mount exists; container/supervisor mount)
   - `./SynthiaAddons/services/mqtt/desired.json` (if present)
   - fallback `./runtime/desired.json`
 - write mode:
@@ -107,6 +108,7 @@ Addon optional docker-group requests are persisted into desired state (no compos
 Runtime feedback path resolution:
 
 - `SYNTHIA_RUNTIME_STATE_PATH` (if set)
+- `/state/runtime.json` (if `/state` mount exists; container/supervisor mount)
 - `./SynthiaAddons/services/mqtt/runtime.json` (if present)
 - fallback `./runtime/runtime.json`
 
